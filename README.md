@@ -1,1 +1,1 @@
-# GUI_Video_Compresser
+# GUI_Video_Compressor
