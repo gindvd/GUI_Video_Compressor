@@ -114,7 +114,7 @@ class App(tk.Tk):
 		self.input_file = item
 
 	""" Returns false if item is not a file or suported video file """
-	def compatible_file(item):
+	def compatible_file(self, item):
 		if item == "":
 			return False
 
