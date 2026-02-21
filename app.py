@@ -102,6 +102,7 @@ class App(tk.Tk):
 		if not self.compatible_file(item):
 			return
 
+		self.file_entry = item
 		self.file_entry.insert(0, self.input_file)
     
 	def file_entered(self, event):
