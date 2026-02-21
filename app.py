@@ -82,6 +82,11 @@ class App(tk.Tk):
 		self.quality_slider.bind("<Motion>", self.change_quality)
 		self.quality_slider.grid(row=3, column=1, columnspan=4, padx=2, pady=2, sticky=tk.N+tk.S+tk.E+tk.W,)
 
+		self.var = tk.IntVar()
+		self.audio_chkbox = tk.Checkbutton(self, text="Remove Audio", variable=self.var,)
+		self.audio_chkbox.config(command=self.set_audio_opt)
+		self.audio_chkbox.grid(row=4, column=0, padx=2, pady=2,)
+
 	def show_guide(self):
 		pass
     
@@ -108,6 +113,9 @@ class App(tk.Tk):
 
 	def change_quality(self, event):
 		self.quality = event.widget.get()
+
+	def set_audio_opt(self):
+		self.remove_audio = True if self.var.get() else False 
 
 	def resolution_values(self):
 		""" Will update to get input files resolution, and use it to update the resolution list """ 
