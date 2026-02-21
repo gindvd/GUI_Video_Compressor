@@ -34,14 +34,14 @@ class App(tk.Tk):
 
 		filemenu = tk.Menu(menubar, tearoff=0)
 		menubar.add_cascade(label="File", menu=filemenu)
-		filemenu.add_command(label="Open", command=self.browse_files())
+		filemenu.add_command(label="Open", command=self.browse_files)
 		filemenu.add_separator()
 		filemenu.add_command(label="Exit", command=self.quit)
 
 		helpmenu = tk.Menu(menubar, tearoff=0)
 		menubar.add_cascade(label="Help", menu=helpmenu)
-		helpmenu.add_command(label="Guide", command=self.show_guide())
-		helpmenu.add_cascade(label="About", command=self.show_about())
+		helpmenu.add_command(label="Guide", command=self.show_guide)
+		helpmenu.add_cascade(label="About", command=self.show_about)
 
 	def create_main(self):  
 		tk.Label(self, text="Input File:",).grid(row=0, column=0, padx=5, pady=5, sticky=tk.W,)
