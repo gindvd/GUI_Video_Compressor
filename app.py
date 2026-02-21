@@ -96,29 +96,40 @@ class App(tk.Tk):
 		pass
   
 	def browse_files(self):
-		self.input_file = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4;*.mov;*.mkv;*.avi;*.webm"),
-																														 ("All Files", "*.*")}))
+		item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4;*.mov;*.mkv;*.avi;*.webm"),
+																									("All Files", "*.*")}))
+    
+		if not self.compatible_file(item):
+			return
+
 		self.file_entry.insert(0, self.input_file)
     
 	def file_entered(self, event):
 		item = event.widget.get()
 
-		if item == "":
+		if not self.compatible_file(item):
 			return
+
+		self.input_file = item
+
+	""" Returns false if item is not a file or suported video file """
+	def compatible_file(item):
+		if item == "":
+			return False
 
 		""" Checks if typed path is a file that exists """
 		if not os.path.isfile(item):
-			messagebox.showwarning("File Warning", "Warning!\n File does not exist!")
-			return
+			messagebox.showwarning("File Warning", "Warning!\nFile does not exist!")
+			return False
 
 		""" Splits file extension from file path """     
 		_, extension = os.path.splitext(item)   
 
 		if extension not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
-			messagebox.showwarning("Video File Warning", "Warning!\n File is not supperted video file!")
-			return
-			
-		self.input_file = item
+			messagebox.showwarning("Video File Warning", "Warning!\nFile is not supperted video file!")
+			return False
+
+		return True
 
 	def select_format(self, event):
 		self.format = event.widget.get()
