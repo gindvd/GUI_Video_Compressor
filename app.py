@@ -12,7 +12,6 @@ class App(tk.Tk):
 		super().__init__()
 
 		self.title("Video Compressor")
-		self.geometry('800x400')
 		self.resizable(False, False)
 
 		""" FFmpeg options to compress video """
@@ -80,7 +79,7 @@ class App(tk.Tk):
 		self.quality_slider = tk.Scale(self, from_=0, to=100, orient="horizontal")
 		self.quality_slider.set(90)
 		self.quality_slider.bind("<Motion>", self.change_quality)
-		self.quality_slider.grid(row=3, column=1, columnspan=4, padx=5, pady=5, sticky=tk.N+tk.S+tk.E+tk.W,)
+		self.quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky=tk.N+tk.S+tk.E+tk.W,)
 
 		self.var = tk.IntVar()
 		self.audio_chkbox = tk.Checkbutton(self, text="Remove Audio", variable=self.var,)
@@ -88,7 +87,7 @@ class App(tk.Tk):
 		self.audio_chkbox.grid(row=4, column=0, padx=5, pady=5,)
 
 		self.compress = ttk.Button(self, text="Compress", command=self.compress_video)
-		self.compress.grid(row=5, column=4, padx=5, pady=5,)
+		self.compress.grid(row=4, column=4, padx=5, pady=5,)
 
 	def show_guide(self):
 		pass
@@ -97,7 +96,9 @@ class App(tk.Tk):
 		pass
   
 	def browse_files(self):
-		pass
+		self.input_file = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4;*.mov;*.mkv;*.avi;*.webm"),
+																														 ("All Files", "*.*")}))
+		self.file_entry.insert(0, self.input_file)
     
 	def file_entered(self, event):
 		item = event.widget.get()
