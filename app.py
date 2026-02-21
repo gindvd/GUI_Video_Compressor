@@ -22,6 +22,7 @@ class App(tk.Tk):
 
     """ Creates menu bar at top of window with dropddown menus """
     self.create_menu()
+    self.create_main()
 
   def create_menu(self):
     menubar = tk.Menu(self)
@@ -38,6 +39,15 @@ class App(tk.Tk):
     helpmenu.add_command(label="Guide", command=self.show_guide())
     helpmenu.add_cascade(label="About", command=self.show_about())
 
+  def create_main(self):  
+    tk.Label(self, text="Input File:",).grid(row=0, column=0, padx=2, pady=2, sticky=tk.W,)
+    self.file_entry = ttk.Entry(self)
+    self.file_entry.bind("<Return>", self.file_entered)
+    self.file_entry.grid(row=0, column=1, columnspan=3, padx=2, pady=2,)
+    
+    self.browse = ttk.Button(self, text="Browse", command=self.browse_files)
+    self.browse.grid(row=0, column=4, padx=2, pady=2,)
+
   def show_guide(self):
     pass
     
@@ -45,6 +55,9 @@ class App(tk.Tk):
     pass
   
   def browse_files(self):
+    pass
+
+  def file_entered(self):
     pass
 
 if __name__ == "__main__":
