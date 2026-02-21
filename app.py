@@ -49,7 +49,7 @@ class App(tk.Tk):
 		self.file_entry.bind("<Return>", self.file_entered)
 		self.file_entry.grid(row=0, column=1, columnspan=3, padx=2, pady=2,sticky=tk.N+tk.S+tk.E+tk.W,)
 
-		self.browse = ttk.Button(self, text="Browse", command=lambda : self.browse_files())
+		self.browse = ttk.Button(self, text="Browse", command=self.browse_files)
 		self.browse.grid(row=0, column=4, padx=2, pady=2,)
 
 		tk.Label(self, text="Video Format:",).grid(row=1, column=0, padx=2, pady=2, sticky=tk.W,)
@@ -69,6 +69,12 @@ class App(tk.Tk):
 		self.codec_combobox.set("libx264")
 		self.codec_combobox.bind("<<ComboboxSelected>>", self.select_codec)
 		self.codec_combobox.grid(row=2, column=1, padx=2, pady=2,)
+
+		tk.Label(self, text="FPS:",).grid(row=2, column=2, padx=2, pady=2, sticky=tk.W,)
+		self.fps_combobox = ttk.Combobox(self, values=["60", "50", "30", "24", "15"], state="readonly",)
+		self.fps_combobox.set("30")
+		self.fps_combobox.bind("<<ComboboxSelected>>", self.select_fps)
+		self.fps_combobox.grid(row=2, column=3, padx=2, pady=2,)
 
 	def show_guide(self):
 		pass
@@ -90,6 +96,9 @@ class App(tk.Tk):
     
 	def select_codec(self, event):
 		self.codec = event.widget.get()
+
+	def select_fps(self, event):
+		self.fps = event.widget.get()
 
 	def resolution_values(self):
 		""" Will update to get input files resolution, and use it to update the resolution list """ 
