@@ -99,8 +99,25 @@ class App(tk.Tk):
 	def browse_files(self):
 		pass
     
-	def file_entered(self):
-		pass
+	def file_entered(self, event):
+		item = event.widget.get()
+
+		if item == "":
+			return
+
+		""" Checks if typed path is a file that exists """
+		if not os.path.isfile(item):
+			messagebox.showwarning("File Warning", "Warning!\n File does not exist!")
+			return
+
+		""" Splits file extension from file path """     
+		_, extension = os.path.splitext(item)   
+
+		if extension not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
+			messagebox.showwarning("Video File Warning", "Warning!\n File is not supperted video file!")
+			return
+			
+		self.input_file = item
 
 	def select_format(self, event):
 		self.format = event.widget.get()
