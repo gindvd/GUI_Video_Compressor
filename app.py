@@ -55,7 +55,7 @@ class App(tk.Tk):
 		tk.Label(self, text="Video Format:",).grid(row=1, column=0, padx=2, pady=2, sticky=tk.W,)
 		self.format_combobox = ttk.Combobox(self, values=["mp4", "mov", "mkv", "avi"], state="readonly",)
 		self.format_combobox.set("mp4")
-		self.format_combobox.bind("<<ComboboxSelected>>", self.select_format())
+		self.format_combobox.bind("<<ComboboxSelected>>", self.select_format)
 		self.format_combobox.grid(row=1, column=1, padx=2, pady=2,)
 
 		tk.Label(self, text="Resolution:",).grid(row=1, column=2, padx=2, pady=2, sticky=tk.W,)
@@ -82,14 +82,14 @@ class App(tk.Tk):
 	def file_entered(self):
 		pass
 
-	def select_format(self):
-		pass
-
-	def select_resolution(self):
-		pass
-
-	def select_codec(self):
-		pass
+	def select_format(self, event):
+		self.format = event.widget.get()
+    
+	def select_resolution(self, event):
+		self.resolution = event.widget.get()
+    
+	def select_codec(self, event):
+		self.codec = event.widget.get()
 
 	def resolution_values(self):
 		""" Will update to get input files resolution, and use it to update the resolution list """ 
