@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 
+import os
+
 class App(tk.Tk):
   def __init__(self):
     super().__init__()
@@ -43,10 +45,22 @@ class App(tk.Tk):
     tk.Label(self, text="Input File:",).grid(row=0, column=0, padx=2, pady=2, sticky=tk.W,)
     self.file_entry = ttk.Entry(self)
     self.file_entry.bind("<Return>", self.file_entered)
-    self.file_entry.grid(row=0, column=1, columnspan=3, padx=2, pady=2,)
+    self.file_entry.grid(row=0, column=1, columnspan=3, padx=2, pady=2,sticky=tk.N+tk.S+tk.E+tk.W,)
     
-    self.browse = ttk.Button(self, text="Browse", command=self.browse_files)
+    self.browse = ttk.Button(self, text="Browse", command=lambda : self.browse_files())
     self.browse.grid(row=0, column=4, padx=2, pady=2,)
+
+    tk.Label(self, text="Video Format:",).grid(row=1, column=0, padx=2, pady=2, sticky=tk.W,)
+    self.format_combobox = ttk.Combobox(self, values=["mp4", "mov", "mkv", "avi"], state="readonly",)
+    self.format_combobox.set("mp4")
+    self.format_combobox.bind("<<ComboboxSelected>>", self.select_format())
+    self.format_combobox.grid(row=1, column=1, padx=2, pady=2,)
+
+    tk.Label(self, text="Resolution:",).grid(row=1, column=2, padx=2, pady=2, sticky=tk.W,)
+    self.res_combobox = ttk.Combobox(self, values=self.resolution_values(), state="readonly",)
+    self.res_combobox.set("1920x1080")
+    self.res_combobox.bind("<<ComboboxSelected>>", self.select_resolution)
+    self.res_combobox.grid(row=1, column=3, padx=2, pady=2,)
 
   def show_guide(self):
     pass
@@ -56,9 +70,23 @@ class App(tk.Tk):
   
   def browse_files(self):
     pass
-
+    
   def file_entered(self):
     pass
+
+  def select_format(self):
+    pass
+
+  def select_resolution(self):
+    pass
+
+  def resolution_values(self):
+    """ Will update to get input files resolution, and use it to update the resolution list """ 
+
+    resolutions = ["3840x2160", "2560x1440", "1920x1080", 
+                   "1280x720", "854x480", "640x360"]
+    
+    return resolutions
 
 if __name__ == "__main__":
   clip_optimization_app = App()
