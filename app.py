@@ -76,6 +76,12 @@ class App(tk.Tk):
 		self.fps_combobox.bind("<<ComboboxSelected>>", self.select_fps)
 		self.fps_combobox.grid(row=2, column=3, padx=2, pady=2,)
 
+		tk.Label(self, text="Video Quality:",).grid(row=3, column=0, padx=2, pady=2, sticky=tk.SW,)
+		self.quality_slider = tk.Scale(self, from_=0, to=100, orient="horizontal")
+		self.quality_slider.set(90)
+		self.quality_slider.bind("<Motion>", self.change_quality)
+		self.quality_slider.grid(row=3, column=1, columnspan=4, padx=2, pady=2, sticky=tk.N+tk.S+tk.E+tk.W,)
+
 	def show_guide(self):
 		pass
     
@@ -99,6 +105,9 @@ class App(tk.Tk):
 
 	def select_fps(self, event):
 		self.fps = event.widget.get()
+
+	def change_quality(self, event):
+		self.quality = event.widget.get()
 
 	def resolution_values(self):
 		""" Will update to get input files resolution, and use it to update the resolution list """ 
