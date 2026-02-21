@@ -87,6 +87,9 @@ class App(tk.Tk):
 		self.audio_chkbox.config(command=self.set_audio_opt)
 		self.audio_chkbox.grid(row=4, column=0, padx=2, pady=2,)
 
+		self.compress = ttk.Button(self, text="Compress", command=self.compress_video)
+		self.compress.grid(row=5, column=4, padx=2, pady=2,)
+
 	def show_guide(self):
 		pass
     
@@ -115,7 +118,10 @@ class App(tk.Tk):
 		self.quality = event.widget.get()
 
 	def set_audio_opt(self):
-		self.remove_audio = True if self.var.get() else False 
+		self.remove_audio = True if self.var.get() else False
+
+	def compress_video(self):
+		pass
 
 	def resolution_values(self):
 		""" Will update to get input files resolution, and use it to update the resolution list """ 
