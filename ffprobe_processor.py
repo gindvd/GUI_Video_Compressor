@@ -23,6 +23,24 @@ class FFprobeProcessor():
     except Exception as err:
       pass
 
+  def get_resolutions(self, filepath):
+    command = [self.ffprobe, "-v", "error", "-select_streams", 
+               "v:0", "-show_entries", "stream=width,height", 
+               "-of", "csv=s=x:p=0", filepath]
+    
+    try:
+      resolution, _ = subprocess.Popen(command, stdout=subprocess.PIPE, 
+                                stderr=subprocess.PIPE, shell=False, text=True)
+                                
+      return self.updated_resolutions(resolution)
+    
+    except FileNotFoundError as err:
+      pass
+    except subprocess.CalledProcessError as err:
+      pass
+    except Exception as err:
+      pass
+
   def updated_resolutions(self, resolution):
     dimensions = resolution.split('x')
     
