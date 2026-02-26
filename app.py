@@ -183,25 +183,25 @@ class App(ctk.CTk):
     return True
 
 	def select_format(self, event):
-		self.format = event.widget.get()
-    
-	def select_resolution(self, event):
-		self.resolution = event.widget.get()
-    
-	def select_codec(self, event):
-		self.codec = event.widget.get()
+    self.format = event.widget.get()
 
-	def select_fps(self, event):
-		self.fps = event.widget.get()
+  def select_resolution(self, event):
+    self.resolution = event.widget.get()
 
-	def change_quality(self, event):
-		self.quality = event.widget.get()
+  def select_codec(self, event):
+    self.codec = event.widget.get()
 
-	def set_audio_opt(self):
-		self.remove_audio = True if self.var.get() else False
+  def select_fps(self, event):
+    self.fps = event.widget.get()
 
-	def compress_video(self):
-		pass
+  def change_quality(self, event):
+    self.quality = event.widget.get()
+
+  def remove_audio(self):
+    self.audio = False if self.var.get() else True
+
+  def compress_video(self):
+    pass
 
 	def resolution_values(self):
 		""" Will update to get input files resolution, and use it to update the resolution list """ 
