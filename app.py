@@ -1,31 +1,38 @@
-import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
-from tkinter import messagebox
+import customtkinter  as ctk
 
 import os
+import platform
+import shutil
 
 import GPUinfo as GPU
 
-class App(tk.Tk):
-	def __init__(self):
-		super().__init__()
+class App(ctk.CTk):
+  def __init__(self):
+    super().__init__()
+    
+    self.ffmpeg_cmd, self.ffprobe = self.exe_paths()
+    self.FFmpeg = FFmpeg(self.ffmpeg_cmd)
+    self.FFprobe = FFprobe(self.ffmpeg_cmd)
 
-		self.title("Video Compressor")
-		self.resizable(False, False)
-
-		""" FFmpeg options to compress video """
-		self.input_file = ""
-		self.format = "mp4"
-		self.resolution = "1920x1080"
-		self.codec = "libx264"
-		self.fps = "30"
-		self.quality = 90
-		self.remove_audio = False
+    """ FFmpeg options to compress video """
+    self.input_file = ""
+    self.format = "mp4"
+    self.resolution = "1920x1080"
+    self.codec = "libx264"
+    self.fps = "30"
+    self.quality = 90
+    self.audio = True
+        
+    self.title("Video Compression Tool")
+    self.resizable(False, False)
+    
+    customtkinter.set_appearance_mode("System")  
+    customtkinter.set_default_color_theme("blue")
 
 		""" Creates menu bar at top of window with dropddown menus """
-		self.create_menu()
-		self.create_main()
+    self.create_menu()
+    self.create_main()
+
 
 	def create_menu(self):
 		menubar = tk.Menu(self)
