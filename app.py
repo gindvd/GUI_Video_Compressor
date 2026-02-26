@@ -128,47 +128,59 @@ class App(ctk.CTk):
     self.compress.grid(row=4, column=4, padx=5, pady=5)
 
 	def show_guide(self):
-		pass
-    
-	def show_about(self):
-		pass
+    pass
+
+  def show_about(self):
+    ctk.CTkMessagebox("About", """GUI Video Compression Tool\n"""
   
 	def browse_files(self):
-		item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4;*.mov;*.mkv;*.avi;*.webm"),
-																									("All Files", "*.*")}))
+    item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4;*.mov;*.mkv;*.avi;*.webm"),
+                                                  ("All Files", "*.*")}))
+
+    if not self.compatible_file(item):
+      return
+
+    self.input_file = item
+    self.file_entry.insert(0, self.input_file)
     
-		if not self.compatible_file(item):
-			return
+    """
+    Updates combox with list of smaller resolutions with same 
+    aspect ratio as the inputted video file
+    """
+    self.res_combobox.configure(values=self.FFprobe.get_resolutions(self.input_file))
 
-		self.input_file = item
-		self.file_entry.insert(0, self.input_file)
+  def file_entered(self, event):
+    item = event.widget.get()
+
+    if not self.compatible_file(item):
+      return
+
+    self.input_file = item
     
-	def file_entered(self, event):
-		item = event.widget.get()
+    """
+    Updates combox with list of smaller resolutions with same 
+    aspect ratio as the inputted video file
+    """
+    self.res_combobox.configure(values=self.FFprobe.get_resolutions(self.input_file))
 
-		if not self.compatible_file(item):
-			return
+  """ Returns false if item is not a file or suported video file """
+  def compatible_file(self, item):
+    if item == "":
+      return False
 
-		self.input_file = item
+    """ Checks if typed path is a file that exists """
+    if not os.path.isfile(item):
+      ctk.CTkMessagebox("File Warning", "Warning!\nFile does not exist!")
+      return False
 
-	""" Returns false if item is not a file or suported video file """
-	def compatible_file(self, item):
-		if item == "":
-			return False
+    """ Splits file extension from file path """     
+    _, extension = os.path.splitext(item)   
 
-		""" Checks if typed path is a file that exists """
-		if not os.path.isfile(item):
-			messagebox.showwarning("File Warning", "Warning!\nFile does not exist!")
-			return False
+    if extension not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
+      messagebox.showwarning("Video File Warning", "Warning!\nFile is not supperted video file!")
+      return False
 
-		""" Splits file extension from file path """     
-		_, extension = os.path.splitext(item)   
-
-		if extension not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
-			messagebox.showwarning("Video File Warning", "Warning!\nFile is not supperted video file!")
-			return False
-
-		return True
+    return True
 
 	def select_format(self, event):
 		self.format = event.widget.get()
