@@ -173,7 +173,7 @@ class App(ctk.CTk):
 
   """ Returns false if item is not a file or suported video file """
   def compatible_file(self, item):
-    if item == "":
+    if item == "" or item == ():
       return False
 
     """ Checks if typed path is a file that exists """
