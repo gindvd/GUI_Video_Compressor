@@ -21,4 +21,76 @@ class FFprobeProcessor():
     except subprocess.CalledProcessError as err:
       pass
     except Exception as err:
-      pass  
+      pass
+
+  def updated_resolutions(self, resolution):
+    dimensions = resolution.split('x')
+    
+    width = int(dimensions[0])
+    height = int(dimensions[1])
+
+    aspect_ratio = width / height
+
+    """ 
+    List of some reoccuring standard pixel measurements for height and width
+    Not a comprehessive list, but enough for a list of usable target 
+    resolutions for compressing too
+    """
+    if width >= height:
+      std_width = [5120, 3840, 2560, 1920, 1600, 1280, 854, 640]
+      std_height = [2880, 2160, 1440, 1080, 900, 720, 480, 360]
+    elif width < height:
+      std_width = [2880, 2160, 1440, 1080, 900, 720, 480, 360]
+      std_height = [5120, 3840, 2560, 1920, 1600, 1280, 854, 640]
+
+    temp_res = []
+    """ 
+    Add original resolution to the list, useful for some 
+    missing stanard screen resolutions
+    """
+    temp_res.extend([resolution])
+
+    for size in std_width:
+      if size <= width:
+        h = round_to_even(size / aspect_ratio)
+        new = str(size) + "x" + str(h)
+
+        temp_res.extend([new])
+
+    for size in std_height:
+      if size <= height:
+        w = round_to_even(size * aspect_ratio)
+        new = str(w) + "x" + str(size)
+
+        temp_res.extend([new])
+
+    """ Turns list into set to remove any duplicate resolutions, then reverts back to a list """
+    temp_res = list(set(temp_res))
+    
+    """ 
+    Sorts list based of size by getting the width from the resolution string 
+    and comparing it as an integer
+    """
+    temp_res = sorted(temp_res, key=lambda x: int(x.split('x')[0]), reverse=True)
+
+    resolutions = []
+    
+    """ Removes resolutions with height or width smaller than 360 """
+    if width >= height:
+      for x in temp_res:
+        h = int(x.split('x')[1])
+
+        if h >= 360:
+          resolutions.extend([x])
+          
+    elif width < height:
+      for x in temp_res:
+        w = int(x.split('x')[0])
+
+        if w >= 360:
+          resolutions.extend([x])
+
+    return resolutions
+
+  def round_to_even(self, f):
+    return round(f / 2.) * 2
