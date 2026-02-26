@@ -86,6 +86,7 @@ class App(ctk.CTk):
     ctk.CTkLabel(self, text="Video Format:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
     self.format_combobox = ctk.CTkComboBox(self, values=["mp4", "mov", "mkv", "avi"],
+		                                       state='readonly',
                                            command=self.select_format)
 
     self.format_combobox.set("mp4")
@@ -94,6 +95,7 @@ class App(ctk.CTk):
     ctk.CTkLabel(self, text="Resolution:").grid(row=1, column=2, padx=5, pady=5, sticky="w")
 
     self.res_combobox = ctk.CTkComboBox(self, values=self.default_resolutions(),
+		                                    state='readonly',
                                         command=self.select_resolution)
 
     self.res_combobox.set("1920x1080")
@@ -101,7 +103,8 @@ class App(ctk.CTk):
 
     ctk.CTkLabel(self, text="Codec:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
-    self.codec_combobox = ctk.CTkComboBox(self, values=self.codec_values(), 
+    self.codec_combobox = ctk.CTkComboBox(self, values=self.codec_values(),
+		                                      state='readonly',
                                           command = self.select_codec)
 
     self.codec_combobox.set("libx264")
@@ -109,7 +112,8 @@ class App(ctk.CTk):
 
     ctk.CTkLabel(self, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
-    self.fps_combobox = ctk.CTkComboBox(self, values=["60", "50", "30", "24", "15"], 
+    self.fps_combobox = ctk.CTkComboBox(self, values=["60", "50", "30", "24", "15"],
+		                                    state='readonly',
                                         command=self.select_fps)
 
     self.fps_combobox.set("30")
@@ -186,20 +190,20 @@ class App(ctk.CTk):
 
     return True
 
-  def select_format(self, event):
-    self.format = event.widget.get()
+  def select_format(self, choice):
+    self.format = choice
 
-  def select_resolution(self, event):
-    self.resolution = event.widget.get()
+  def select_resolution(self, choice):
+    self.resolution = choice
 
-  def select_codec(self, event):
-    self.codec = event.widget.get()
+  def select_codec(self, choice):
+    self.codec = choice
 
-  def select_fps(self, event):
-    self.fps = event.widget.get()
+  def select_fps(self, choice):
+    self.fps = choice
 
-  def change_quality(self, event):
-    self.quality = event.widget.get()
+  def change_quality(self, choice):
+    self.quality = choice
 
   def remove_audio(self):
     self.audio = False if self.var.get() else True
