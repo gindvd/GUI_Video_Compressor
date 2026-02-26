@@ -1,4 +1,6 @@
 import customtkinter  as ctk
+import tkinter as tk
+from tkinter import filedialog
 
 import os
 import platform
@@ -10,9 +12,11 @@ class App(ctk.CTk):
   def __init__(self):
     super().__init__()
     
+    """
     self.ffmpeg_cmd, self.ffprobe = self.exe_paths()
     self.FFmpeg = FFmpeg(self.ffmpeg_cmd)
     self.FFprobe = FFprobe(self.ffmpeg_cmd)
+    """
 
     """ FFmpeg options to compress video """
     self.input_file = ""
@@ -26,14 +30,14 @@ class App(ctk.CTk):
     self.title("Video Compression Tool")
     self.resizable(False, False)
     
-    customtkinter.set_appearance_mode("System")  
-    customtkinter.set_default_color_theme("blue")
+    ctk.set_appearance_mode("System")  
+    ctk.set_default_color_theme("blue")
 
-		""" Creates menu bar at top of window with dropddown menus """
+    """ Creates menu bar at top of window with dropddown menus """
     self.create_menu()
     self.create_main()
 	
-	def exe_paths(self):
+  def exe_paths(self):
     if platform.system() == "Windows":
       basepath = os.getcwd()
       ffmpeg_path = "/lib/ffmpeg.exe"
@@ -54,17 +58,17 @@ class App(ctk.CTk):
       return "ffmpeg", "ffprobe"
 
 
-	def create_menu(self):
-    menubar = ctk.CTkMenu(self)
+  def create_menu(self):
+    menubar = tk.Menu(self)
     self.config(menu=menubar)
 
-    filemenu = ctk.CTkMenu(menubar, tearoff=0)
+    filemenu = tk.Menu(menubar, tearoff=0)
     menubar.add_cascade(label="File", menu=filemenu)
     filemenu.add_command(label="Open", command=self.browse_files)
     filemenu.add_separator()
     filemenu.add_command(label="Exit", command=self.quit)
 
-    helpmenu = ctk.CTkMenu(menubar, tearoff=0)
+    helpmenu = tk.Menu(menubar, tearoff=0)
     menubar.add_cascade(label="Help", menu=helpmenu)
     helpmenu.add_command(label="Guide", command=self.show_guide)
     helpmenu.add_command(label="About", command=self.show_about)
@@ -127,13 +131,13 @@ class App(ctk.CTk):
     self.compress = ctk.CTkButton(self, text="Compress", command=self.compress_video)
     self.compress.grid(row=4, column=4, padx=5, pady=5)
 
-	def show_guide(self):
+  def show_guide(self):
     pass
 
   def show_about(self):
-    ctk.CTkMessagebox("About", """GUI Video Compression Tool\n"""
+    ctk.CTkMessagebox("About", """GUI Video Compression Tool\n""")
   
-	def browse_files(self):
+  def browse_files(self):
     item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4;*.mov;*.mkv;*.avi;*.webm"),
                                                   ("All Files", "*.*")}))
 
@@ -147,7 +151,7 @@ class App(ctk.CTk):
     Updates combox with list of smaller resolutions with same 
     aspect ratio as the inputted video file
     """
-    self.res_combobox.configure(values=self.FFprobe.get_resolutions(self.input_file))
+    #self.res_combobox.configure(values=self.FFprobe.get_resolutions(self.input_file))
 
   def file_entered(self, event):
     item = event.widget.get()
@@ -161,7 +165,7 @@ class App(ctk.CTk):
     Updates combox with list of smaller resolutions with same 
     aspect ratio as the inputted video file
     """
-    self.res_combobox.configure(values=self.FFprobe.get_resolutions(self.input_file))
+    #self.res_combobox.configure(values=self.FFprobe.get_resolutions(self.input_file))
 
   """ Returns false if item is not a file or suported video file """
   def compatible_file(self, item):
@@ -182,7 +186,7 @@ class App(ctk.CTk):
 
     return True
 
-	def select_format(self, event):
+  def select_format(self, event):
     self.format = event.widget.get()
 
   def select_resolution(self, event):
@@ -203,11 +207,11 @@ class App(ctk.CTk):
   def compress_video(self):
     pass
 
-	def default_resolutions(self):
+  def default_resolutions(self):
     return ["3840x2160", "2560x1440", "1920x1080", 
             "1280x720", "854x480", "640x360"]
 
-	def codec_values(self):
+  def codec_values(self):
     codecs = ["libx264", "libx265", "libvtav1", "libvpx-vp9"]
 
     """ 
