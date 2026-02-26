@@ -8,16 +8,16 @@ import platform
 import shutil
 
 import GPUinfo as GPU
+from ffmpeg_processor import FFmpegProcessor
+from ffprobe_processor import FFprobeProcessor
 
 class App(ctk.CTk):
   def __init__(self):
     super().__init__()
-    
-    """
+     
     self.ffmpeg_cmd, self.ffprobe = self.exe_paths()
-    self.FFmpeg = FFmpeg(self.ffmpeg_cmd)
-    self.FFprobe = FFprobe(self.ffmpeg_cmd)
-    """
+    self.ffmpeg = FFmpegProcessor(self.ffmpeg_cmd)
+    self.ffprobe = FFprobeProcessor(self.ffmpeg_cmd)
 
     """ FFmpeg options to compress video """
     self.input_file = ""
