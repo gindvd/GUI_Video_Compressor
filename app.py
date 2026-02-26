@@ -32,6 +32,26 @@ class App(ctk.CTk):
 		""" Creates menu bar at top of window with dropddown menus """
     self.create_menu()
     self.create_main()
+	
+	def exe_paths(self):
+    if platform.system() == "Windows":
+      basepath = os.getcwd()
+      ffmpeg_path = "/lib/ffmpeg.exe"
+      ffprobe_path = "/lib/ffprobe.exe" 
+
+      return os.path.join(basepath, ffmpeg_path), os.path.join(basepath, ffprobe_path)
+    
+    if platform.system() == "Linux":
+
+      if not shutil.which("ffmpeg"):
+        ctk.CTkMessagebox("Missing FFmpeg", "ERROR!\nMissing FFmpeg binaries!\nInstall to use program!")
+        self.quit()
+        
+      if not shutil.which("ffprobe"):
+        ctk.CTkMessagebox("Missing FFprobe", "ERROR!\nMissing FFprobe binaries!\nInstall to use program!")
+        self.quit()
+        
+      return "ffmpeg", "ffprobe"
 
 
 	def create_menu(self):
