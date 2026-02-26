@@ -1,4 +1,5 @@
 import customtkinter  as ctk
+from CTkMessagebox import CTkMessagebox
 import tkinter as tk
 from tkinter import filedialog
 
@@ -48,11 +49,11 @@ class App(ctk.CTk):
     if platform.system() == "Linux":
 
       if not shutil.which("ffmpeg"):
-        ctk.CTkMessagebox("Missing FFmpeg", "ERROR!\nMissing FFmpeg binaries!\nInstall to use program!")
+        CTkMessagebox(title="Missing FFmpeg", message="ERROR!\nMissing FFmpeg binaries!\nInstall to use program!", icon="error")
         self.quit()
         
       if not shutil.which("ffprobe"):
-        ctk.CTkMessagebox("Missing FFprobe", "ERROR!\nMissing FFprobe binaries!\nInstall to use program!")
+        CTkMessagebox(title="Missing FFprobe", message="ERROR!\nMissing FFprobe binaries!\nInstall to use program!", icon="error")
         self.quit()
         
       return "ffmpeg", "ffprobe"
@@ -139,7 +140,7 @@ class App(ctk.CTk):
     pass
 
   def show_about(self):
-    ctk.CTkMessagebox("About", """GUI Video Compression Tool\n""")
+    CTkMessagebox(title="About", message="""GUI Video Compression Tool\n""", icon="info")
   
   def browse_files(self):
     item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4;*.mov;*.mkv;*.avi;*.webm"),
@@ -178,14 +179,14 @@ class App(ctk.CTk):
 
     """ Checks if typed path is a file that exists """
     if not os.path.isfile(item):
-      ctk.CTkMessagebox("File Warning", "Warning!\nFile does not exist!")
+      CTkMessagebox(title="File Warning", message="Warning!\nFile does not exist!", icon='warning')
       return False
 
     """ Splits file extension from file path """     
     _, extension = os.path.splitext(item)   
 
     if extension not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
-      messagebox.showwarning("Video File Warning", "Warning!\nFile is not supperted video file!")
+      CTkMessagebox(title="Video File Warning", message="Warning!\nFile is not supperted video file!", icon='warning')
       return False
 
     return True
