@@ -203,34 +203,30 @@ class App(ctk.CTk):
   def compress_video(self):
     pass
 
-	def resolution_values(self):
-		""" Will update to get input files resolution, and use it to update the resolution list """ 
-
-		resolutions = ["3840x2160", "2560x1440", "1920x1080", 
-									 "1280x720", "854x480", "640x360"]
-
-		return resolutions
+	def default_resolutions(self):
+    return ["3840x2160", "2560x1440", "1920x1080", 
+            "1280x720", "854x480", "640x360"]
 
 	def codec_values(self):
-		codec_values = ["libx264", "libx265", "libvtav1", "libvpx-vp9"]
+    codecs = ["libx264", "libx265", "libvtav1", "libvpx-vp9"]
 
-		""" 
-		Gets list of GPU Manufacturer names to update list of codec with codecs
-		only compatible with the GPU brand
-		"""
-		for name in GPU.manufacturer():
-			match name:
-				case "NVIDIA":
-					codec_values.extend(["h264_nvemc", "hevc_nvenc"])
-				case "AMD":
-					codec_values.extend(["h264_amf", "hevc_amf"])
-				case "Intel":
-					codec_values.extend(["h264_qsv", "hevc_qsv"])
-				case _:
-					continue
-					
-		return codec_values
+    """ 
+    Gets list of GPU Manufacturer names to update list of codec with codecs
+    only compatible with the GPU brand
+    """
+    for name in GPU.manufacturer():
+      match name:
+        case "NVIDIA":
+          codecs.extend(["h264_nvenc", "hevc_nvenc"])
+        case "AMD":
+          codecs.extend(["h264_amf", "hevc_amf"])
+        case "Intel":
+          codecs.extend(["h264_qsv", "hevc_qsv"])
+        case _:
+          continue
+  
+    return codecs
 
 if __name__ == "__main__":
-	clip_optimization_app = App()
-	clip_optimization_app.mainloop()
+  video_compression_tool = App()
+  video_compression_tool.mainloop()
