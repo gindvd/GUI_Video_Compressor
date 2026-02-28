@@ -41,3 +41,12 @@ class VideoPlayer(ctk.CTkFrame):
     except:
       CTkMessagebox(title="Loading Failure", message="ERROR!\nMVideo file couldn't be opened!", 
                     icon="error")
+
+  def play_pause(self):
+    if self.video_file != "":
+      if self.video_player.is_paused():
+        self.video_player.play()
+        self.play_pause_btn.configure(text="Pause")
+      else:
+        self.video_player.pause()
+        self.play_pause_btn.configure(text="Play")
