@@ -11,8 +11,11 @@ class FFprobeProcessor():
                "-sexagesimal", filepath]
     
     try:
-      duration, _ = subprocess.Popen(command, stdout=subprocess.PIPE, 
-                                stderr=subprocess.PIPE, shell=False, text=True)
+      duration, _ = subprocess.Popen(command, 
+                                     stdout=subprocess.PIPE, 
+                                     stderr=subprocess.PIPE, 
+                                     shell=False, 
+                                     text=True)
     
       return duration
     
@@ -29,8 +32,11 @@ class FFprobeProcessor():
                "-of", "csv=s=x:p=0", filepath]
     
     try:
-      result = subprocess.Popen(command, stdout=subprocess.PIPE, 
-                                stderr=subprocess.PIPE, shell=False, text=True)
+      result = subprocess.Popen(command, 
+                                stdout=subprocess.PIPE, 
+                                stderr=subprocess.PIPE, 
+                                shell=False, 
+                                text=True)
       
       resolution, _ = result.communicate()
       
