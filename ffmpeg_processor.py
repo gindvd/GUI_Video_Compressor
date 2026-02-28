@@ -22,7 +22,7 @@ class FFmpegProcessor():
                "i", input_file, 
                "-c:v", codec,
                "-r", fps,
-               "-crf", crf, 
+               "-crf", str(crf), 
                "-vf", scale]
 
     if not audio:
@@ -34,22 +34,22 @@ class FFmpegProcessor():
     command.extend(output_file)
 
     try:
-      _, err = subprocess.Popen(command, stdout=subprocess.PIPE, 
-                                stderr=subprocess.PIPE, shell=False, text=True)
+      process = subprocess.Popen(command, 
+                                stdout=subprocess.PIPE, 
+                                stderr=subprocess.PIPE, 
+                                shell=False,
+                                text=True)
+
+      results, _ = process.communicate()
 
       return "success"
     
-    except FileNotFoundError as err:
-     pass
-    except subprocess.CalledProcessError as err:
-      pass
-    except Exception as err:
+    except:
       pass
 
-  """ 
-  Converts quality which will be a number between 100 and 0 to
-  a number between 0 and 51 which will be in the range of all
-  codec options
-  """
-  def crf_converter(self, quality):
-    return math.floor((quality / 100) * 51)
+  @staticmethod
+  def crf_converter(quality):
+    """ Convert quality percentage (0-100) to CRF value (18-51) """
+    quality_inverted = abs(quality / 100 - 1)
+    crf = quality_inverted * 33 + 18
+    return int(crf)
