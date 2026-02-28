@@ -15,9 +15,12 @@ class App(ctk.CTk):
   def __init__(self):
     super().__init__()
      
-    self.ffmpeg_cmd, self.ffprobe = self.exe_paths()
+    self.ffmpeg_cmd, self.ffprobe_cmd = self.exe_paths()
     self.ffmpeg = FFmpegProcessor(self.ffmpeg_cmd)
-    self.ffprobe = FFprobeProcessor(self.ffmpeg_cmd)
+    self.ffprobe = FFprobeProcessor(self.ffprobe_cmd)
+
+    print(self.ffmpeg)
+    print(self.ffprobe)
 
     """ FFmpeg options to compress video """
     self.input_file = ""
@@ -122,7 +125,9 @@ class App(ctk.CTk):
 
     ctk.CTkLabel(self, text="Video Quality:").grid(row=3, column=0, padx=5, pady=5, sticky="sw")
 
-    self.quality_slider = ctk.CTkSlider(self, from_=0, to=100, command=self.change_quality)
+    self.quality_slider = ctk.CTkSlider(self, from_=0, to=100, 
+                                        command=self.change_quality,
+                                        )
     self.quality_slider.set(90)
     self.quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
 
@@ -143,7 +148,7 @@ class App(ctk.CTk):
     CTkMessagebox(title="About", message="""GUI Video Compression Tool\n""", icon="info")
   
   def browse_files(self):
-    item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4;*.mov;*.mkv;*.avi;*.webm"),
+    item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
 
     if not self.compatible_file(item):
@@ -156,7 +161,9 @@ class App(ctk.CTk):
     Updates combox with list of smaller resolutions with same 
     aspect ratio as the inputted video file
     """
-    #self.res_combobox.configure(values=self.FFprobe.get_resolutions(self.input_file))
+    updated_resolutions = self.ffprobe.get_resolutions(self.input_file)
+    self.res_combobox.configure(values=updated_resolutions)
+    self.res_combobox.set(updated_resolutions[0])
 
   def file_entered(self, event):
     item = event.widget.get()
@@ -170,7 +177,9 @@ class App(ctk.CTk):
     Updates combox with list of smaller resolutions with same 
     aspect ratio as the inputted video file
     """
-    #self.res_combobox.configure(values=self.FFprobe.get_resolutions(self.input_file))
+    updated_resolutions = self.ffprobe.get_resolutions(self.input_file)
+    self.res_combobox.configure(values=updated_resolutions)
+    self.res_combobox.set(updated_resolutions[0])
 
   """ Returns false if item is not a file or suported video file """
   def compatible_file(self, item):
