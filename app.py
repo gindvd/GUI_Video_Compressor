@@ -19,9 +19,6 @@ class App(ctk.CTk):
     self.ffmpeg = FFmpegProcessor(self.ffmpeg_cmd)
     self.ffprobe = FFprobeProcessor(self.ffprobe_cmd)
 
-    print(self.ffmpeg)
-    print(self.ffprobe)
-
     """ FFmpeg options to compress video """
     self.input_file = ""
     self.format = "mp4"
