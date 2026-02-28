@@ -28,18 +28,22 @@ class FFprobeProcessor():
                "v:0", "-show_entries", "stream=width,height", 
                "-of", "csv=s=x:p=0", filepath]
     
+    print(command)
+    
     try:
-      resolution, _ = subprocess.Popen(command, stdout=subprocess.PIPE, 
+      result = subprocess.Popen(command, stdout=subprocess.PIPE, 
                                 stderr=subprocess.PIPE, shell=False, text=True)
-                                
+      
+      resolution, _ = result.communicate()
+      
       return self.updated_resolutions(resolution)
     
     except FileNotFoundError as err:
-      pass
+      print("1 {}".format(err))
     except subprocess.CalledProcessError as err:
-      pass
+      print("2 {}".format(err))
     except Exception as err:
-      pass
+      print("3 {}".format(err))
 
   def updated_resolutions(self, resolution):
     dimensions = resolution.split('x')
@@ -66,18 +70,17 @@ class FFprobeProcessor():
     Add original resolution to the list, useful for some 
     missing stanard screen resolutions
     """
-    temp_res.extend([resolution])
 
     for size in std_width:
       if size <= width:
-        h = round_to_even(size / aspect_ratio)
+        h = self.round_to_even(size / aspect_ratio)
         new = str(size) + "x" + str(h)
 
         temp_res.extend([new])
 
     for size in std_height:
       if size <= height:
-        w = round_to_even(size * aspect_ratio)
+        w = self.round_to_even(size * aspect_ratio)
         new = str(w) + "x" + str(size)
 
         temp_res.extend([new])
