@@ -1,4 +1,5 @@
 import subprocess
+import os
 
 class FFmpegProcessor():
   def __init__(self, ffmpeg):
