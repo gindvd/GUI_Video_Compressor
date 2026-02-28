@@ -34,22 +34,25 @@ class FFmpegProcessor():
     command.extend(output_file)
 
     try:
-      process = subprocess.Popen(command, 
+      current_process = subprocess.Popen(command, 
                                 stdout=subprocess.PIPE, 
                                 stderr=subprocess.PIPE, 
                                 shell=False,
                                 text=True)
 
-      results, _ = process.communicate()
+      output, error = current_process.communicate()
 
-      return "success"
+      if current_process.returncode != 0:
+        return False, error
+      
+      return True, None
     
-    except:
-      pass
+    except Exception as err:
+      return False, str(err)
 
   @staticmethod
   def crf_converter(quality):
-    """ Convert quality percentage (0-100) to CRF value (18-51) """
+    """ Convert quality percentage (0-100) to CRF value (10-51) """
     quality_inverted = abs(quality / 100 - 1)
-    crf = quality_inverted * 33 + 18
+    crf = quality_inverted * 41 + 10
     return int(crf)
