@@ -28,8 +28,6 @@ class FFprobeProcessor():
                "v:0", "-show_entries", "stream=width,height", 
                "-of", "csv=s=x:p=0", filepath]
     
-    print(command)
-    
     try:
       result = subprocess.Popen(command, stdout=subprocess.PIPE, 
                                 stderr=subprocess.PIPE, shell=False, text=True)
