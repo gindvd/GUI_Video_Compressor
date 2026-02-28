@@ -49,11 +49,11 @@ class App(ctk.CTk):
     if platform.system() == "Linux":
 
       if not shutil.which("ffmpeg"):
-        CTkMessagebox(title="Missing FFmpeg", message="ERROR!\nMissing FFmpeg binaries!\nInstall to use program!", icon="error")
+        CTkMessagebox(title="Missing FFmpeg", message="ERROR!\nMissing FFmpeg binaries!\nInstall to use program!", icon="cancel")
         self.quit()
         
       if not shutil.which("ffprobe"):
-        CTkMessagebox(title="Missing FFprobe", message="ERROR!\nMissing FFprobe binaries!\nInstall to use program!", icon="error")
+        CTkMessagebox(title="Missing FFprobe", message="ERROR!\nMissing FFprobe binaries!\nInstall to use program!", icon="cancel")
         self.quit()
         
       return "ffmpeg", "ffprobe"
@@ -123,13 +123,14 @@ class App(ctk.CTk):
     ctk.CTkLabel(self, text="Video Quality:").grid(row=3, column=0, padx=5, pady=5, sticky="sw")
 
     self.quality_slider = ctk.CTkSlider(self, from_=0, to=100, 
-                                        command=self.change_quality,
-                                        )
+                                        command=self.change_quality)
+
     self.quality_slider.set(90)
     self.quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
 
     self.var = ctk.IntVar()
-    self.audio_chkbox = ctk.CTkCheckBox(self, text="Remove Audio",
+    self.audio_chkbox = ctk.CTkCheckBox(self, 
+                                        text="Remove Audio",
                                         variable=self.var,
                                         command=self.remove_audio)
 
@@ -256,7 +257,7 @@ class App(ctk.CTk):
     if completed:
       CTkMessagebox(title="Video Compression Completed", message="Success!\nVideo has been successfully compressed!", icon='info')
     if not completed:
-      CTkMessagebox(title="Video Compression Error", message=f"Error!\n{error_msg}", icon='error')
+      CTkMessagebox(title="Video Compression Error", message=f"Error!\n{error_msg}", icon='cancel')
 
     progressbar.stop()      
 
