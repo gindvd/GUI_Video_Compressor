@@ -214,8 +214,6 @@ class App(ctk.CTk):
 
   def remove_audio(self):
     self.audio = False if self.var.get() else True
-
-  def compress_video(self):
     pass
 
   def default_resolutions(self):
@@ -241,6 +239,26 @@ class App(ctk.CTk):
           continue
   
     return codecs
+
+  def compress_video(self):
+    """ Create progress bar to display while FFmpeg is converting video file """
+    progressbar = ctk.CTkProgressBar(self, orientation='horizontal', mode='indeterminate')
+    progressbar.start()
+
+    completed, error_msg = self.ffmpeg.compress(self.input_file, 
+                                                self.format, 
+                                                self.resolution,
+                                                self.codec,
+                                                self.fps,
+                                                self.quality,
+                                                self.audio)
+  
+    if completed:
+      CTkMessagebox(title="Video Compression Completed", message="Success!\nVideo has been successfully compressed!", icon='info')
+    if not completed:
+      CTkMessagebox(title="Video Compression Error", message=f"Error!\n{error_msg}", icon='error')
+
+    progressbar.stop()      
 
 if __name__ == "__main__":
   video_compression_tool = App()
