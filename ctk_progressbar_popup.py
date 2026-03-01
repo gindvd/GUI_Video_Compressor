@@ -1,7 +1,9 @@
 import customtkinter as ctk
 
-class ProgressbarPopup(ctk.CTk):
-  def __init__(self):
+class ProgressbarPopup(ctk.CTkToplevel):
+  def __init__(self, parent):
+    super().__init__(parent)
+
     self.title("Progress Bar")
     self.resizable(False, False)
     
