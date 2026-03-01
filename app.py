@@ -245,8 +245,8 @@ class App(ctk.CTk):
   def compress_video(self):
     """ Create progress bar to display while FFmpeg is converting video file """
     
-    self.progressbar = ProgressbarPopup().mainloop()
-    self.progressbar.start()
+    self.progressbar_popup = ProgressbarPopup(self)
+    self.progressbar_popup.start()
     
 
     completed, error_msg = self.ffmpeg.compress(self.input_file, 
@@ -262,7 +262,7 @@ class App(ctk.CTk):
     if not completed:
       CTkMessagebox(title="Video Compression Error", message=f"Error!\n{error_msg}", icon='cancel')
 
-    self.progressbar.destroy()      
+    self.progressbar_popup.destroy()      
 
 if __name__ == "__main__":
   video_compression_tool = App()
