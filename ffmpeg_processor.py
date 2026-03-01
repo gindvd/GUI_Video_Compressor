@@ -8,7 +8,7 @@ class FFmpegProcessor():
   def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
-
+    
     width, height = resolution.split("x")
     scale = "scale={}:{}".format(width, height)
     
@@ -20,7 +20,7 @@ class FFmpegProcessor():
       audio_codec = "aac"
 
     command = [self.ffmpeg, 
-               "i", input_file, 
+               "-i", input_file, 
                "-c:v", codec,
                "-r", fps,
                "-crf", str(crf), 
@@ -32,7 +32,9 @@ class FFmpegProcessor():
         command.extend(["-c:a", audio_codec, 
                         "-b:a", "128k"]) 
     
-    command.extend(output_file)
+    command.extend([output_file])
+
+    print(command)
 
     try:
       current_process = subprocess.Popen(command, 
