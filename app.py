@@ -10,6 +10,7 @@ import shutil
 import GPUinfo as GPU
 from ffmpeg_processor import FFmpegProcessor
 from ffprobe_processor import FFprobeProcessor
+from ctk_progressbar_popup import ProgressbarPopup
 
 class App(ctk.CTk):
   def __init__(self):
@@ -243,8 +244,10 @@ class App(ctk.CTk):
 
   def compress_video(self):
     """ Create progress bar to display while FFmpeg is converting video file """
-    progressbar = ctk.CTkProgressBar(self, orientation='horizontal', mode='indeterminate')
-    progressbar.start()
+    
+    self.progressbar = ProgressbarPopup().mainloop()
+    self.progressbar.start()
+    
 
     completed, error_msg = self.ffmpeg.compress(self.input_file, 
                                                 self.format, 
@@ -259,7 +262,7 @@ class App(ctk.CTk):
     if not completed:
       CTkMessagebox(title="Video Compression Error", message=f"Error!\n{error_msg}", icon='cancel')
 
-    progressbar.stop()      
+    self.progressbar.destroy()      
 
 if __name__ == "__main__":
   video_compression_tool = App()
