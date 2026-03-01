@@ -223,7 +223,7 @@ class App(ctk.CTk):
             "1280x720", "854x480", "640x360"]
 
   def codec_values(self):
-    codecs = ["libx264", "libx265", "libvtav1", "libvpx-vp9"]
+    codecs = ["libx264", "libx265", "libsvtav1", "libvpx-vp9"]
 
     """ 
     Gets list of GPU Manufacturer names to update list of codec with codecs
