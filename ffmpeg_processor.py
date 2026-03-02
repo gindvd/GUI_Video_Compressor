@@ -1,11 +1,11 @@
-import subprocess
+import asyncio
 import os
 
 class FFmpegProcessor():
   def __init__(self, ffmpeg):
     self.ffmpeg = ffmpeg
 
-  def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
+  async def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
     
@@ -34,24 +34,27 @@ class FFmpegProcessor():
     
     command.extend([output_file])
 
-    print(command)
+    cmd_str = " ".join(command)
+
+    print(cmd_str)
 
     try:
-      current_process = subprocess.Popen(command, 
-                                stdout=subprocess.PIPE, 
-                                stderr=subprocess.PIPE, 
-                                shell=False,
-                                text=True)
+      proc = await asyncio.create_subprocess_exec(cmd_str, 
+                                                  stdout=asyncio.subprocess.PIPE, 
+                                                  stderr=asyncio.subprocess.PIPE)
 
-      output, error = current_process.communicate()
+      output, error = await proc.communicate()
 
-      if current_process.returncode != 0:
-        return False, error
+      print(error)
+
+      if proc.returncode != 0:
+        return False, error.decode()
       
       return True, None
     
-    except Exception as err:
-      return False, str(err)
+    except Exception as e:
+      print(e)
+      return False, str(e)
 
   @staticmethod
   def crf_converter(quality):
