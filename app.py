@@ -147,6 +147,7 @@ class App(ctk.CTk):
     CTkMessagebox(title="About", message="""GUI Video Compression Tool\n""", icon="info")
   
   def browse_files(self):
+    self.file_entry.insert(0, "")
     item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
 
@@ -246,8 +247,6 @@ class App(ctk.CTk):
     """ Create progress bar to display while FFmpeg is converting video file """
     
     self.progressbar_popup = ProgressbarPopup(self)
-    self.progressbar_popup.start_bar()
-    
 
     completed, error_msg = self.ffmpeg.compress(self.input_file, 
                                                 self.format, 
@@ -262,7 +261,7 @@ class App(ctk.CTk):
     if not completed:
       CTkMessagebox(title="Video Compression Error", message=f"Error!\n{error_msg}", icon='cancel')
 
-    self.progressbar_popup.destroy_window()      
+    self.progressbar_popup.destroy_window()    
 
 if __name__ == "__main__":
   video_compression_tool = App()
