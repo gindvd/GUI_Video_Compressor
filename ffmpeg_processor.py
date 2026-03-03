@@ -19,8 +19,7 @@ class FFmpegProcessor():
     else:
       audio_codec = "aac"
 
-    command = [self.ffmpeg, 
-               "-i", input_file, 
+    command = ["-i", input_file, 
                "-c:v", codec,
                "-r", fps,
                "-crf", str(crf), 
@@ -34,18 +33,13 @@ class FFmpegProcessor():
     
     command.extend([output_file])
 
-    cmd_str = " ".join(command)
-
-    print(cmd_str)
-
     try:
-      proc = await asyncio.create_subprocess_exec(cmd_str, 
+      proc = await asyncio.create_subprocess_exec(self.ffmpeg,
+                                                  *command, 
                                                   stdout=asyncio.subprocess.PIPE, 
                                                   stderr=asyncio.subprocess.PIPE)
 
       output, error = await proc.communicate()
-
-      print(error)
 
       if proc.returncode != 0:
         return False, error.decode()
