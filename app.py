@@ -6,7 +6,7 @@ from tkinter import filedialog
 import os
 import platform
 import shutil
-import asyncio
+import threading
 
 import GPUinfo as GPU
 from ffmpeg_processor import FFmpegProcessor
@@ -286,28 +286,33 @@ class App(ctk.CTk):
 
   def compress_video(self):
     """ Create progress bar to display while FFmpeg is converting video file """
-    
     self.progressbar_popup = ProgressbarPopup(self)
+    self.progressbar_popup.run_progressbar()
 
-    completed, error_msg = asyncio.run(self.ffmpeg.compress(self.input_file, 
+    """ Run FFmpeg executable/binary is separate thread """
+    threading.Thread(target=self.run_command, daemon=True).start()
+
+  def run_command(self): 
+    completed, error_msg = self.ffmpeg.compress(self.input_file, 
                                                 self.format, 
                                                 self.resolution,
                                                 self.codec,
                                                 self.fps,
                                                 self.quality,
-                                                self.audio))
-  
+                                                self.audio)
+
+    
+    self.progressbar_popup.destroy_window() 
+
     if completed:
       CTkMessagebox(title="Video Compression Completed", 
                     message="Success!\nVideo has been successfully compressed!", 
                     icon='info')
-    
+
     if not completed:
       CTkMessagebox(title="Video Compression Error", 
                     message=f"Error!\n{error_msg}", 
                     icon='cancel')
-
-    self.progressbar_popup.destroy_window()    
 
 if __name__ == "__main__":
   video_compression_tool = App()
