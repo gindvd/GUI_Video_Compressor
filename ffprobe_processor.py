@@ -5,10 +5,15 @@ class FFprobeProcessor():
     self.ffprobe = ffprobe
     
   def get_duration(self, filepath):
-    command = [self.ffprobe, "-v", "error", "-show_entries", 
-               "format=duration", "-of", 
+    command = [self.ffprobe, 
+               "-v", 
+               "error", 
+               "-show_entries", 
+               "format=duration", 
+               "-of", 
                "default=noprint_wrappers=1:nokey=1", 
-               "-sexagesimal", filepath]
+               "-sexagesimal", 
+               filepath]
     
     try:
       duration, _ = subprocess.Popen(command, 
