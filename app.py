@@ -51,15 +51,30 @@ class App(ctk.CTk):
     if platform.system() == "Linux":
 
       if not shutil.which("ffmpeg"):
-        CTkMessagebox(title="Missing FFmpeg", message="ERROR!\nMissing FFmpeg binaries!\nInstall to use program!", icon="cancel")
+        CTkMessagebox(title="Missing FFmpeg", 
+                      message="ERROR!\nMissing FFmpeg binaries!\nInstall to use program!", 
+                      icon="cancel")
+        
         self.quit()
         
       if not shutil.which("ffprobe"):
-        CTkMessagebox(title="Missing FFprobe", message="ERROR!\nMissing FFprobe binaries!\nInstall to use program!", icon="cancel")
+        CTkMessagebox(title="Missing FFprobe", 
+                      message="ERROR!\nMissing FFprobe binaries!\nInstall to use program!", 
+                      icon="cancel")
+        
         self.quit()
         
       return "ffmpeg", "ffprobe"
+    
+    error_msg = CTkMessagebox(title="Missing FFprobe", 
+                              message="ERROR!\nMissing FFprobe binaries!\nInstall to use program!", 
+                              icon="cancel"
+                              option_1='Ok')
+    
+    response = error_msg.get()
 
+    if error_msg == 'OK':
+      self.quit()
 
   def create_menu(self):
     menubar = tk.Menu(self)
