@@ -1,11 +1,11 @@
-import asyncio
 import os
+import subprocess
 
 class FFmpegProcessor():
   def __init__(self, ffmpeg):
     self.ffmpeg = ffmpeg
 
-  async def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
+  def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
     
@@ -19,7 +19,8 @@ class FFmpegProcessor():
     else:
       audio_codec = "aac"
 
-    command = ["-i", input_file, 
+    command = [self.ffmpeg,
+               "-i", input_file, 
                "-c:v", codec,
                "-r", fps,
                "-crf", str(crf), 
@@ -34,15 +35,16 @@ class FFmpegProcessor():
     command.extend([output_file])
 
     try:
-      proc = await asyncio.create_subprocess_exec(self.ffmpeg,
-                                                  *command, 
-                                                  stdout=asyncio.subprocess.PIPE, 
-                                                  stderr=asyncio.subprocess.PIPE)
+      proc = subprocess.Popen(command,
+                              stdout=subprocess.PIPE, 
+                              stderr=subprocess.PIPE,
+                              shell=False,
+                              text=True)
 
-      output, error = await proc.communicate()
+      output, error = proc.communicate()
 
       if proc.returncode != 0:
-        return False, error.decode()
+        return False, error
       
       return True, None
     
