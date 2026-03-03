@@ -41,14 +41,15 @@ class App(ctk.CTk):
     self.create_main()
 	
   def exe_paths(self):
-    if platform.system() == "Windows":
+    device_os = platform.system() 
+    if device_os == "Windows":
       basepath = os.getcwd()
       ffmpeg_path = "/lib/ffmpeg.exe"
       ffprobe_path = "/lib/ffprobe.exe" 
 
       return os.path.join(basepath, ffmpeg_path), os.path.join(basepath, ffprobe_path)
     
-    if platform.system() == "Linux":
+    if device_os == "Linux":
 
       if not shutil.which("ffmpeg"):
         CTkMessagebox(title="Missing FFmpeg", 
@@ -66,9 +67,11 @@ class App(ctk.CTk):
         
       return "ffmpeg", "ffprobe"
     
-    error_msg = CTkMessagebox(title="Missing FFprobe", 
-                              message="ERROR!\nMissing FFprobe binaries!\nInstall to use program!", 
-                              icon="cancel"
+    error_msg = CTkMessagebox(title="Incompatible Operating System", 
+                              message="""ERROR!
+                                         \nCurrent program is not currently compatible with {}!
+                                         \n\nTerminating program!""".format(device_os), 
+                              icon="cancel",
                               option_1='Ok')
     
     response = error_msg.get()
@@ -98,12 +101,16 @@ class App(ctk.CTk):
     self.file_entry.bind("<Return>", self.file_entered)
     self.file_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
 
-    self.browse = ctk.CTkButton(self, text="Browse", command=self.browse_files)
+    self.browse = ctk.CTkButton(self, 
+                                text="Browse", 
+                                command=self.browse_files)
+    
     self.browse.grid(row=0, column=4, padx=5, pady=5)
 
     ctk.CTkLabel(self, text="Video Format:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
-    self.format_combobox = ctk.CTkComboBox(self, values=["mp4", "mov", "mkv", "avi"],
+    self.format_combobox = ctk.CTkComboBox(self, 
+                                           values=["mp4", "mov", "mkv", "avi"],
 		                                       state='readonly',
                                            command=self.select_format)
 
@@ -112,7 +119,8 @@ class App(ctk.CTk):
 
     ctk.CTkLabel(self, text="Resolution:").grid(row=1, column=2, padx=5, pady=5, sticky="w")
 
-    self.res_combobox = ctk.CTkComboBox(self, values=self.default_resolutions(),
+    self.res_combobox = ctk.CTkComboBox(self, 
+                                        values=self.default_resolutions(),
 		                                    state='readonly',
                                         command=self.select_resolution)
 
@@ -121,7 +129,8 @@ class App(ctk.CTk):
 
     ctk.CTkLabel(self, text="Codec:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
-    self.codec_combobox = ctk.CTkComboBox(self, values=self.codec_values(),
+    self.codec_combobox = ctk.CTkComboBox(self, 
+                                          values=self.codec_values(),
 		                                      state='readonly',
                                           command = self.select_codec)
 
@@ -130,7 +139,8 @@ class App(ctk.CTk):
 
     ctk.CTkLabel(self, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
-    self.fps_combobox = ctk.CTkComboBox(self, values=["60", "50", "30", "24", "15"],
+    self.fps_combobox = ctk.CTkComboBox(self, 
+                                        values=["60", "50", "30", "24", "15"],
 		                                    state='readonly',
                                         command=self.select_fps)
 
@@ -139,7 +149,9 @@ class App(ctk.CTk):
 
     ctk.CTkLabel(self, text="Video Quality:").grid(row=3, column=0, padx=5, pady=5, sticky="sw")
 
-    self.quality_slider = ctk.CTkSlider(self, from_=0, to=100, 
+    self.quality_slider = ctk.CTkSlider(self, 
+                                        from_=0, 
+                                        to=100, 
                                         command=self.change_quality)
 
     self.quality_slider.set(90)
@@ -153,14 +165,19 @@ class App(ctk.CTk):
 
     self.audio_chkbox.grid(row=4, column=0, padx=5, pady=5)
 
-    self.compress = ctk.CTkButton(self, text="Compress", command=self.compress_video)
+    self.compress = ctk.CTkButton(self, 
+                                  text="Compress", 
+                                  command=self.compress_video)
+    
     self.compress.grid(row=4, column=4, padx=5, pady=5)
 
   def show_guide(self):
     pass
 
   def show_about(self):
-    CTkMessagebox(title="About", message="""GUI Video Compression Tool\n""", icon="info")
+    CTkMessagebox(title="About", 
+                  message="""GUI Video Compression Tool\n""", 
+                  icon="info")
   
   def browse_files(self):
     self.file_entry.insert(0, "")
@@ -178,6 +195,7 @@ class App(ctk.CTk):
     aspect ratio as the inputted video file
     """
     updated_resolutions = self.ffprobe.get_resolutions(self.input_file)
+
     self.res_combobox.configure(values=updated_resolutions)
     self.res_combobox.set(updated_resolutions[0])
 
@@ -194,6 +212,7 @@ class App(ctk.CTk):
     aspect ratio as the inputted video file
     """
     updated_resolutions = self.ffprobe.get_resolutions(self.input_file)
+
     self.res_combobox.configure(values=updated_resolutions)
     self.res_combobox.set(updated_resolutions[0])
 
@@ -204,14 +223,20 @@ class App(ctk.CTk):
 
     """ Checks if typed path is a file that exists """
     if not os.path.isfile(item):
-      CTkMessagebox(title="File Warning", message="Warning!\nFile does not exist!", icon='warning')
+      CTkMessagebox(title="File Warning", 
+                    message="Warning!\nFile does not exist!", 
+                    icon='warning')
+     
       return False
 
     """ Splits file extension from file path """     
     _, extension = os.path.splitext(item)   
 
     if extension not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
-      CTkMessagebox(title="Video File Warning", message="Warning!\nFile is not supperted video file!", icon='warning')
+      CTkMessagebox(title="Video File Warning", 
+                    message="Warning!\nFile is not supperted video file!", 
+                    icon='warning')
+      
       return False
 
     return True
@@ -273,9 +298,14 @@ class App(ctk.CTk):
                                                 self.audio))
   
     if completed:
-      CTkMessagebox(title="Video Compression Completed", message="Success!\nVideo has been successfully compressed!", icon='info')
+      CTkMessagebox(title="Video Compression Completed", 
+                    message="Success!\nVideo has been successfully compressed!", 
+                    icon='info')
+    
     if not completed:
-      CTkMessagebox(title="Video Compression Error", message=f"Error!\n{error_msg}", icon='cancel')
+      CTkMessagebox(title="Video Compression Error", 
+                    message=f"Error!\n{error_msg}", 
+                    icon='cancel')
 
     self.progressbar_popup.destroy_window()    
 
