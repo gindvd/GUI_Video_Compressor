@@ -24,7 +24,7 @@ def GPU_names():
 
   return run_multi_cmds(primary_cmd, secondary_cmd)
 
-def cmd_getter(device_os: str):
+def cmd_getter(device_os):
   if device_os not in ["Windows", "Linux", "Darwin"]:
     raise OSCompatibiltyError("Current OS is not compatible with this module.", device_os)
   
@@ -58,8 +58,11 @@ def parse_cmd(cmd):
 def run_single_cmd(primary_cmd):
   try:
     # Runs command and returns all connected GPU names as a string
-    result = subprocess.Popen(primary_cmd, stdout=subprocess.PIPE, 
-                              stderr=subprocess.PIPE, shell=False, text=True)
+    result = subprocess.Popen(primary_cmd, 
+                              stdout=subprocess.PIPE, 
+                              stderr=subprocess.PIPE, 
+                              shell=False, 
+                              text=True)
 
     output, _ = result.communicate()
     return output.split()
@@ -71,15 +74,22 @@ def run_single_cmd(primary_cmd):
 
 def run_multi_cmds( primary_cmd, secondary_cmd):
   try:
-    process = subprocess.Popen(primary_cmd, stdout=subprocess.PIPE, 
-                               stderr=subprocess.PIPE, shell=False, text=True)
+    process = subprocess.Popen(primary_cmd, 
+                               stdout=subprocess.PIPE, 
+                               stderr=subprocess.PIPE, 
+                               shell=False, 
+                               text=True)
 
-    result = subprocess.Popen(secondary_cmd, stdin=process.stdout, 
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-                              shell=False, text=True)
+    result = subprocess.Popen(secondary_cmd, 
+                              stdin=process.stdout, 
+                              stdout=subprocess.PIPE, 
+                              stderr=subprocess.PIPE, 
+                              shell=False, 
+                              text=True)
 
     process.stdout.close()
     output, _ = result.communicate()
+    
     return output.split()
 
   except FileNotFoundError as err:
