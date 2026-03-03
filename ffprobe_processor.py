@@ -117,5 +117,6 @@ class FFprobeProcessor():
 
     return resolutions
 
-  def round_to_even(self, f):
+  @staticmethod
+  def round_to_even(f):
     return round(f / 2.) * 2
