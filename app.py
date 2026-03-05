@@ -104,13 +104,13 @@ class App(ctk.CTk):
 
     filemenu = tk.Menu(menubar, tearoff=0)
     menubar.add_cascade(label="File", menu=filemenu)
-    filemenu.add_command(label="Open", command=self.browse_files)
+    filemenu.add_command(label="Open", command=self._browse_files)
     filemenu.add_separator()
     filemenu.add_command(label="Exit", command=self.quit)
 
     helpmenu = tk.Menu(menubar, tearoff=0)
     menubar.add_cascade(label="Help", menu=helpmenu)
-    helpmenu.add_command(label="About", command=self.show_about)
+    helpmenu.add_command(label="About", command=self._show_about)
 
   def _create_main(self):  
     ctk.CTkLabel(self, text="Input File:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
@@ -189,49 +189,35 @@ class App(ctk.CTk):
     
     self.compress.grid(row=4, column=4, padx=5, pady=5)
 
-  def show_about(self):
+  def _show_about(self):
     CTkMessagebox(title="About", 
                   message="""GUI Video Compression Tool\n""", 
                   icon="info")
   
-  def browse_files(self):
-    self.file_entry.insert(0, "")
+ def _browse_files(self):
+    self._file_entry.insert(0, "")
     item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
 
-    if not self.compatible_file(item):
+    if not self._compatible_file(item):
       return
 
-    self.input_file = item
-    self.file_entry.insert(0, self.input_file)
+    self._input_file = item
+    self._file_entry.insert(0, self._input_file)
     
-    """
-    Updates combox with list of smaller resolutions with same 
-    aspect ratio as the inputted video file
-    """
-    updated_resolutions = self.ffprobe.get_resolutions(self.input_file)
-
-    self.res_combobox.configure(values=updated_resolutions)
-    self.res_combobox.set(updated_resolutions[0])
-
-  def file_entered(self, event):
+    self._update_gui()
+ 
+  def _file_entered(self, event):
     item = event.widget.get()
 
-    if not self.compatible_file(item):
+    if not self._compatible_file(item):
       return
 
     self.input_file = item
     
-    """
-    Updates combox with list of smaller resolutions with same 
-    aspect ratio as the inputted video file
-    """
-    updated_resolutions = self.ffprobe.get_resolutions(self.input_file)
+    self._update_gui()
 
-    self.res_combobox.configure(values=updated_resolutions)
-    self.res_combobox.set(updated_resolutions[0])
 
-  """ Returns false if item is not a file or suported video file """
   def compatible_file(self, item):
     if item == "" or item == ():
       return False
