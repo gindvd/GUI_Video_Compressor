@@ -236,11 +236,10 @@ class App(ctk.CTk):
       self._target_res_drpdwn.set(updated_resolutions[0])
 
 
-  def compatible_file(self, item):
+  def _compatible_file(self, item):
     if item == "" or item == ():
       return False
 
-    """ Checks if typed path is a file that exists """
     if not os.path.isfile(item):
       CTkMessagebox(title="File Warning", 
                     message="Warning!\nFile does not exist!", 
@@ -248,17 +247,15 @@ class App(ctk.CTk):
      
       return False
 
-    """ Splits file extension from file path """     
-    _, extension = os.path.splitext(item)   
+    _, ext = os.path.splitext(item)   
 
-    if extension not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
+    if ext not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
       CTkMessagebox(title="Video File Warning", 
-                    message="Warning!\nFile is not supperted video file!", 
+                    message="Warning!\nFile is not supported video file!", 
                     icon='warning')
       
       return False
 
-    return True
 
   def select_format(self, choice):
     self.format = choice
