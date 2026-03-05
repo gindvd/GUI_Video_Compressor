@@ -360,7 +360,7 @@ class App(ctk.CTk):
                               FFmpeg was not terminated!\n
                               Video Compression continuing!
                               """, 
-                    icon="cancel"
+                    icon="cancel",
                     option_1=None)
 
       sleep(30)
