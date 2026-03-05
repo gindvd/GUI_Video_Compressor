@@ -217,6 +217,24 @@ class App(ctk.CTk):
     
     self._update_gui()
 
+  def _update_gui(self):
+    self._compress_btn.config(state=NORMAL)
+
+    # ffprobe.get_resolutions will return list of common resolutions 
+    # smaller that the videos current resolution that maintain the same aspect ratio
+    completed, updated_list, err_msg = self._ffprobe.get_resolutions(self._input_file)
+    
+    if not completed:
+      CTkMessagebox(title="FFprobe Error", 
+                    message="Error getting video file's resolution!\n{}".format(err_msg), 
+                    icon='cancel')
+      
+      return
+
+    elif completed:    
+      self._target_res_drpdwn.configure(values=updated_list)
+      self._target_res_drpdwn.set(updated_resolutions[0])
+
 
   def compatible_file(self, item):
     if item == "" or item == ():
