@@ -172,7 +172,7 @@ class App(ctk.CTk):
                                         command=self._codec_choice)
 
     self._codec_drpdwn.set("libx264")
-    self._ccodec_drpdwn.grid(row=2, column=1, padx=5, pady=5)
+    self._codec_drpdwn.grid(row=2, column=1, padx=5, pady=5)
 
     ctk.CTkLabel(self, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
