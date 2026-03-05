@@ -8,7 +8,7 @@ import platform
 import shutil
 import threading
 
-import GPUinfo as GPU
+import GPUinfo as gpu
 from ffmpeg_processor import FFmpegProcessor
 from ffprobe_processor import FFprobeProcessor
 from ctk_progressbar_popup import ProgressbarPopup
@@ -271,7 +271,7 @@ class App(ctk.CTk):
     Gets list of GPU Manufacturer names to update list of codec with codecs
     only compatible with the GPU brand
     """
-    for name in GPU.manufacturer():
+    for name in gpu.manufacturer():
       match name:
         case "NVIDIA":
           codecs.extend(["h264_nvenc", "hevc_nvenc"])
