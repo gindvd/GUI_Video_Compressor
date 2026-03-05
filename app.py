@@ -204,7 +204,7 @@ class App(ctk.CTk):
 
     self._compress_btn = ctk.CTkButton(self, 
                                        text="Compress",
-                                       state=DISABLE,
+                                       state=DISABLEDD,
                                        command=self._compress_video)
     
     self._compress_btn.grid(row=4, column=4, padx=5, pady=5)
@@ -312,7 +312,7 @@ class App(ctk.CTk):
     return codecs
 
   def _compress_video(self):
-    self._compress_btn.config(state=DISABLE)
+    self._compress_btn.config(state=DISABLED)
     
     self._progressbar_popup = ProgressbarPopup(self)
     self._progressbar_popup.run_progressbar()
