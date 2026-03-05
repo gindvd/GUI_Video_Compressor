@@ -362,7 +362,7 @@ class App(ctk.CTk):
                                   """, 
                           icon="cancel")
       
-      if msg = "Ok":
+      if msg == "OK":
         self.quit()
     
     if killed:
@@ -372,7 +372,7 @@ class App(ctk.CTk):
                                   Video Compression cancelled!
                                   """, 
                           icon="info")
-      if msg = "Ok":
+      if msg == "OK":
         self.quit()
 
 if __name__ == "__main__":
