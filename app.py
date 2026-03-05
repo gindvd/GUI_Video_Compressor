@@ -204,7 +204,7 @@ class App(ctk.CTk):
 
     self._compress_btn = ctk.CTkButton(self, 
                                        text="Compress",
-                                       state=DISABLEDD,
+                                       state=DISABLED,
                                        command=self._compress_video)
     
     self._compress_btn.grid(row=4, column=4, padx=5, pady=5)
