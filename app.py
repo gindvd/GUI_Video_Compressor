@@ -147,8 +147,8 @@ class App(ctk.CTk):
 
     self._target_ext_drpdwn = ctk.CTkComboBox(self, 
                                               values=["mp4", "mov", "mkv", "avi"],
-		                                      state='readonly',
-                                              command=lambda x: self._target_format=x)
+		                                          state='readonly',
+                                              command=_ext_choice)
 
     self._target_ext_drpdwn.set("mp4")
     self._target_ext_drpdwn.grid(row=1, column=1, padx=5, pady=5)
@@ -158,8 +158,8 @@ class App(ctk.CTk):
     self._target_res_drpdwn = ctk.CTkComboBox(self, 
                                               values=["3840x2160", "2560x1440", "1920x1080", 
                                                       "1280x720", "854x480", "640x360"],
-		                                      state='readonly',
-                                              command=lambda x: self._target_res=x)
+		                                          state='readonly',
+                                              command=_res_choice)
 
     self._target_res_drpdwn.set("1920x1080")
     self._target_res_drpdwn.grid(row=1, column=3, padx=5, pady=5)
@@ -168,8 +168,8 @@ class App(ctk.CTk):
 
     self.codec_drpdwn = ctk.CTkComboBox(self, 
                                         values=self.codec_values(),
-		                                state='readonly',
-                                        command=lambda x: self._codec=x)
+		                                    state='readonly',
+                                        command=_codec_choice)
 
     self._codec_drpdwn.set("libx264")
     self._ccodec_drpdwn.grid(row=2, column=1, padx=5, pady=5)
@@ -178,8 +178,8 @@ class App(ctk.CTk):
 
     self._target_fps_drpdwn = ctk.CTkComboBox(self, 
                                               values=["60", "50", "30", "24", "15"],
-		                                      state='readonly',
-                                              command=lambda x: self._target_fps=x)
+		                                          state='readonly',
+                                              command=_fps_choice)
 
     self._target_fps_drpdwn.set("30")
     self._target_fps_drpdwn.grid(row=2, column=3, padx=5, pady=5)
@@ -189,7 +189,7 @@ class App(ctk.CTk):
     self._quality_slider = ctk.CTkSlider(self, 
                                          from_=0, 
                                          to=100, 
-                                         command=lambda x: self._quality=x)
+                                         command=_quality_choice)
 
     self._quality_slider.set(90)
     self._quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
@@ -276,6 +276,21 @@ class App(ctk.CTk):
       return False
 
     return True
+  
+  def _ext_choice(self, choice):
+    self._target_format = choice
+
+  def _res_choice(self, choice):
+    self._target_res = choice
+  
+  def _codec_choice(self, choice):
+    self._codec = choice 
+
+  def _fps_choice(self, choice):
+    self._target_fps = choice
+  
+  def _quality_choice(self, value):
+    self._quality = value
 
   def _remove_audio(self):
     self._audio = False if self._audio_on_of.get() else True
