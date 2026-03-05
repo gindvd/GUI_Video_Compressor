@@ -36,6 +36,11 @@ class FFmpegProcessor():
     
     command.extend([output_file])
 
+    if platform.system() == "Windows":
+      creationflag = subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+      creationflag = 0
+
     try:
       proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
