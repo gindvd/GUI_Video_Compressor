@@ -238,11 +238,11 @@ class App(ctk.CTk):
     self._update_gui()
     
   def _update_gui(self):
-    self._compress_btn.config(state="normal")
+    self._compress_btn.configure(state="normal")
 
     # ffprobe.get_resolutions will return list of common resolutions 
     # smaller that the videos current resolution that maintain the same aspect ratio
-    completed, updated_list, err_msg = self._ffprobe.get_resolutions(self._input_file)
+    completed, res_list, err_msg = self._ffprobe.get_resolutions(self._input_file)
     
     if not completed:
       CTkMessagebox(title="FFprobe Error", 
@@ -252,8 +252,8 @@ class App(ctk.CTk):
       return
 
     elif completed:    
-      self._target_res_drpdwn.configure(values=updated_list)
-      self._target_res_drpdwn.set(updated_resolutions[0])
+      self._target_res_drpdwn.configure(values=res_list)
+      self._target_res_drpdwn.set(res_list[0])
 
   def _compatible_file(self, item):
     if item == "" or item == ():
@@ -312,7 +312,7 @@ class App(ctk.CTk):
     return codecs
 
   def _compress_video(self):
-    self._compress_btn.config(state="disabled")
+    self._compress_btn.configure(state="disabled")
     
     self._progressbar_popup = ProgressbarPopup(self)
     self._progressbar_popup.run_progressbar()
@@ -335,7 +335,7 @@ class App(ctk.CTk):
   
   def _compression_finished(self, completed, err_msg):
     self._progressbar_popup.destroy_window()
-    self._compress_btn.config(state=NORMAL)
+    self._compress_btn.configure(state="normal")
 
     if completed:
       CTkMessagebox(title="Video Compression Completed", 
@@ -350,32 +350,30 @@ class App(ctk.CTk):
   def kill_ffmpeg(self):
     killed = self._ffmpeg.terminate_compression
     
-    if killed == None:
-      return
+    if killed == "None":
+      self.quit()
     
     if not killed:
-      CTkMessagebox(title="Video Compression Not Terminated", 
-                    message="""
-                              ERROR!\n
-                              FFmpeg was not terminated!\n
-                              Video Compression continuing!
-                              """, 
-                    icon="cancel",
-                    option_1=None)
-
-      sleep(30)
-      return
-
-    CTkMessagebox(title="Video Compression Terminated", 
-                  message="""
-                           FFmpeg terminated!\n
-                           Video Compression cancelled!
-                           """, 
-                  icon="info",
-                  option_1=None)
-
-    sleep(30)
-    return 
+      msg = CTkMessagebox(title="Video Compression Not Terminated", 
+                          message="""
+                                  ERROR!\n
+                                  FFmpeg was not terminated!\n
+                                  Video Compression continuing!
+                                  """, 
+                          icon="cancel")
+      
+      if msg = "Ok":
+        self.quit()
+    
+    if killed:
+      msg = CTkMessagebox(title="Video Compression Terminated", 
+                          message="""
+                                  FFmpeg terminated!\n
+                                  Video Compression cancelled!
+                                  """, 
+                          icon="info")
+      if msg = "Ok":
+        self.quit()
 
 if __name__ == "__main__":
   vid_compress_app = App()
