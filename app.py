@@ -303,7 +303,7 @@ class App(ctk.CTk):
                                                self._quality,
                                                self._audio)
 
-    self.after(0, lambda: self._compression_finished(completed, error_msg))
+    self.after(0, lambda: self._compression_finished, completed, err_msg)
   
   def _compression_finished(self, completed, err_msg):
     self._progressbar_popup.destroy_window()
