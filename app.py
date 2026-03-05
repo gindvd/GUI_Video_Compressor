@@ -264,17 +264,12 @@ class App(ctk.CTk):
     self.audio = False if self.var.get() else True
     pass
 
-  def default_resolutions(self):
-    return ["3840x2160", "2560x1440", "1920x1080", 
-            "1280x720", "854x480", "640x360"]
+  def _remove_audio(self):
+    self._audio = False if self._audio_on_of.get() else True
 
-  def codec_values(self):
+  def _codec_values(self):
     codecs = ["libx264", "libx265", "libsvtav1", "libvpx-vp9"]
 
-    """ 
-    Gets list of GPU Manufacturer names to update list of codec with codecs
-    only compatible with the GPU brand
-    """
     for name in gpu.manufacturer():
       match name:
         case "NVIDIA":
@@ -288,13 +283,16 @@ class App(ctk.CTk):
   
     return codecs
 
-  def compress_video(self):
-    """ Create progress bar to display while FFmpeg is converting video file """
-    self.progressbar_popup = ProgressbarPopup(self)
-    self.progressbar_popup.run_progressbar()
+  def _compress_video(self):
+    self._compress_btn.config(state=DISABLE)
+    
+    self._progressbar_popup = ProgressbarPopup(self)
+    self._progressbar_popup.run_progressbar()
 
-    """ Run FFmpeg executable/binary is separate thread """
-    threading.Thread(target=self.run_command, daemon=True).start()
+    # Run FFmpeg executable/binary in separate thread 
+    # Keeps the process from blocking progress bar animation from rendering
+ 
+    threading.Thread(target=self._run_compression_cmd, daemon=True).start()
 
   def run_command(self): 
     completed, error_msg = self.ffmpeg.compress(self.input_file, 
