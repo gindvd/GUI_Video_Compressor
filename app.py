@@ -292,21 +292,22 @@ class App(ctk.CTk):
     # Run FFmpeg executable/binary in separate thread 
     # Keeps the process from blocking progress bar animation from rendering
  
-    threading.Thread(target=self._run_compression_cmd, daemon=True).start()
+    threading.Thread(target=self.c, daemon=True).start()
 
-  def run_command(self): 
-    completed, error_msg = self.ffmpeg.compress(self.input_file, 
-                                                self.format, 
-                                                self.resolution,
-                                                self.codec,
-                                                self.fps,
-                                                self.quality,
-                                                self.audio)
+  def _run_compression_cmd(self): 
+    completed, error_msg = self.ffmpeg.compress(self._input_file, 
+                                               self._target_format, 
+                                               self._target_res,
+                                               self._codec,
+                                               self._target_fps,
+                                               self._quality,
+                                               self._audio)
 
-    self.after(0, lambda: self.compression_finished(completed, error_msg))
+    self.after(0, lambda: self._compression_finished(completed, error_msg))
   
-  def compression_finished(self, completed, error_msg):
-    self.progressbar_popup.destroy_window() 
+  def _compression_finished(self, completed, err_msg):
+    self._progressbar_popup.destroy_window()
+    self._compress_btn.config(state=NORMAL)
 
     if completed:
       CTkMessagebox(title="Video Compression Completed", 
@@ -315,7 +316,7 @@ class App(ctk.CTk):
 
     if not completed:
       CTkMessagebox(title="Video Compression Error", 
-                    message=f"Error!\n{error_msg}", 
+                    message="Compression Error!\n{}".format(err_msg), 
                     icon='cancel')
 
 if __name__ == "__main__":
