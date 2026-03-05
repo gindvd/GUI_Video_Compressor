@@ -1,12 +1,14 @@
 import customtkinter  as ctk
-from CTkMessagebox import CTkMessagebox
 import tkinter as tk
-from tkinter import filedialog
+from CTkMessagebox import CTkMessagebox
+from customtkinter import filedialog
 
 import os
 import platform
 import shutil
 import threading
+
+from time import sleep
 
 import GPUinfo as gpu
 from ffmpeg_processor import FFmpegProcessor
@@ -41,8 +43,10 @@ class App(ctk.CTk):
   def _ffmpeg_ffprobe_sys_cmd(self)
     # Currently only supports WIndows and Linux
     # Possibly expand this to be compatible with Mac and others    
+    
     device_os = platform.system() 
-    basepath = os.getcwd()
+    if device_os == "Windows":
+      basepath = os.getcwd()
       ffmpeg_path = os.path.join(basepath, "/lib/ffmpeg.exe")
       ffprobe_path = os.path.join(basepath, "/lib/ffprobe.exe")
       
@@ -67,38 +71,52 @@ class App(ctk.CTk):
                       icon="cancel")
         
         self.quit()
+        
+      return ffmpeg_path, ffprobe_path
     
-    elif device_os == "Linux":
+    if device_os == "Linux":
 
       if not shutil.which("ffmpeg"):
         CTkMessagebox(title="Missing FFmpeg", 
-                      message="ERROR!\nMissing FFmpeg binaries!\nInstall to use program!", 
+                      message="""
+                              ERROR!\n
+                              FFmpeg command not recognized!\n
+                              Ensure FFmpeg is installed!
+                              """, 
                       icon="cancel")
         
         self.quit()
         
       if not shutil.which("ffprobe"):
         CTkMessagebox(title="Missing FFprobe", 
-                      message="ERROR!\nMissing FFprobe binaries!\nInstall to use program!", 
+                      message="""
+                              ERROR!\n
+                              FFprobe command not recognized!\n
+                              Ensure FFprobe is installed!
+                              """, 
                       icon="cancel")
         
         self.quit()
         
       return "ffmpeg", "ffprobe"
     
-    error_msg = CTkMessagebox(title="Incompatible Operating System", 
-                              message="""ERROR!
-                                         \nCurrent program is not currently compatible with {}!
-                                         \n\nTerminating program!""".format(device_os), 
-                              icon="cancel",
-                              option_1='Ok')
+    # Terminate the program with a message to let users
+    # know the OS is not compatible 
+    err_msg = CTkMessagebox(title="Incompatible Operating System", 
+                            message="""
+                                    ERROR!
+                                    \nCurrent program is not currently compatible with {}!
+                                    \n\nTerminating program!
+                                    """.format(device_os), 
+                            icon="cancel",
+                            option_1='Ok')
     
-    response = error_msg.get()
+    response = err_msg.get()
 
-    if error_msg == 'OK':
+    if err_msg == 'Ok':
       self.quit()
 
-  def _create_menu(self):
+  def _create_menu_gui(self):
     menubar = tk.Menu(self)
     self.config(menu=menubar)
 
@@ -196,7 +214,7 @@ class App(ctk.CTk):
                   message="""GUI Video Compression Tool\n""", 
                   icon="info")
   
- def _browse_files(self):
+  def _browse_files(self):
     self._file_entry.insert(0, "")
     item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
@@ -218,7 +236,7 @@ class App(ctk.CTk):
     self.input_file = item
     
     self._update_gui()
-
+    
   def _update_gui(self):
     self._compress_btn.config(state=NORMAL)
 
@@ -236,7 +254,6 @@ class App(ctk.CTk):
     elif completed:    
       self._target_res_drpdwn.configure(values=updated_list)
       self._target_res_drpdwn.set(updated_resolutions[0])
-
 
   def _compatible_file(self, item):
     if item == "" or item == ():
@@ -259,10 +276,6 @@ class App(ctk.CTk):
       return False
 
     return True
-
-  def remove_audio(self):
-    self.audio = False if self.var.get() else True
-    pass
 
   def _remove_audio(self):
     self._audio = False if self._audio_on_of.get() else True
@@ -292,10 +305,10 @@ class App(ctk.CTk):
     # Run FFmpeg executable/binary in separate thread 
     # Keeps the process from blocking progress bar animation from rendering
  
-    threading.Thread(target=self.c, daemon=True).start()
+    threading.Thread(target=self._run_compression_cmd, daemon=True).start()
 
   def _run_compression_cmd(self): 
-    completed, error_msg = self.ffmpeg.compress(self._input_file, 
+    completed, err_msg = self._ffmpeg.compress(self._input_file, 
                                                self._target_format, 
                                                self._target_res,
                                                self._codec,
@@ -303,7 +316,7 @@ class App(ctk.CTk):
                                                self._quality,
                                                self._audio)
 
-    self.after(0, lambda: self._compression_finished, completed, err_msg)
+    self.after(0, self._compression_finished, completed, err_msg)
   
   def _compression_finished(self, completed, err_msg):
     self._progressbar_popup.destroy_window()
@@ -318,7 +331,7 @@ class App(ctk.CTk):
       CTkMessagebox(title="Video Compression Error", 
                     message="Compression Error!\n{}".format(err_msg), 
                     icon='cancel')
-
+  
   def kill_ffmpeg(self):
     killed = self._ffmpeg.terminate_compression
     
@@ -352,4 +365,4 @@ class App(ctk.CTk):
 if __name__ == "__main__":
   vid_compress_app = App()
   vid_compress_app.protocol("WM_DELETE_WINDOW", vid_compress_app.kill_ffmpeg)
-  video_compression_tool.mainloop()
+  vid_compress_app.mainloop()
