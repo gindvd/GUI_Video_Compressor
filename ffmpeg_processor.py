@@ -41,23 +41,30 @@ class FFmpegProcessor():
     else:
       creationflag = 0
 
-    try:
-      proc = subprocess.Popen(cmd,
+
+    self._proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
                               stderr=subprocess.PIPE,
                               shell=False,
-                              text=True)
+                              creationflags=creationflag)
 
-      output, error = proc.communicate()
-
-      if proc.returncode != 0:
-        return False, error
-      
+    try:
+      out, err = self._proc.communicate()
+    
+    except subprocess.CalledProcessError:
+      return False, err.decode()
+    
+    except FileNotFoundError:
+      return False, "FFmpeg could not be found!"        
+    
+    except Exception as e: 
+      return False, e
+    
+    else:
       return True, None
     
-    except Exception as e:
-      print(e)
-      return False, str(e)
+    finally:
+      self._proc = None
 
   @staticmethod
   def crf_converter(quality):
