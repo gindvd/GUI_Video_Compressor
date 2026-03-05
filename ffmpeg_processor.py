@@ -35,13 +35,12 @@ class FFmpegProcessor():
                     "-b:a", "128k"]) 
     
     command.extend([output_file])
-
+    
     if platform.system() == "Windows":
       creationflag = subprocess.CREATE_NEW_PROCESS_GROUP
     else:
       creationflag = 0
-
-
+    
     self._proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
                               stderr=subprocess.PIPE,
@@ -65,7 +64,7 @@ class FFmpegProcessor():
     
     finally:
       self._proc = None
-
+    
   def terminate_compression(self):
     if self._proc != None:
       try:
@@ -77,8 +76,8 @@ class FFmpegProcessor():
       else:
         return True
     
-    return None
-
+    return "None"
+  
   @staticmethod
   def _crf_converter(quality):
     # Quality needs be inverted as the lower the CRF number, the better the quality
