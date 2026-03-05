@@ -204,7 +204,7 @@ class App(ctk.CTk):
 
     self._compress_btn = ctk.CTkButton(self, 
                                        text="Compress",
-                                       state=DISABLED,
+                                       state="disabled",
                                        command=self._compress_video)
     
     self._compress_btn.grid(row=4, column=4, padx=5, pady=5)
@@ -238,7 +238,7 @@ class App(ctk.CTk):
     self._update_gui()
     
   def _update_gui(self):
-    self._compress_btn.config(state=NORMAL)
+    self._compress_btn.config(state="normal")
 
     # ffprobe.get_resolutions will return list of common resolutions 
     # smaller that the videos current resolution that maintain the same aspect ratio
@@ -312,7 +312,7 @@ class App(ctk.CTk):
     return codecs
 
   def _compress_video(self):
-    self._compress_btn.config(state=DISABLED)
+    self._compress_btn.config(state="disabled")
     
     self._progressbar_popup = ProgressbarPopup(self)
     self._progressbar_popup.run_progressbar()
