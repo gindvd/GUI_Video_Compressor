@@ -17,18 +17,17 @@ class App(ctk.CTk):
   def __init__(self):
     super().__init__()
      
-    self.ffmpeg_cmd, self.ffprobe_cmd = self.exe_paths()
-    self.ffmpeg = FFmpegProcessor(self.ffmpeg_cmd)
-    self.ffprobe = FFprobeProcessor(self.ffprobe_cmd)
+    self._ffmpeg_cmd, self._ffprobe_cmd = self._ffmpeg_ffprobe_sys_cmd()
+    self._ffmpeg = FFmpegProcessor(self._ffmpeg_cmd)
+    self._ffprobe = FFprobeProcessor(self._ffprobe_cmd)
 
-    """ FFmpeg options to compress video """
-    self.input_file = ""
-    self.format = "mp4"
-    self.resolution = "1920x1080"
-    self.codec = "libx264"
-    self.fps = "30"
-    self.quality = 90
-    self.audio = True
+    self._input_file = ""
+    self._target_format = "mp4"
+    self._target_res = "1920x1080"
+    self._codec = "libx264"
+    self._target_fps = "30"
+    self._quality = 90
+    self._audio = True
         
     self.title("Video Compression Tool")
     self.resizable(False, False)
@@ -36,11 +35,12 @@ class App(ctk.CTk):
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
 
-    """ Creates menu bar at top of window with dropddown menus """
-    self.create_menu()
-    self.create_main()
+    self._create_menu_gui()
+    self._create_main_gui()
 	
-  def exe_paths(self):
+  def _ffmpeg_ffprobe_sys_cmd(self)
+    # Currently only supports WIndows and Linux
+    # Possibly expand this to be compatible with Mac and others    
     device_os = platform.system() 
     basepath = os.getcwd()
       ffmpeg_path = os.path.join(basepath, "/lib/ffmpeg.exe")
@@ -98,7 +98,7 @@ class App(ctk.CTk):
     if error_msg == 'OK':
       self.quit()
 
-  def create_menu(self):
+  def _create_menu(self):
     menubar = tk.Menu(self)
     self.config(menu=menubar)
 
@@ -110,10 +110,9 @@ class App(ctk.CTk):
 
     helpmenu = tk.Menu(menubar, tearoff=0)
     menubar.add_cascade(label="Help", menu=helpmenu)
-    helpmenu.add_command(label="Guide", command=self.show_guide)
     helpmenu.add_command(label="About", command=self.show_about)
 
-  def create_main(self):  
+  def _create_main(self):  
     ctk.CTkLabel(self, text="Input File:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
     self.file_entry = ctk.CTkEntry(self)
@@ -189,9 +188,6 @@ class App(ctk.CTk):
                                   command=self.compress_video)
     
     self.compress.grid(row=4, column=4, padx=5, pady=5)
-
-  def show_guide(self):
-    pass
 
   def show_about(self):
     CTkMessagebox(title="About", 
