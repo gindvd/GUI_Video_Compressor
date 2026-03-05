@@ -1,52 +1,59 @@
-import customtkinter as ctk
-from tkVideoPlayer import TkinterVideo as TkV
+iimport customtkinter as ctk
+from tkVideoPlayer import TkinterVideo 
+from CTkMessagebox import CTkMessagebox
 
 class VideoPlayer(ctk.CTkFrame):
   def __init__(self):
     super().__init__()
-
+    
     ctk.set_appearance_mode("System")
-    ctk.set_default_color_theme("blue")
+    stk.set_default_color_theme("blue")
     
-    self.video_file = ""
-    self.duration = 0
-    self.start_time = -1
-    self.end_time = 1
-    self.currrent_time = 0
-    self.new_duration = 0
+    self._vid_file = ""
     
-    self.video_player = TkinterVideo(self, scaled=True, keep_aspect=True, 
-                            consistent_frame_rate=True,  bg="black")
+    self._vid_player = TkinterVideo(self, 
+                                    scaled=True, 
+                                    keep_aspect=True, 
+                                    consistent_frame_rate=True,  
+                                    bg="black")
     
-    self.video_player.set_resampling_method(1)
-    self.video_player.pack(expand=True, fill=both, padx=10, pady=10)
-    self.video_player.bind("<<Duration>>", self.update_duration)
-    self.video_player.bind("<<SecondChanged>>", self.update_scale)
-    self.video_player.bind("<<Ended>>", self.video_ended)
+    self._vid_player.set_resampling_method(1)
+    self._vid_player.pack(expand=True, fill=both, padx=10, pady=10)
+    self._vid_player.bind("<<Duration>>", self._update_dur)
+    self._vid_player.bind("<<SecondChanged>>", self._update_scale)
+    self._vid_player.bind("<<Ended>>", self._vid_ended)
     
-    self.play_pause_btn = ctk.CTkButton(self, text="Play", command=self.play_pause)
-    self.play_pause_btn.pack(padx=10, pady=10)
+    self._play_pause_btn = ctk.CTkButton(self, text="Play", command=self._play_pause)
+    self._play_pause_btn.pack(padx=10, pady=10)
+    
     
   def load_video(self, filename):
-    self.video_file = filename 
-    self.video_player.stop()
+    self._vid_file = filename 
+    self._vid_player.stop()
     
     try:
-      self.video_player.load(self.video_file)
-      
-      self.duration = int(self.video_player.video_info()["duration"])
-      self.end_time = int(self.video_player.video_info()["duration"])
-      
-         
+      self._vid_player.load(self._vid_file)
+    
     except:
-      CTkMessagebox(title="Loading Failure", message="ERROR!\nMVideo file couldn't be opened!", 
-                    icon="error")
+      CTkMessagebox(title="Loading Failure", 
+                    message="ERROR!\nVideo file couldn't be opened!", 
+                    icon="cancel")
 
-  def play_pause(self):
-    if self.video_file != "":
-      if self.video_player.is_paused():
-        self.video_player.play()
-        self.play_pause_btn.configure(text="Pause")
+  def _play_pause(self):
+    if self._vid_file != "":
+      if self._vid_player.is_paused():
+        self._vid_player.play()
+        self._play_pause_btn.configure(text="Pause")
+        
       else:
-        self.video_player.pause()
-        self.play_pause_btn.configure(text="Play")
+        self._vid_player.pause()
+        self._play_pause_btn.configure(text="Play")
+
+  def _update_dur(self):
+    pass
+    
+  def _update_scale(self):
+    pass
+    
+  def _vid_ended(slef):
+    pass
