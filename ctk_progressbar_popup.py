@@ -19,6 +19,12 @@ class ProgressbarPopup(ctk.CTkToplevel):
                                            determinate_speed=0.75)
 
     self._progressbar.grid(row=0, column=0, columnspan=3, padx=50, pady=50)
+
+    self._cancel_compression_btn = ctk.CTkButton(self, 
+                                                 text="Cancel", 
+                                                 command=self.parent.kill_ffmpeg)  
+
+    self._cancel_compression_btn.grid(row=2,column=2, padx=10, pady=10)
   
   def run_progressbar(self):
     self.progressbar.start()
