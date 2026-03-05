@@ -42,14 +42,33 @@ class App(ctk.CTk):
 	
   def exe_paths(self):
     device_os = platform.system() 
-    if device_os == "Windows":
-      basepath = os.getcwd()
-      ffmpeg_path = "/lib/ffmpeg.exe"
-      ffprobe_path = "/lib/ffprobe.exe" 
-
-      return os.path.join(basepath, ffmpeg_path), os.path.join(basepath, ffprobe_path)
+    basepath = os.getcwd()
+      ffmpeg_path = os.path.join(basepath, "/lib/ffmpeg.exe")
+      ffprobe_path = os.path.join(basepath, "/lib/ffprobe.exe")
+      
+      if os.path.isfile(ffmpeg_path):
+        CTkMessagebox(title="Missing FFmpeg Exe", 
+                      message="""
+                              ERROR!\n
+                              FFmpeg.exe is missing from lib folder!\n
+                              Please ensure FFmpeg is installed correctly!
+                              """, 
+                      icon="cancel")
+        
+        self.quit()
+      
+      if os.path.isfile(ffprobe_path):
+        CTkMessagebox(title="Missing FFprobe Exe", 
+                      message="""
+                              ERROR!\n
+                              FFprobe.exe is missing from lib folder!\n
+                              Please ensure FFmpeg is installed correctly!
+                              """, 
+                      icon="cancel")
+        
+        self.quit()
     
-    if device_os == "Linux":
+    elif device_os == "Linux":
 
       if not shutil.which("ffmpeg"):
         CTkMessagebox(title="Missing FFmpeg", 
