@@ -197,7 +197,7 @@ class App(ctk.CTk):
     self._aud_on_off = ctk.IntVar()
     self._rm_aud_chkbox = ctk.CTkCheckBox(self, 
                                           text="Remove Audio",
-                                          variable=self._audio_on_off,
+                                          variable=self._aud_on_off,
                                           command=self._remove_audio)
 
     self._rm_aud_chkbox.grid(row=4, column=0, padx=5, pady=5)
