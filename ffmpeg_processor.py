@@ -66,9 +66,22 @@ class FFmpegProcessor():
     finally:
       self._proc = None
 
+  def terminate_compression(self):
+    if self._proc != None:
+      try:
+        self._proc.kill()
+
+      except:
+        return False
+
+      else:
+        return True
+    
+    return None
+
   @staticmethod
-  def crf_converter(quality):
-    """ Convert quality percentage (0-100) to CRF value (10-51) """
+  def _crf_converter(quality):
+    # Quality needs be inverted as the lower the CRF number, the better the quality
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 41 + 10
     return int(crf)
