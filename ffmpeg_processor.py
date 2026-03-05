@@ -34,7 +34,7 @@ class FFmpegProcessor():
         cmd.extend(["-c:a", audio_codec, 
                     "-b:a", "128k"]) 
     
-    command.extend([output_file])
+    cmd.extend([output_file])
     
     if platform.system() == "Windows":
       creationflag = subprocess.CREATE_NEW_PROCESS_GROUP
