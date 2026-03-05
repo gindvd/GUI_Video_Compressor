@@ -255,7 +255,8 @@ class App(ctk.CTk):
                     icon='warning')
       
       return False
-
+      
+    return True
 
   def select_format(self, choice):
     self.format = choice
