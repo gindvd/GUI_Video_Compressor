@@ -40,7 +40,7 @@ class App(ctk.CTk):
     self._create_menu_gui()
     self._create_main_gui()
 	
-  def _ffmpeg_ffprobe_sys_cmd(self)
+  def _ffmpeg_ffprobe_sys_cmd(self):
     # Currently only supports WIndows and Linux
     # Possibly expand this to be compatible with Mac and others    
     
