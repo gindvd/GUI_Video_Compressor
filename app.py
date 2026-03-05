@@ -148,7 +148,7 @@ class App(ctk.CTk):
     self._target_ext_drpdwn = ctk.CTkComboBox(self, 
                                               values=["mp4", "mov", "mkv", "avi"],
 		                                          state='readonly',
-                                              command=_ext_choice)
+                                              command=self._ext_choice)
 
     self._target_ext_drpdwn.set("mp4")
     self._target_ext_drpdwn.grid(row=1, column=1, padx=5, pady=5)
@@ -159,7 +159,7 @@ class App(ctk.CTk):
                                               values=["3840x2160", "2560x1440", "1920x1080", 
                                                       "1280x720", "854x480", "640x360"],
 		                                          state='readonly',
-                                              command=_res_choice)
+                                              command=self._res_choice)
 
     self._target_res_drpdwn.set("1920x1080")
     self._target_res_drpdwn.grid(row=1, column=3, padx=5, pady=5)
@@ -169,7 +169,7 @@ class App(ctk.CTk):
     self.codec_drpdwn = ctk.CTkComboBox(self, 
                                         values=self.codec_values(),
 		                                    state='readonly',
-                                        command=_codec_choice)
+                                        command=self._codec_choice)
 
     self._codec_drpdwn.set("libx264")
     self._ccodec_drpdwn.grid(row=2, column=1, padx=5, pady=5)
@@ -179,7 +179,7 @@ class App(ctk.CTk):
     self._target_fps_drpdwn = ctk.CTkComboBox(self, 
                                               values=["60", "50", "30", "24", "15"],
 		                                          state='readonly',
-                                              command=_fps_choice)
+                                              command=self._fps_choice)
 
     self._target_fps_drpdwn.set("30")
     self._target_fps_drpdwn.grid(row=2, column=3, padx=5, pady=5)
@@ -189,7 +189,7 @@ class App(ctk.CTk):
     self._quality_slider = ctk.CTkSlider(self, 
                                          from_=0, 
                                          to=100, 
-                                         command=_quality_choice)
+                                         command=self._quality_choice)
 
     self._quality_slider.set(90)
     self._quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
@@ -371,7 +371,7 @@ class App(ctk.CTk):
                            FFmpeg terminated!\n
                            Video Compression cancelled!
                            """, 
-                  icon="info"
+                  icon="info",
                   option_1=None)
 
     sleep(30)
