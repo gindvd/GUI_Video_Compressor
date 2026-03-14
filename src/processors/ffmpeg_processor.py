@@ -6,6 +6,7 @@ class FFmpegProcessor():
   def __init__(self, ffmpeg):
     self._ffmpeg = ffmpeg
     self._proc = None
+    self._terminated = False
 
   def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
     basename, _ = os.path.splitext(input_file)
@@ -40,7 +41,6 @@ class FFmpegProcessor():
 
     if platform.system() == "Windows":
       creation_flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
-    
     else:
       creation_flags["start_new_session"] = True
     
@@ -52,34 +52,51 @@ class FFmpegProcessor():
 
     try:
       out, err = self._proc.communicate()
+      self._proc.wait()
     
-    except subprocess.CalledProcessError:
-      return False, err
+      rc = self._proc.returncode
     
     except FileNotFoundError:
       return False, "FFmpeg could not be found!"        
     
     except Exception as e: 
-      return False, e
+      return False, str(e)
     
     else:
-      return True, None
+      if rc != 0 and self._terminated == False:
+        if os.path.exists(output_file):
+                os.remove(output_file)
+
+        return False, "Compression Failed or Interupted"
+
+      elif rc != 0 and self._terminated == True:
+        if os.path.exists(output_file):
+                os.remove(output_file)
+        
+        return False,  ""
+
+      else:
+        return True, None
     
     finally:
       self._proc = None
+      self._terminated = False
     
   def terminate_compression(self):
     # _proc_poll will only be None when process is running
     if self._proc and self._proc.poll() is None:
       self._proc.terminate()
+      self._terminated = True
 
       try:
         self._proc.wait(timeout=5)
-        return True, "Video compression terminated"
       
       except subprocess.TimeoutExpired:
         self._proc.kill()
         return True, "Video compression killed"
+      
+      else:
+        return True, "Video compression terminated"
 
       finally:
         self._proc = None
@@ -93,3 +110,4 @@ class FFmpegProcessor():
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 41 + 10
     return int(crf)
+  
