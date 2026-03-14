@@ -345,9 +345,9 @@ class App(ctk.CTk):
                     message="Success!\nVideo has been successfully compressed!", 
                     icon='info')
 
-    if not completed:
+    if not completed and err_msg != "":
       CTkMessagebox(title="Video Compression Error", 
-                    message="Compression Error!\n{}".format(err_msg), 
+                    message="ERROR\n{}".format(err_msg), 
                     icon='cancel')
   
   def cancel_compression(self):
