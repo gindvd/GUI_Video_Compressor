@@ -6,6 +6,7 @@ class FFmpegProcessor():
   def __init__(self, ffmpeg):
     self._ffmpeg = ffmpeg
     self._proc = None
+    self._proc_poll = 1
 
   def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
     basename, _ = os.path.splitext(input_file)
@@ -36,22 +37,18 @@ class FFmpegProcessor():
     
     cmd.extend([output_file])
     
-    if platform.system() == "Windows":
-      creationflag = subprocess.CREATE_NEW_PROCESS_GROUP
-    else:
-      creationflag = 0
-    
     self._proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
                               stderr=subprocess.PIPE,
                               shell=False,
-                              creationflags=creationflag)
+                              creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 
     try:
       out, err = self._proc.communicate()
+      self._proc_poll = self._proc.poll()
     
     except subprocess.CalledProcessError:
-      return False, err.decode()
+      return False, err
     
     except FileNotFoundError:
       return False, "FFmpeg could not be found!"        
@@ -64,10 +61,11 @@ class FFmpegProcessor():
     
     finally:
       self._proc = None
+      self._proc_poll = 1
     
   def terminate_compression(self):
-    print(self._proc)
-    if self._proc != None:
+    # _proc_poll will only be None when process is running
+    if self._proc_poll is None:
       try:
         self._proc.kill()
 
@@ -78,7 +76,7 @@ class FFmpegProcessor():
         return True
     
     return "None"
-  
+
   @staticmethod
   def _crf_converter(quality):
     # Quality needs be inverted as the lower the CRF number, the better the quality
