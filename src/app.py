@@ -49,12 +49,11 @@ class App(ctk.CTk):
     
     device_os = platform.system() 
     if device_os == "Windows":
-      basepath = os.getcwd()
-      ffmpeg_path = os.path.join(basepath, "/lib/ffmpeg.exe")
-      ffprobe_path = os.path.join(basepath, "/lib/ffprobe.exe")
+      ffmpeg_path = os.path.abspath("lib/ffmpeg.exe")
+      ffprobe_path = os.path.abspath("lib/ffprobe.exe")
       
       if os.path.isfile(ffmpeg_path):
-        CTkMessagebox(title="Missing FFmpeg Exe", 
+        close = CTkMessagebox(title="Missing FFmpeg Exe", 
                       message="""
                               ERROR!\n
                               FFmpeg.exe is missing from lib folder!\n
@@ -62,10 +61,11 @@ class App(ctk.CTk):
                               """, 
                       icon="cancel")
         
-        self.quit()
+        if close:
+          self.destroy()
       
       if os.path.isfile(ffprobe_path):
-        CTkMessagebox(title="Missing FFprobe Exe", 
+        close = CTkMessagebox(title="Missing FFprobe Exe", 
                       message="""
                               ERROR!\n
                               FFprobe.exe is missing from lib folder!\n
@@ -73,14 +73,15 @@ class App(ctk.CTk):
                               """, 
                       icon="cancel")
         
-        self.quit()
+        if close:
+          self.destroy()
         
       return ffmpeg_path, ffprobe_path
     
     if device_os == "Linux":
 
       if not shutil.which("ffmpeg"):
-        CTkMessagebox(title="Missing FFmpeg", 
+        close = CTkMessagebox(title="Missing FFmpeg", 
                       message="""
                               ERROR!\n
                               FFmpeg command not recognized!\n
@@ -88,10 +89,11 @@ class App(ctk.CTk):
                               """, 
                       icon="cancel")
         
-        self.quit()
+        if close:
+          self.destroy()
         
       if not shutil.which("ffprobe"):
-        CTkMessagebox(title="Missing FFprobe", 
+        close = CTkMessagebox(title="Missing FFprobe", 
                       message="""
                               ERROR!\n
                               FFprobe command not recognized!\n
@@ -99,25 +101,23 @@ class App(ctk.CTk):
                               """, 
                       icon="cancel")
         
-        self.quit()
+        if close:
+          self.destroy()
         
       return "ffmpeg", "ffprobe"
     
     # Terminate the program with a message to let users
     # know the OS is not compatible 
-    err_msg = CTkMessagebox(title="Incompatible Operating System", 
+    close = CTkMessagebox(title="Incompatible Operating System", 
                             message="""
                                     ERROR!
                                     \nCurrent program is not currently compatible with {}!
                                     \n\nTerminating program!
                                     """.format(device_os), 
-                            icon="cancel",
-                            option_1='Ok')
-    
-    response = err_msg.get()
+                            icon="cancel")
 
-    if err_msg == 'Ok':
-      self.quit()
+    if close:
+      self.destroy()
 
   def _create_menu_gui(self):
     menubar = CTkMenuBar(self)
@@ -128,7 +128,7 @@ class App(ctk.CTk):
     file_drop = CustomDropdownMenu(widget=file_btn)
     file_drop.add_option(option="Open", command=self._browse_files)
     file_drop.add_separator()
-    file_drop.add_option(option="Exit", command=self.quit)
+    file_drop.add_option(option="Exit", command=self.on_quit)
     
     help_drop = CustomDropdownMenu(widget=help_btn)
     help_drop.add_option(option="About", command=self._show_about)
@@ -357,17 +357,17 @@ class App(ctk.CTk):
       return
       
     elif killed:
-      response = CTkMessagebox(title="Video Compression Terminated", 
+      close = CTkMessagebox(title="Video Compression Terminated", 
                           message="{}!".format(msg), 
                           icon="info")
       
-      if response.get() == "OK":
+      if close:
         return
   
   def on_quit(self):
     self.cancel_compression()
     
-    self.quit()
+    self.destroy()
 
 if __name__ == "__main__":
   vid_compress_app = App()
