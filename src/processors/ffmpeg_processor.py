@@ -55,6 +55,15 @@ class FFmpegProcessor():
       self._proc.wait()
     
       rc = self._proc.returncode
+
+    # AttributeError sometimes raised when cancelling video compression due to _proc being set to None which has no wait()
+    # Must be a timing thing
+    # Addding except to ignore and treat like normal termination as it still properly kills the process
+    except AttributeError:
+      if os.path.exists(output_file):
+        os.remove(output_file)
+        
+      return False,  ""
     
     except FileNotFoundError:
       return False, "FFmpeg could not be found!"        
