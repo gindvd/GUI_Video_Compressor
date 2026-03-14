@@ -8,12 +8,12 @@ import platform
 import shutil
 import threading
 
-from time import sleep
+import modules.GPUinfo as gpu
 
-import GPUinfo as gpu
-from ffmpeg_processor import FFmpegProcessor
-from ffprobe_processor import FFprobeProcessor
-from ctk_progressbar_popup import ProgressbarPopup
+from processors.ffmpeg_processor import FFmpegProcessor
+from processors.ffprobe_processor import FFprobeProcessor
+
+from components.progressbar_popup import ProgressbarPopup
 
 class App(ctk.CTk):
   def __init__(self):
