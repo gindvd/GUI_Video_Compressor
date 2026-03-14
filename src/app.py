@@ -352,7 +352,6 @@ class App(ctk.CTk):
   
   def cancel_compression(self):
     killed, msg = self._ffmpeg.terminate_compression()
-    
 
     if not killed:
       return

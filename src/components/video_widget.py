@@ -1,4 +1,4 @@
-iimport customtkinter as ctk
+import customtkinter as ctk
 from tkVideoPlayer import TkinterVideo 
 from CTkMessagebox import CTkMessagebox
 
