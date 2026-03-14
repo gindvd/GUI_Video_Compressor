@@ -351,24 +351,18 @@ class App(ctk.CTk):
                     icon='cancel')
   
   def cancel_compression(self):
-    killed = self._ffmpeg.terminate_compression
+    killed, msg = self._ffmpeg.terminate_compression()
     
-    if killed == "None":
+
+    if not killed:
       return
-    
-    elif not killed:
-      msg = CTkMessagebox(title="Video Compression Not Terminated", 
-                          message="ERROR!\nFailed to cancel compression", 
-                          icon="cancel")
       
-      if msg.get() == "OK":
-        return
-    
     elif killed:
-      msg = CTkMessagebox(title="Video Compression Terminated", 
-                          message="Ended Process!\nVideo Compression cancelled!", 
+      response = CTkMessagebox(title="Video Compression Terminated", 
+                          message="{}!".format(msg), 
                           icon="info")
-      if msg.get() == "OK":
+      
+      if response.get() == "OK":
         return
   
   def on_quit(self):
