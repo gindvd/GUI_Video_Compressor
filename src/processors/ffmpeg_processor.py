@@ -65,17 +65,22 @@ class FFmpegProcessor():
     
   def terminate_compression(self):
     # _proc_poll will only be None when process is running
-    if self._proc_poll is None:
+    if self._proc and self._proc_poll is None:
+      self._proc.terminate()
+
       try:
+        self._proc.wait(timeout=3)
+        return True, "Video compression terminated"
+      
+      except subprocess.TimeoutExpired:
         self._proc.kill()
+        return True, "Video compression killed"
 
-      except:
-        return False
-
-      else:
-        return True
-    
-    return "None"
+      finally:
+        self._proc = None
+        self._proc_poll = 1
+      
+    return False, ""
 
   @staticmethod
   def _crf_converter(quality):
