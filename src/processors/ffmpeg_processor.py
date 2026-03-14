@@ -66,6 +66,7 @@ class FFmpegProcessor():
       self._proc = None
     
   def terminate_compression(self):
+    print(self._proc)
     if self._proc != None:
       try:
         self._proc.kill()

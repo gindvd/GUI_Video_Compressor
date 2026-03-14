@@ -347,37 +347,33 @@ class App(ctk.CTk):
                     message="Compression Error!\n{}".format(err_msg), 
                     icon='cancel')
   
-  """
   def kill_ffmpeg(self):
     killed = self._ffmpeg.terminate_compression
+    print(killed)
     
     if killed == "None":
       self.quit()
     
-    if not killed:
-      msg = CTkMessagebox(title="Video Compression Not Terminated", 
-                          message=""""""
-                                  ERROR!
-                                  FFmpeg was not terminated!
-                                  Video Compression continuing!
-                                  """""", 
-                          icon="cancel")
+    elif not killed:
+      msg = CTkMessagebox(self,
+                          title="Video Compression Not Terminated", 
+                          message="ERROR!\nFFmpeg was not terminated!\nVideo Compression continuing!", 
+                          icon="cancel",
+                          option_1="OK")
       
-      if msg == "OK":
+      if msg.get() == "OK":
         self.quit()
     
-    if killed:
-      msg = CTkMessagebox(title="Video Compression Terminated", 
-                          message=""""""
-                                  FFmpeg terminated!
-                                  Video Compression cancelled!
-                                  """""", 
-                          icon="info")
-      if msg == "OK":
+    elif killed:
+      msg = CTkMessagebox(self,
+                          title="Video Compression Terminated", 
+                          message="Success!\nVideo Compression cancelled!", 
+                          icon="info",
+                          option_1="OK")
+      if msg.get() == "OK":
         self.quit()
-  """
 
 if __name__ == "__main__":
   vid_compress_app = App()
-  #vid_compress_app.protocol("WM_DELETE_WINDOW", vid_compress_app.kill_ffmpeg)
+  vid_compress_app.protocol("WM_DELETE_WINDOW", vid_compress_app.kill_ffmpeg)
   vid_compress_app.mainloop()
