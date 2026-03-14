@@ -1,5 +1,6 @@
 import customtkinter  as ctk
-import tkinter as tk
+
+from CTkMenuBar import *
 from CTkMessagebox import CTkMessagebox
 from customtkinter import filedialog
 
@@ -117,18 +118,18 @@ class App(ctk.CTk):
       self.quit()
 
   def _create_menu_gui(self):
-    menubar = tk.Menu(self)
-    self.config(menu=menubar)
-
-    filemenu = tk.Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="File", menu=filemenu)
-    filemenu.add_command(label="Open", command=self._browse_files)
-    filemenu.add_separator()
-    filemenu.add_command(label="Exit", command=self.quit)
-
-    helpmenu = tk.Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="Help", menu=helpmenu)
-    helpmenu.add_command(label="About", command=self._show_about)
+    menubar = CTkMenuBar(self)
+    
+    file_btn = menubar.add_cascade("File")
+    help_btn = menubar.add_cascade("Help")
+    
+    file_drop = CustomDropdownMenu(widget=file_btn)
+    file_drop.add_option(option="Open", command=self._browse_files)
+    file_drop.add_separator()
+    file_drop.add_option(option="Exit", command=self.quit)
+    
+    help_drop = CustomDropdownMenu(widget=help_btn)
+    help_drop.add_option(option="About", command=self._show_about)
 
   def _create_main_gui(self):  
     ctk.CTkLabel(self, text="Input File:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
