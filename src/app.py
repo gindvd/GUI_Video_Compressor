@@ -59,10 +59,11 @@ class App(ctk.CTk):
                               FFmpeg.exe is missing from lib folder!\n
                               Please ensure FFmpeg is installed correctly!
                               """, 
-                      icon="cancel")
+                      icon="cancel",
+                      option_1="Ok")
         
-        if close:
-          self.destroy()
+        if close.get() == "Ok":
+          self.quit()
       
       if os.path.isfile(ffprobe_path):
         close = CTkMessagebox(title="Missing FFprobe Exe", 
@@ -71,10 +72,11 @@ class App(ctk.CTk):
                               FFprobe.exe is missing from lib folder!\n
                               Please ensure FFmpeg is installed correctly!
                               """, 
-                      icon="cancel")
+                      icon="cancel",
+                      option_1="Ok")
         
-        if close:
-          self.destroy()
+        if close.get() == "Ok":
+          self.quit()
         
       return ffmpeg_path, ffprobe_path
     
@@ -87,10 +89,11 @@ class App(ctk.CTk):
                               FFmpeg command not recognized!\n
                               Ensure FFmpeg is installed!
                               """, 
-                      icon="cancel")
+                      icon="cancel",
+                      option_1="Ok")
         
-        if close:
-          self.destroy()
+        if close.get() == "Ok":
+          self.quit()
         
       if not shutil.which("ffprobe"):
         close = CTkMessagebox(title="Missing FFprobe", 
@@ -99,10 +102,11 @@ class App(ctk.CTk):
                               FFprobe command not recognized!\n
                               Ensure FFprobe is installed!
                               """, 
-                      icon="cancel")
+                      icon="cancel",
+                      option_1="Ok")
         
-        if close:
-          self.destroy()
+        if close.get() == "Ok":
+          self.quit()
         
       return "ffmpeg", "ffprobe"
     
@@ -114,10 +118,11 @@ class App(ctk.CTk):
                                     \nCurrent program is not currently compatible with {}!
                                     \n\nTerminating program!
                                     """.format(device_os), 
-                            icon="cancel")
-
-    if close:
-      self.destroy()
+                            icon="cancel",
+                            option_1="Ok")
+        
+    if close.get() == "Ok":
+      self.quit()
 
   def _create_menu_gui(self):
     menubar = CTkMenuBar(self)
@@ -359,15 +364,16 @@ class App(ctk.CTk):
     elif killed:
       close = CTkMessagebox(title="Video Compression Terminated", 
                           message="{}!".format(msg), 
-                          icon="info")
-      
-      if close:
+                          icon="info",
+                          option_1="Ok")
+        
+      if close.get() == "Ok":
         return
   
   def on_quit(self):
     self.cancel_compression()
     
-    self.destroy()
+    self.quit()
 
 if __name__ == "__main__":
   vid_compress_app = App()
