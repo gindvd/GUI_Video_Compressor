@@ -39,7 +39,9 @@ class App(ctk.CTk):
     ctk.set_default_color_theme("blue")
 
     self._create_menu_gui()
-    self._create_main_gui()
+    self._central_frame = ctk.CTkFrame(self)
+    self._pack_central_frame()
+    self._central_frame.pack(padx=5, pady=5)
 	
   def _ffmpeg_ffprobe_sys_cmd(self):
     # Currently only supports WIndows and Linux
@@ -131,22 +133,22 @@ class App(ctk.CTk):
     help_drop = CustomDropdownMenu(widget=help_btn)
     help_drop.add_option(option="About", command=self._show_about)
 
-  def _create_main_gui(self):  
-    ctk.CTkLabel(self, text="Input File:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+  def _pack_central_frame(self):  
+    ctk.CTkLabel(self._central_frame, text="Input File:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
-    self._file_entry = ctk.CTkEntry(self)
+    self._file_entry = ctk.CTkEntry(self._central_frame)
     self._file_entry.bind("<Return>", self._file_entered)
     self._file_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
 
-    self._browse_btn = ctk.CTkButton(self, 
+    self._browse_btn = ctk.CTkButton(self._central_frame, 
                                 text="Browse", 
                                 command=self._browse_files)
     
     self._browse_btn.grid(row=0, column=4, padx=5, pady=5)
 
-    ctk.CTkLabel(self, text="Video Format:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._central_frame, text="Video Format:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
-    self._target_ext_drpdwn = ctk.CTkComboBox(self, 
+    self._target_ext_drpdwn = ctk.CTkComboBox(self._central_frame, 
                                               values=["mp4", "mov", "mkv", "avi"],
 		                                          state='readonly',
                                               command=self._ext_choice)
@@ -154,9 +156,9 @@ class App(ctk.CTk):
     self._target_ext_drpdwn.set("mp4")
     self._target_ext_drpdwn.grid(row=1, column=1, padx=5, pady=5)
 
-    ctk.CTkLabel(self, text="Resolution:").grid(row=1, column=2, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._central_frame, text="Resolution:").grid(row=1, column=2, padx=5, pady=5, sticky="w")
 
-    self._target_res_drpdwn = ctk.CTkComboBox(self, 
+    self._target_res_drpdwn = ctk.CTkComboBox(self._central_frame, 
                                               values=["3840x2160", "2560x1440", "1920x1080", 
                                                       "1280x720", "854x480", "640x360"],
 		                                          state='readonly',
@@ -165,9 +167,9 @@ class App(ctk.CTk):
     self._target_res_drpdwn.set("1920x1080")
     self._target_res_drpdwn.grid(row=1, column=3, padx=5, pady=5)
 
-    ctk.CTkLabel(self, text="Codec:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._central_frame, text="Codec:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
-    self._codec_drpdwn = ctk.CTkComboBox(self, 
+    self._codec_drpdwn = ctk.CTkComboBox(self._central_frame, 
                                         values=self._codec_values(),
 		                                    state='readonly',
                                         command=self._codec_choice)
@@ -175,9 +177,9 @@ class App(ctk.CTk):
     self._codec_drpdwn.set("libx264")
     self._codec_drpdwn.grid(row=2, column=1, padx=5, pady=5)
 
-    ctk.CTkLabel(self, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._central_frame, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
-    self._target_fps_drpdwn = ctk.CTkComboBox(self, 
+    self._target_fps_drpdwn = ctk.CTkComboBox(self._central_frame, 
                                               values=["60", "50", "30", "24", "15"],
 		                                          state='readonly',
                                               command=self._fps_choice)
@@ -185,9 +187,9 @@ class App(ctk.CTk):
     self._target_fps_drpdwn.set("30")
     self._target_fps_drpdwn.grid(row=2, column=3, padx=5, pady=5)
 
-    ctk.CTkLabel(self, text="Video Quality:").grid(row=3, column=0, padx=5, pady=5, sticky="sw")
+    ctk.CTkLabel(self._central_frame, text="Video Quality:").grid(row=3, column=0, padx=5, pady=5, sticky="sw")
 
-    self._quality_slider = ctk.CTkSlider(self, 
+    self._quality_slider = ctk.CTkSlider(self._central_frame, 
                                          from_=0, 
                                          to=100, 
                                          command=self._quality_choice)
@@ -196,14 +198,14 @@ class App(ctk.CTk):
     self._quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
 
     self._aud_on_off = ctk.IntVar()
-    self._rm_aud_chkbox = ctk.CTkCheckBox(self, 
+    self._rm_aud_chkbox = ctk.CTkCheckBox(self._central_frame, 
                                           text="Remove Audio",
                                           variable=self._aud_on_off,
                                           command=self._remove_audio)
 
     self._rm_aud_chkbox.grid(row=4, column=0, padx=5, pady=5)
 
-    self._compress_btn = ctk.CTkButton(self, 
+    self._compress_btn = ctk.CTkButton(self._central_frame, 
                                        text="Compress",
                                        state="disabled",
                                        command=self._compress_video)
