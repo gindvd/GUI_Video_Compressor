@@ -6,7 +6,6 @@ class FFmpegProcessor():
   def __init__(self, ffmpeg):
     self._ffmpeg = ffmpeg
     self._proc = None
-    self._proc_poll = 1
 
   def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
     basename, _ = os.path.splitext(input_file)
@@ -36,16 +35,23 @@ class FFmpegProcessor():
                     "-b:a", "128k"]) 
     
     cmd.extend([output_file])
+
+    creation_flags = {}
+
+    if platform.system() == "Windows":
+      creation_flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+    
+    else:
+      creation_flags["start_new_session"] = True
     
     self._proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
                               stderr=subprocess.PIPE,
                               shell=False,
-                              creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+                              **creation_flags)
 
     try:
       out, err = self._proc.communicate()
-      self._proc_poll = self._proc.poll()
     
     except subprocess.CalledProcessError:
       return False, err
@@ -61,15 +67,14 @@ class FFmpegProcessor():
     
     finally:
       self._proc = None
-      self._proc_poll = 1
     
   def terminate_compression(self):
     # _proc_poll will only be None when process is running
-    if self._proc and self._proc_poll is None:
+    if self._proc and self._proc.poll() is None:
       self._proc.terminate()
 
       try:
-        self._proc.wait(timeout=3)
+        self._proc.wait(timeout=5)
         return True, "Video compression terminated"
       
       except subprocess.TimeoutExpired:
@@ -78,9 +83,9 @@ class FFmpegProcessor():
 
       finally:
         self._proc = None
-        self._proc_poll = 1
-      
-    return False, ""
+    
+    else:
+      return False, ""
 
   @staticmethod
   def _crf_converter(quality):
