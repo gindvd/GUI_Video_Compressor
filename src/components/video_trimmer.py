@@ -38,7 +38,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                 option_1="Ok")
         
           if close.get() == "Ok":
-            self.quit()
+            self.destroy()
         
         else:
             return vlc.Instance("--plugin-path={}".format(vlc_path))
@@ -60,3 +60,4 @@ class VideoTrimmer(ctk.CTkFrame):
     elif btn_text == "Pause":
       self._vid_player.pause()
       self._play_pause_btn.configure(text="Play")
+  
