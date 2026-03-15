@@ -39,9 +39,9 @@ class App(ctk.CTk):
     ctk.set_default_color_theme("blue")
 
     self._create_menu_gui()
-    self._central_frame = ctk.CTkFrame(self)
+    self._central_frame = ctk.CTkFrame(self, corner_radius=0)
     self._pack_central_frame()
-    self._central_frame.pack(padx=5, pady=5)
+    self._central_frame.pack()
 	
   def _ffmpeg_ffprobe_sys_cmd(self):
     # Currently only supports WIndows and Linux
@@ -196,11 +196,15 @@ class App(ctk.CTk):
 
     self._quality_slider = ctk.CTkSlider(self._central_frame, 
                                          from_=0, 
-                                         to=100, 
+                                         to=100,
+                                         number_of_steps=100, 
                                          command=self._quality_choice)
 
     self._quality_slider.set(90)
     self._quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
+
+    self._quality_perc_lbl = ctk.CTkLabel(self._central_frame, text="{}%".format(self._quality_slider.get()))
+    self._quality_perc_lbl.grid(row=3, column=4, padx=5, pady=5, sticky="w")
 
     self._aud_on_off = ctk.IntVar()
     self._rm_aud_chkbox = ctk.CTkCheckBox(self._central_frame, 
@@ -299,6 +303,7 @@ class App(ctk.CTk):
   
   def _quality_choice(self, value):
     self._quality = value
+    self._quality_perc_lbl.configure(text="{}%".format(value))
 
   def _remove_audio(self):
     self._audio = False if self._audio_on_of.get() else True
