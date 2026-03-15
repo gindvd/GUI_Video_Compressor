@@ -12,6 +12,7 @@ class VideoTrimmer(ctk.CTkFrame):
     ctk.set_default_color_theme("blue")
 
     self._instance = self._platform_specific_inst()
+    self._instance.log_unset()
     self._vid_player = self._instance.media_player_new()
 
     self._vid_panel = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
