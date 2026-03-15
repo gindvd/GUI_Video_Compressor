@@ -18,6 +18,8 @@ class VideoTrimmer(ctk.CTkFrame):
     self._control_panel = ctk.CTkFrame(self)
     self._control_panel.pack(fill='x', padx=10, pady=10)
 
+    self._add_controls()
+
   def _platform_specific_inst(self):
 
     if platform.system() == "Windows":
@@ -44,3 +46,17 @@ class VideoTrimmer(ctk.CTkFrame):
     else:
         return vlc.Instance()
       
+  def _add_controls(self):
+    self._play_pause_btn = ctk.CTkButton(self._control_panel, text="Play", command=self._play_pause)
+    self._play_pause_btn.pack(padx=5, pady=5)
+
+  def _play_pause(self):
+    btn_text = self._play_pause_btn['text']
+
+    if btn_text == "Play":
+      self._vid_player.play()
+      self._play_pause_btn.configure(text='Pause')
+    
+    elif btn_text == "Pause":
+      self._vid_player.pause()
+      self._play_pause_btn.configure(text="Play")
