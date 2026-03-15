@@ -49,10 +49,11 @@ class App(ctk.CTk):
     
     device_os = platform.system() 
     if device_os == "Windows":
-      ffmpeg_path = os.path.abspath("lib/ffmpeg.exe")
-      ffprobe_path = os.path.abspath("lib/ffprobe.exe")
+
+      try:
+        ffmpeg_path = os.path.abspath("lib/win32/ffmpeg.exe")
       
-      if os.path.isfile(ffmpeg_path):
+      except FileNotFoundError:
         close = CTkMessagebox(title="Missing FFmpeg Exe", 
                       message="""
                               ERROR!\n
@@ -62,10 +63,13 @@ class App(ctk.CTk):
                       icon="cancel",
                       option_1="Ok")
         
-        if close.get() == "Ok":
-          self.quit()
+          if close.get() == "Ok":
+            self.quit()
       
-      if os.path.isfile(ffprobe_path):
+      try:
+        ffprobe_path = os.path.abspath("lib/win32/ffprobe.exe")
+      
+      except FileNotFoundError:
         close = CTkMessagebox(title="Missing FFprobe Exe", 
                       message="""
                               ERROR!\n
@@ -75,8 +79,8 @@ class App(ctk.CTk):
                       icon="cancel",
                       option_1="Ok")
         
-        if close.get() == "Ok":
-          self.quit()
+          if close.get() == "Ok":
+            self.quit()
         
       return ffmpeg_path, ffprobe_path
     
