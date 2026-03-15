@@ -46,7 +46,7 @@ class VideoTrimmer(ctk.CTkFrame):
         return vlc.Instance("--plugin-path={}".format(vlc_path))
     
     else:
-        return vlc.Instance()
+        return vlc.Instance("--no-xlib")
       
   def _add_controls(self):
     self._play_pause_btn = ctk.CTkButton(self._control_panel, 
@@ -68,9 +68,11 @@ class VideoTrimmer(ctk.CTkFrame):
       self._play_pause_btn.configure(text="Play")
   
   def set_video(self, vid_file):
-    video = self._instance.media_new(vid_file)
+    self.update()
 
+    video = self._instance.media_new(vid_file)
     self._vid_player.set_media(video)
+
     self._display_video()
 
     self._play_pause_btn.configure(state="normal")
