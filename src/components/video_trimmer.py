@@ -5,7 +5,7 @@ import platform
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, parent):
-    super().__init__(parent)
+    super().__init__(parent, corner_radius=0)
     self._parent = parent
 
     ctk.set_appearance_mode("System")  
@@ -14,7 +14,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._instance = self._platform_specific_inst()
     self._vid_player = self._instance.media_player_new()
 
-    self._vid_panel = ctk.CTkFrame(self, bg_color="black", corner_radius=0)
+    self._vid_panel = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
     self._vid_panel.pack(fill='both', expand=True, padx=5, pady=5)
 
     self._control_panel = ctk.CTkFrame(self, corner_radius=0)
