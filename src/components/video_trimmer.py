@@ -13,10 +13,10 @@ class VideoTrimmer(ctk.CTkFrame):
     self._vid_player = self._instance.media_player_new()
 
     self._vid_panel = ctk.CTkFrame(self, bg="black")
-    self._vid_panel.pack(fill='both', expand=True)
+    self._vid_panel.pack(fill='both', expand=True, padx=5, pady=5)
 
     self._control_panel = ctk.CTkFrame(self)
-    self._control_panel.pack(fill='x', padx=10, pady=10)
+    self._control_panel.pack(fill='x', padx=5, pady=5)
 
     self._add_controls()
 
@@ -61,3 +61,13 @@ class VideoTrimmer(ctk.CTkFrame):
       self._vid_player.pause()
       self._play_pause_btn.configure(text="Play")
   
+  def set_video(self, vid_file):
+    video = self._instance.media_new(vid_file)
+    self._vid_player.set_media(video)
+    self._display_video()
+
+  def _display_video(self):
+    if platform.system() == "Linux":
+      self._vid_player.set_xwindow(self._vid_panel.winfo_id())
+    elif platform.system() == "Windows":
+      self._vid_player.set_hwnd(self._vid_panel.winfo_id())
