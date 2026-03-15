@@ -15,6 +15,7 @@ from processors.ffmpeg_processor import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
 
 from components.progressbar_popup import ProgressbarPopup
+from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
   def __init__(self):
@@ -42,6 +43,9 @@ class App(ctk.CTk):
     self._central_frame = ctk.CTkFrame(self, corner_radius=0)
     self._pack_central_frame()
     self._central_frame.pack()
+
+    self._vid_trimmer = VideoTrimmer(self)
+    self._vid_trimmer.pack(fill='x')
 	
   def _ffmpeg_ffprobe_sys_cmd(self):
     # Currently only supports WIndows and Linux
@@ -63,8 +67,8 @@ class App(ctk.CTk):
                       icon="cancel",
                       option_1="Ok")
         
-          if close.get() == "Ok":
-            self.quit()
+        if close.get() == "Ok":
+          self.quit()
       
       try:
         ffprobe_path = os.path.abspath("lib/win32/ffprobe.exe")
@@ -79,8 +83,8 @@ class App(ctk.CTk):
                       icon="cancel",
                       option_1="Ok")
         
-          if close.get() == "Ok":
-            self.quit()
+        if close.get() == "Ok":
+          self.quit()
         
       return ffmpeg_path, ffprobe_path
     
@@ -270,6 +274,8 @@ class App(ctk.CTk):
     elif completed:    
       self._target_res_drpdwn.configure(values=res_list)
       self._target_res_drpdwn.set(res_list[0])
+
+      self._vid_trimmer.set_video(self._input_file)
 
   def _compatible_file(self, item):
     if item == "" or item == ():
