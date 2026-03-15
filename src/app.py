@@ -45,7 +45,7 @@ class App(ctk.CTk):
 	
   def _ffmpeg_ffprobe_sys_cmd(self):
     # Currently only supports WIndows and Linux
-    # Possibly expand this to be compatible with Mac and others    
+    # Possibly expand this to be compatible with Mac   
     
     device_os = platform.system() 
     if device_os == "Windows":
