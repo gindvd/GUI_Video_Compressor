@@ -2,6 +2,7 @@ import customtkinter as ctk
 
 import vlc
 import platform
+import shutil
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, parent):
@@ -44,6 +45,19 @@ class VideoTrimmer(ctk.CTkFrame):
           self.destroy()
         
       else:
+        if not shutil.which("vlc"):
+          close = CTkMessagebox(title="Missing VLC", 
+                              message="""
+                                      ERROR!\n
+                                      Missing VLC!\n
+                                      Please ensure VLC is installed correctly!
+                                      """, 
+                              icon="cancel",
+                              option_1="Ok")
+        
+          if close.get() == "Ok":
+            self.destroy()
+
         return vlc.Instance("--plugin-path={}".format(vlc_path))
     
     else:
