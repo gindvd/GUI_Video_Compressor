@@ -32,11 +32,11 @@ class VideoTrimmer(ctk.CTkFrame):
         vlc_path = os.path.abspath("lib/win32/vlc-win32.exe")
 
       except FileNotFoundError:
-        close = CTkMessagebox(title="Missing FFmpeg Exe", 
+        close = CTkMessagebox(title="Missing VLC Exe", 
                               message="""
                                       ERROR!\n
-                                      vlc-win32.exe is missing from lib folder!\n
-                                      Please ensure FFmpeg is installed correctly!
+                                      vlc-win32.exe is missing from lib/win32 folder!\n
+                                      Please ensure VLC is installed correctly!
                                       """, 
                               icon="cancel",
                               option_1="Ok")
