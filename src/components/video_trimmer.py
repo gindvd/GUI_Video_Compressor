@@ -72,7 +72,6 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause_btn.pack(padx=5, pady=5)
 
   def _play_pause(self):
-
     playing = self._vid_player.is_playing()
 
     if not playing:
@@ -92,6 +91,9 @@ class VideoTrimmer(ctk.CTkFrame):
     self._display_video()
 
     self._play_pause_btn.configure(state="normal")
+
+    self._play_pause()
+    self.after(50, self._play_pause)
 
   def _display_video(self):
     if platform.system() == "Linux":
