@@ -72,13 +72,14 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause_btn.pack(padx=5, pady=5)
 
   def _play_pause(self):
-    btn_text = self._play_pause_btn.cget("text")
 
-    if btn_text == "Play":
+    playing = self._vid_player.is_playing()
+
+    if not playing:
       self._vid_player.play()
       self._play_pause_btn.configure(text='Pause')
     
-    elif btn_text == "Pause":
+    elif playing:
       self._vid_player.pause()
       self._play_pause_btn.configure(text="Play")
   
