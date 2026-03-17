@@ -236,7 +236,8 @@ class App(ctk.CTk):
   
   def _browse_files(self):
     self._file_entry.insert(0, "")
-    item = filedialog.askopenfilename(filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
+    item = filedialog.askopenfilename(initialdir = os.path.expanduser("~"),
+                                      filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
 
     if not self._compatible_file(item):
