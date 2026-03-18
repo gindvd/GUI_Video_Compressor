@@ -24,18 +24,15 @@ class FFprobeProcessor():
     
     try: 
       duration, err = proc.communicate()
-      
-    except subprocess.CalledProcessError:
-      return False, err
     
     except FileNotFoundError:
-      return False, "FFprobe not found!"
+      return False, None, "FFprobe not found!"
 
     except Exception as e:
-      return False, str(e)
+      return False, None, "Error occured! Check logs for details"
     
     else:
-      return True, duration
+      return True, duration, None
 
   def get_resolutions(self, filepath):
     cmd = [self._ffprobe, 
