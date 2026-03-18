@@ -7,9 +7,11 @@ class FFprobeProcessor():
   def get_duration(self, filepath):
     cmd = [self._ffprobe, 
                "-v", 
-               "error", 
-               "-show_entries", 
-               "format=duration", 
+               "error",
+               "-select_streams",
+               "v:0",
+               "-show_entries",
+               "stream=duration",
                "-of", 
                "default=noprint_wrappers=1:nokey=1", 
                "-sexagesimal", 
@@ -24,6 +26,9 @@ class FFprobeProcessor():
     
     try: 
       duration, err = proc.communicate()
+
+      proc.wait()
+      rc = proc.returncode
     
     except FileNotFoundError:
       return False, None, "FFprobe not found!"
@@ -32,6 +37,9 @@ class FFprobeProcessor():
       return False, None, "Error occured! Check logs for details"
     
     else:
+      if rc != 0:
+        return False, None, err
+
       return True, duration, None
 
   def get_resolutions(self, filepath):
@@ -55,6 +63,9 @@ class FFprobeProcessor():
 
     try: 
       vid_res, err = proc.communicate()
+
+      proc.wait()
+      rc = proc.returncode
       
     except subprocess.CalledProcessError:
       return False, None, err
@@ -66,6 +77,9 @@ class FFprobeProcessor():
       return False, None, str(e)
     
     else:
+      if rc != 0:
+        return False, None, err
+        
       return True, self._res_opt_list(vid_res), None
 
   def _res_opt_list(self, vid_res):
