@@ -1,8 +1,11 @@
 import customtkinter as ctk
+from CTkMessagebox import CTkMessagebox
 
 import vlc
 import platform
 import shutil
+
+from datetime import time
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, parent):
@@ -17,12 +20,17 @@ class VideoTrimmer(ctk.CTkFrame):
     self._vid_player = self._instance.media_player_new()
 
     self._vid_panel = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
-    self._vid_panel.pack(fill='both', expand=True, padx=5, pady=5)
+    self._vid_panel.pack(fill='both', expand=True, padx=5, pady=10)
 
     self._control_panel = ctk.CTkFrame(self, corner_radius=0)
-    self._control_panel.pack(fill='x', padx=5, pady=5)
+    self._control_panel.pack(fill='x', padx=5)
 
-    self._add_controls()
+    self._create_control_panel()
+
+    self._time_panel = ctk.CTkFrame(self, corner_radius=0)
+    self._time_panel.pack(fill='x', padx=5)
+
+    self._create_time_panel()
 
   def _platform_specific_inst(self):
 
@@ -63,13 +71,35 @@ class VideoTrimmer(ctk.CTkFrame):
     else:
         return vlc.Instance("--no-xlib")
       
-  def _add_controls(self):
+  def _create_control_panel(self):
     self._play_pause_btn = ctk.CTkButton(self._control_panel, 
                                          text="Play",
                                          state="disabled",
                                          command=self._play_pause)
 
     self._play_pause_btn.pack(padx=5, pady=5)
+
+  def _create_time_panel(self):
+    ctk.CTkLabel(self._time_panel, text="Video Duration:").grid(row=0, column=0, padx=10, pady=5)
+
+    self._dur_lbl = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
+    self._dur_lbl.grid(row=0, column=1, padx=10, pady=5)
+
+    ctk.CTkLabel(self._time_panel, text="Current Time:").grid(row=0, column=2, padx=10, pady=5)
+
+    self._curtime_lbl = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
+    self._curtime_lbl.grid(row=0, column=3, padx=10, pady=5)
+
+  @staticmethod
+  def _ms_to_isoformat(ms):
+    seconds = ms // 1000
+    ms_remainder = ms % 1000
+
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{ms_remainder:03d}"
 
   def _play_pause(self):
     playing = self._vid_player.is_playing()
@@ -95,8 +125,13 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause()
     self.after(50, self._play_pause)
 
+    self._dur_lbl.configure(text=self._get_duration())
+    self._curtime_lbl.configure(text=self._get_current_time())
+
   def _display_video(self):
     if platform.system() == "Linux":
       self._vid_player.set_xwindow(self._vid_panel.winfo_id())
     elif platform.system() == "Windows":
       self._vid_player.set_hwnd(self._vid_panel.winfo_id())
+
+  
