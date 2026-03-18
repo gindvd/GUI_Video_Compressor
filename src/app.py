@@ -59,11 +59,7 @@ class App(ctk.CTk):
       
       except FileNotFoundError:
         close = CTkMessagebox(title="Missing FFmpeg Exe", 
-                      message="""
-                              ERROR!\n
-                              FFmpeg.exe is missing from lib folder!\n
-                              Please ensure FFmpeg is installed correctly!
-                              """, 
+                      message="FFmpeg.exe missing from lib/win32 folder!", 
                       icon="cancel",
                       option_1="Ok")
         
@@ -75,11 +71,7 @@ class App(ctk.CTk):
       
       except FileNotFoundError:
         close = CTkMessagebox(title="Missing FFprobe Exe", 
-                      message="""
-                              ERROR!\n
-                              FFprobe.exe is missing from lib folder!\n
-                              Please ensure FFmpeg is installed correctly!
-                              """, 
+                      message="FFprobe.exe missing from lib/win32 folder!", 
                       icon="cancel",
                       option_1="Ok")
         
@@ -92,11 +84,7 @@ class App(ctk.CTk):
 
       if not shutil.which("ffmpeg"):
         close = CTkMessagebox(title="Missing FFmpeg", 
-                      message="""
-                              ERROR!\n
-                              FFmpeg command not recognized!\n
-                              Ensure FFmpeg is installed!
-                              """, 
+                      message="FFmpeg not recognized command", 
                       icon="cancel",
                       option_1="Ok")
         
@@ -105,11 +93,7 @@ class App(ctk.CTk):
         
       if not shutil.which("ffprobe"):
         close = CTkMessagebox(title="Missing FFprobe", 
-                      message="""
-                              ERROR!\n
-                              FFprobe command not recognized!\n
-                              Ensure FFprobe is installed!
-                              """, 
+                      message="FFmprobe not recognized command",
                       icon="cancel",
                       option_1="Ok")
         
@@ -121,11 +105,7 @@ class App(ctk.CTk):
     # Terminate the program with a message to let users
     # know the OS is not compatible 
     close = CTkMessagebox(title="Incompatible Operating System", 
-                            message="""
-                                    ERROR!
-                                    \nCurrent program is not currently compatible with {}!
-                                    \n\nTerminating program!
-                                    """.format(device_os), 
+                            message=f"Current program is not currently compatible with {device_os}!\nTerminating program!", 
                             icon="cancel",
                             option_1="Ok")
         
@@ -267,7 +247,7 @@ class App(ctk.CTk):
     
     if not completed:
       CTkMessagebox(title="FFprobe Error", 
-                    message="Error getting video file's resolution!\n{}".format(err_msg), 
+                    message=f"Error getting video file's resolution!\n{err_msg}", 
                     icon='cancel')
       
       return
@@ -282,7 +262,7 @@ class App(ctk.CTk):
 
     if not completed:
       CTkMessagebox(title="FFprobe Error", 
-                    message="{}".format(err_msg), 
+                    message=f"{err_msg}", 
                     icon='cancel')
       
       return
@@ -381,7 +361,7 @@ class App(ctk.CTk):
 
     if not completed and err_msg != "":
       CTkMessagebox(title="Video Compression Error", 
-                    message="ERROR\n{}".format(err_msg), 
+                    message=f"ERROR\n{err_msg}", 
                     icon='cancel')
   
   def cancel_compression(self):
@@ -392,7 +372,7 @@ class App(ctk.CTk):
       
     elif killed:
       close = CTkMessagebox(title="Video Compression Terminated", 
-                          message="{}!".format(msg), 
+                          message=f"{msg}!", 
                           icon="info",
                           option_1="Ok")
         
