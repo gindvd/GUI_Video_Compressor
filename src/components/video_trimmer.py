@@ -28,7 +28,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._create_control_panel()
 
     self._time_panel = ctk.CTkFrame(self, corner_radius=0)
-    self._time_panel.pack(fill='x', padx=5)
+    self._time_panel.pack(fill='x', padx=5, pady=(0,5))
 
     self._create_time_panel()
 
