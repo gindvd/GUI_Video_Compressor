@@ -52,8 +52,12 @@ class VideoTrimmer(ctk.CTkFrame):
         if close.get() == "Ok":
           self.destroy()
         
+    
       else:
-        if not shutil.which("vlc"):
+        return vlc.Instance("--plugin-path={}".format(vlc_path))
+    
+    else:
+      if not shutil.which("vlc"):
           close = CTkMessagebox(title="Missing VLC", 
                               message="""
                                       ERROR!\n
@@ -66,10 +70,7 @@ class VideoTrimmer(ctk.CTkFrame):
           if close.get() == "Ok":
             self.destroy()
 
-        return vlc.Instance("--plugin-path={}".format(vlc_path))
-    
-    else:
-        return vlc.Instance("--no-xlib")
+      return vlc.Instance("--no-xlib")
       
   def _create_control_panel(self):
     self._play_pause_btn = ctk.CTkButton(self._control_panel, 
