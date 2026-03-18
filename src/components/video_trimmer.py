@@ -87,17 +87,6 @@ class VideoTrimmer(ctk.CTkFrame):
     vid_dur_ms = duration[:duration.find('.')+4]
     self._dur_lbl.configure(text=vid_dur_ms)
 
-  @staticmethod
-  def _ms_to_isoformat(ms):
-    seconds = ms // 1000
-    ms_remainder = ms % 1000
-
-    hours = seconds // 3600
-    minutes = (seconds % 3600) // 60
-    seconds = seconds % 60
-
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{ms_remainder:03d}"
-
   def _play_pause(self):
     playing = self._vid_player.is_playing()
 
@@ -122,10 +111,28 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause()
     self.after(50, self._play_pause)
 
+    self._update_progress()
+
   def _display_video(self):
     if platform.system() == "Linux":
       self._vid_player.set_xwindow(self._vid_panel.winfo_id())
     elif platform.system() == "Windows":
       self._vid_player.set_hwnd(self._vid_panel.winfo_id())
 
-  
+  def _update_progress(self):
+    current_time_ms = self._vid_player.get_time()
+    current_time = self._ms_to_isoformat(current_time_ms)
+
+    self._curtime_lbl.configure(text=current_time)
+    self.after(100, self._update_progress)
+
+  @staticmethod
+  def _ms_to_isoformat(ms):
+    seconds = ms // 1000
+    ms_remainder = ms % 1000
+
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{ms_remainder:03d}"
