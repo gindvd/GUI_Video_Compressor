@@ -41,11 +41,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
       except FileNotFoundError:
         close = CTkMessagebox(title="Missing VLC Exe", 
-                              message="""
-                                      ERROR!\n
-                                      vlc-win32.exe is missing from lib/win32 folder!\n
-                                      Please ensure VLC is installed correctly!
-                                      """, 
+                              message="vlc-win32.exe is missing from lib/win32 folder!", 
                               icon="cancel",
                               option_1="Ok")
         
@@ -59,11 +55,7 @@ class VideoTrimmer(ctk.CTkFrame):
     else:
       if not shutil.which("vlc"):
           close = CTkMessagebox(title="Missing VLC", 
-                              message="""
-                                      ERROR!\n
-                                      Missing VLC!\n
-                                      Please ensure VLC is installed correctly!
-                                      """, 
+                              message="VLC not a recognized command!", 
                               icon="cancel",
                               option_1="Ok")
         
