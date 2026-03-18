@@ -89,6 +89,10 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._curtime_lbl = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._curtime_lbl.grid(row=0, column=3, padx=10, pady=5)
+  
+  def set_duration(self, duration):
+    vid_dur_ms = duration[:duration.find('.')+4]
+    self._dur_lbl.configure(text=vid_dur_ms)
 
   @staticmethod
   def _ms_to_isoformat(ms):
@@ -124,9 +128,6 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._play_pause()
     self.after(50, self._play_pause)
-
-    self._dur_lbl.configure(text=self._get_duration())
-    self._curtime_lbl.configure(text=self._get_current_time())
 
   def _display_video(self):
     if platform.system() == "Linux":
