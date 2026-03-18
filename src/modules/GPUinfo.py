@@ -2,6 +2,14 @@ import platform
 import subprocess
 import re
 
+class OSCompatibiltyError(Exception):
+  def __init__(self, message, os):
+    super().__init__(message)
+    self.os = os
+  
+  def __str__(self):
+    return "{} (Non-Compatible OS: {}) List of compatible OS [Windows, Linux, Mac OS]".format(self.message, self.os)
+
 CMD_DICT = {
   "Linux" : "lspci | grep -iE VGA|3D|video",
   "Darwin" : "system_profiler SPDisplaysDataType",
@@ -11,91 +19,102 @@ CMD_DICT = {
     }
 }
 
-def GPU_names():
+def get_card_info():
   device_os = platform.system()
-
-  cmds = cmd_getter(device_os)
-
-  primary_cmd, secondary_cmd = parse_cmd(cmds)
-  assert primary_cmd != None, "cmd_getter function incorrectly returning None"
-
-  if secondary_cmd == None:
-    return run_single_cmd(primary_cmd)
-
-  return run_multi_cmds(primary_cmd, secondary_cmd)
-
-def cmd_getter(device_os):
+  
   if device_os not in ["Windows", "Linux", "Darwin"]:
     raise OSCompatibiltyError("Current OS is not compatible with this module.", device_os)
-  
+
   if device_os == "Windows":
     win_ver = platform.release()
   
     if win_ver != "11":
       win_ver = "legacy"
+      
+    cmd =  CMD_DICT.get(device_os, {}).get(win_ver)
+  
+  else:
+    cmd = CMD_DICT.get(device_os)
     
-    return CMD_DICT.get(device_os, {}).get(win_ver)
-
-  return CMD_DICT.get(device_os)
-
-def parse_cmd(cmd):
-  """ 
-  Divides command at the | operator and separates them into 2 lists. The two lists
-  are then split at every white-space. This makes 2 lists of commands to be run
-  """
+  # Need to seperate commands in 2 if it contains a pipe
+  # Then turn both commands into lists
   cmd_lists = [word.split() for word in cmd.split('|', 1)]
   
-  assert len(cmd_lists) <= 2, "cmd_list contains too many lists of commands, Max Num of list: 2"
+  assert len(cmd_lists) <= 2, "Command list contains too many lists of commands, Max Num of list: 2"
 
-  GPUname_cmd1 = cmd_lists[0]
-
-  GPUname_cmd2 = None
+  primary_cmd = cmd_lists[0]
+  secondary_cmd = None
+  
   if len(cmd_lists) == 2:
     GPUname_cmd2 = cmd_lists[1]
 
-  return GPUname_cmd1, GPUname_cmd2
+  assert primary_cmd != None, "Primary command is set to None"
 
-def run_single_cmd(primary_cmd):
+  if secondary_cmd == None:
+    return run_cmd(primary_cmd)
+
+  return run_piped_cmds(primary_cmd, secondary_cmd)
+
+def run_cmd(cmd):
+  proc = subprocess.Popen(cmd, 
+                          stdout=subprocess.PIPE, 
+                          stderr=subprocess.PIPE, 
+                          shell=False, 
+                          text=True)
+
   try:
-    # Runs command and returns all connected GPU names as a string
-    result = subprocess.Popen(primary_cmd, 
-                              stdout=subprocess.PIPE, 
-                              stderr=subprocess.PIPE, 
-                              shell=False, 
-                              text=True)
-
-    output, _ = result.communicate()
-    return output.split()
-
-  except FileNotFoundError as err:
-    print(err)
-  except subprocess.CalledProcessError as err:
-    print(err)
-
-def run_multi_cmds( primary_cmd, secondary_cmd):
-  try:
-    process = subprocess.Popen(primary_cmd, 
-                               stdout=subprocess.PIPE, 
-                               stderr=subprocess.PIPE, 
-                               shell=False, 
-                               text=True)
-
-    result = subprocess.Popen(secondary_cmd, 
-                              stdin=process.stdout, 
-                              stdout=subprocess.PIPE, 
-                              stderr=subprocess.PIPE, 
-                              shell=False, 
-                              text=True)
-
-    process.stdout.close()
-    output, _ = result.communicate()
+    out, err = proc.communicate()
+    proc.wait()
     
-    return output.split()
+    rc = proc.returncode
 
-  except FileNotFoundError as err:
-    print(err)
-  except subprocess.CalledProcessError as err:
-    print(err)
+  except FileNotFoundError as e:
+    print(e)
+  
+  except Exception as e:
+    print(e)
+
+  else:
+    if rc != 0:
+      print(f"{str(rc)}: {err}")
+
+    else:
+      return out.split()
+
+
+def run_piped_cmd(cmd1, cmd2):
+  proc1 = subprocess.Popen(cmd1,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            shell=False,
+                            text=True)
+
+  proc2 = subprocess.Popen(secondary_cmd,
+                             stdin=proc1.stdout,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             shell=False,
+                             text=True) 
+   
+  try:
+    proc1.stdout.close()
+    out, err = proc2.communicate()
+    
+    proc2.wait()
+    rc = proc2.returncode
+
+  except FileNotFoundError as e:
+    print(e)
+  
+  except Exception as e:
+    print(e)
+    
+  else:
+    if rc != 0:
+      print(f"{str(rc)}: {err}")
+
+    else:
+      return out.split()
 
 def clean_data(list):
   clean_list = []
@@ -115,11 +134,13 @@ def manufacturer():
       manufacturers.append(string)
       
   return manufacturers
-
-class OSCompatibiltyError(Exception):
-  def __init__(self, message, os):
-    super().__init__(message)
-    self.os = os
   
-  def __str__(self):
-    return "{} (Non-Compatible OS: {}) List of compatible OS [Windows, Linux, Mac OS]".format(self.message, self.os)
+def brand():
+  gpus = clean_data(GPU_names())
+  brand_list = []
+  
+  for string in gpus:
+    if string in ["GeForce", "Radeon", "Arc", "Iris", "UHD", "HD"]:
+      brand_list.append(string)
+      
+  return brands
