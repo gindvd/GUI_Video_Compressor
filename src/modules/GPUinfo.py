@@ -46,14 +46,14 @@ def get_card_info():
   secondary_cmd = None
   
   if len(cmd_lists) == 2:
-    GPUname_cmd2 = cmd_lists[1]
+    secondary_cmd = cmd_lists[1]
 
   assert primary_cmd != None, "Primary command is set to None"
 
   if secondary_cmd == None:
     return run_cmd(primary_cmd)
 
-  return run_piped_cmds(primary_cmd, secondary_cmd)
+  return run_piped_cmd(primary_cmd, secondary_cmd)
 
 def run_cmd(cmd):
   proc = subprocess.Popen(cmd, 
@@ -89,17 +89,17 @@ def run_piped_cmd(cmd1, cmd2):
                             shell=False,
                             text=True)
 
-  proc2 = subprocess.Popen(secondary_cmd,
+  proc2 = subprocess.Popen(cmd2,
                              stdin=proc1.stdout,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              shell=False,
                              text=True) 
-   
+  
   try:
-    proc1.stdout.close()
+    proc1.stdout.close() 
     out, err = proc2.communicate()
-    
+
     proc2.wait()
     rc = proc2.returncode
 
@@ -116,17 +116,18 @@ def run_piped_cmd(cmd1, cmd2):
     else:
       return out.split()
 
-def clean_data(list):
+def clean_data(gpu_list):
   clean_list = []
   
-  for string in list:
+  for string in gpu_list:
     stripped = re.sub(r"[\(\[$@*&?-].*[\)\]$@*&?-]", "", string)
     clean_list.append(stripped)
 
   return clean_list
   
 def manufacturer():
-  gpus = clean_data(GPU_names())
+  gpus = clean_data(get_card_info())
+  
   manufacturers = []
   
   for string in gpus:
@@ -134,13 +135,3 @@ def manufacturer():
       manufacturers.append(string)
       
   return manufacturers
-  
-def brand():
-  gpus = clean_data(GPU_names())
-  brand_list = []
-  
-  for string in gpus:
-    if string in ["GeForce", "Radeon", "Arc", "Iris", "UHD", "HD"]:
-      brand_list.append(string)
-      
-  return brands
