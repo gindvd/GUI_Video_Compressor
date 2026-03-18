@@ -278,6 +278,19 @@ class App(ctk.CTk):
 
       self._vid_trimmer.set_video(self._input_file)
 
+    completed, duration, err_msg = self._ffprobe.get_duration(self._input_file)
+
+    if not completed:
+      CTkMessagebox(title="FFprobe Error", 
+                    message="{}".format(err_msg), 
+                    icon='cancel')
+      
+      return
+    
+    elif completed:
+      self._vid_trimmer.set_duration(duration)
+
+
   def _compatible_file(self, item):
     if item == "" or item == ():
       return False
