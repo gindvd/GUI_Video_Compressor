@@ -5,7 +5,7 @@ class FFprobeProcessor():
     self._ffprobe = ffprobe
     
   def get_duration(self, filepath):
-    cmd = [self.ffprobe, 
+    cmd = [self._ffprobe, 
                "-v", 
                "error", 
                "-show_entries", 
