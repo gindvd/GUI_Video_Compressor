@@ -147,7 +147,7 @@ class FFprobeProcessor():
   def _round_to_even(f):
     return round(f / 2.) * 2
 
-  def get_fps(self):
+  def get_fps(self, filepath):
     cmd = [self._ffprobe, 
               "-v", 
               "error",
