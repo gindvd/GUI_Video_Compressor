@@ -108,9 +108,9 @@ class App(ctk.CTk):
     # Terminate the program with a message to let users
     # know the OS is not compatible 
     close = CTkMessagebox(title="Incompatible Operating System", 
-                            message=f"Current program is not currently compatible with {device_os}!\nTerminating program!", 
-                            icon="cancel",
-                            option_1="Ok")
+                          message=f"Current program is not currently compatible with {device_os}!\nTerminating program!", 
+                          icon="cancel",
+                          option_1="Ok")
         
     if close.get() == "Ok":
       self.quit()
