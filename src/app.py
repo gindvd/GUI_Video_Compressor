@@ -137,20 +137,20 @@ class App(ctk.CTk):
     self._file_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
 
     self._browse_btn = ctk.CTkButton(self._central_frame, 
-                                text="Browse", 
-                                command=self._browse_files)
+                                     text="Browse", 
+                                     command=self._browse_files)
     
     self._browse_btn.grid(row=0, column=4, padx=5, pady=5)
 
-    ctk.CTkLabel(self._central_frame, text="Video Format:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._central_frame, text="Codec:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
-    self._target_ext_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                              values=["mp4", "mov", "mkv", "avi"],
-		                                          state='readonly',
-                                              command=self._ext_choice)
+    self._codec_drpdwn = ctk.CTkComboBox(self._central_frame, 
+                                         values=self._codec_values(),
+		                                     state='readonly',
+                                         command=self._codec_choice)
 
-    self._target_ext_drpdwn.set("mp4")
-    self._target_ext_drpdwn.grid(row=1, column=1, padx=5, pady=5)
+    self._codec_drpdwn.set("libx264")
+    self._codec_drpdwn.grid(row=1, column=1, padx=5, pady=5)
 
     ctk.CTkLabel(self._central_frame, text="Resolution:").grid(row=1, column=2, padx=5, pady=5, sticky="w")
 
@@ -163,15 +163,15 @@ class App(ctk.CTk):
     self._target_res_drpdwn.set("1920x1080")
     self._target_res_drpdwn.grid(row=1, column=3, padx=5, pady=5)
 
-    ctk.CTkLabel(self._central_frame, text="Codec:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._central_frame, text="Video Format:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
-    self._codec_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                        values=self._codec_values(),
-		                                    state='readonly',
-                                        command=self._codec_choice)
+    self._target_ext_drpdwn = ctk.CTkComboBox(self._central_frame, 
+                                              values=["mp4", "mov", "mkv", "avi"],
+		                                          state='readonly',
+                                              command=self._ext_choice)
 
-    self._codec_drpdwn.set("libx264")
-    self._codec_drpdwn.grid(row=2, column=1, padx=5, pady=5)
+    self._target_ext_drpdwn.set("mp4")
+    self._target_ext_drpdwn.grid(row=2, column=1, padx=5, pady=5)
 
     ctk.CTkLabel(self._central_frame, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
