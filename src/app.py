@@ -314,6 +314,9 @@ class App(ctk.CTk):
 
   def _codec_choice(self, choice):
     self._codec = choice
+
+    if choice in ["libsvtav1", "libvpx-vp9"]:
+      self._target_ext_drpdwn.configure(values=["mp4", "webm"])
   
   def _ext_choice(self, choice):
     self._target_format = choice
