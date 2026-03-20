@@ -154,7 +154,7 @@ class FFprobeProcessor():
               "-select_streams",
               "v:0",
               "-show_entries",
-              "stream=avg_frame_rate",
+              "stream=r_frame_rate",
               "-of",
               "default=noprint_wrappers=1:nokey=1",
               filepath]
@@ -181,5 +181,7 @@ class FFprobeProcessor():
     else:
       if rc != 0:
         return False, None, err
-
-      return True, fps, None
+      
+      fps = fps[:2]
+      print(fps)
+      return True, int(fps), None
