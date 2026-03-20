@@ -340,7 +340,7 @@ class App(ctk.CTk):
     self._quality_perc_lbl.configure(text="{}%".format(value))
 
   def _remove_audio(self):
-    self._audio = False if self._audio_on_off.get() else True
+    self._audio = False if self._aud_on_off.get() else True
 
   def _codec_values(self):
     codecs = ["libx264", "libx265", "libsvtav1", "libvpx-vp9"]
