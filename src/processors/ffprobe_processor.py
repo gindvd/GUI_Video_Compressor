@@ -6,16 +6,16 @@ class FFprobeProcessor():
     
   def get_duration(self, filepath):
     cmd = [self._ffprobe, 
-               "-v", 
-               "error",
-               "-select_streams",
-               "v:0",
-               "-show_entries",
-               "stream=duration",
-               "-of", 
-               "default=noprint_wrappers=1:nokey=1", 
-               "-sexagesimal", 
-               filepath]
+              "-v", 
+              "error",
+              "-select_streams",
+              "v:0",
+              "-show_entries",
+              "stream=duration",
+              "-of", 
+              "default=noprint_wrappers=1:nokey=1", 
+              "-sexagesimal", 
+              filepath]
     
     
     proc = subprocess.Popen(cmd, 
@@ -44,15 +44,15 @@ class FFprobeProcessor():
 
   def get_resolutions(self, filepath):
     cmd = [self._ffprobe, 
-               "-v", 
-               "error", 
-               "-select_streams", 
-               "v:0", 
-               "-show_entries", 
-               "stream=width,height", 
-               "-of",
-               "csv=s=x:p=0", 
-               filepath]
+              "-v", 
+              "error", 
+              "-select_streams", 
+              "v:0", 
+              "-show_entries", 
+              "stream=width,height", 
+              "-of",
+              "csv=s=x:p=0", 
+              filepath]
     
     
     proc = subprocess.Popen(cmd, 
@@ -79,7 +79,7 @@ class FFprobeProcessor():
     else:
       if rc != 0:
         return False, None, err
-        
+
       return True, self._res_opt_list(vid_res), None
 
   def _res_opt_list(self, vid_res):
@@ -146,3 +146,40 @@ class FFprobeProcessor():
   @staticmethod
   def _round_to_even(f):
     return round(f / 2.) * 2
+
+  def get_fps(self):
+    cmd = [self._ffprobe, 
+              "-v", 
+              "error",
+              "-select_streams",
+              "v:0",
+              "-show_entries",
+              "stream=avg_frame_rate",
+              "-of",
+              "default=noprint_wrappers=1:nokey=1",
+              filepath]
+    
+    
+    proc = subprocess.Popen(cmd, 
+                            stdout=subprocess.PIPE, 
+                            stderr=subprocess.PIPE, 
+                            shell=False, 
+                            text=True)
+    
+    try: 
+      fps, err = proc.communicate()
+
+      proc.wait()
+      rc = proc.returncode
+    
+    except FileNotFoundError:
+      return False, None, "FFprobe not found!"
+
+    except Exception as e:
+      return False, None, "Error occured! Check logs for details"
+    
+    else:
+      if rc != 0:
+        return False, None, err
+
+      return True, fps, None
