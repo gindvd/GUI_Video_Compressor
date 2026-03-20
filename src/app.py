@@ -166,7 +166,7 @@ class App(ctk.CTk):
     ctk.CTkLabel(self._central_frame, text="Video Format:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
     self._target_ext_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                              values=["mp4", "mov", "mkv", "avi"],
+                                              values=["mp4", "mkv", "mov", "webm"],
 		                                          state='readonly',
                                               command=self._ext_choice)
 
@@ -316,11 +316,12 @@ class App(ctk.CTk):
   def _codec_choice(self, choice):
     self._codec = choice
 
-    if choice in ["libsvtav1", "libvpx-vp9"]:
-      self._target_ext_drpdwn.configure(values=["mp4", "webm"])
-
-    elif choice in ["libx265", "hevc_nvenc", "hevc_amf", "hevc_qsv"]:
-      self._target_ext_drpdwn.configure(values=["mp4", "mov", "mkv"])
+    if choice == "libsvtav1":
+      self._target_ext_drpdwn.configure(values=["mp4", "mkv", "webm"])
+    elif choice == "libvpx-vp9":
+      self._target_ext_drpdwn.configure(values=["webm", "mkv"])
+    else:
+      self._target_ext_drpdwn.configure(values=["mp4", "mkv", "mov"])
   
   def _ext_choice(self, choice):
     self._target_format = choice
