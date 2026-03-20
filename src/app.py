@@ -19,7 +19,7 @@ from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
 
-  _FPS_LIST = [270, 240, 210, 160, 144, 120, 60, 30, 24, 15]
+  _FPS_LIST = [120, 60, 30, 24, 15]
 
   def __init__(self):
     super().__init__()
