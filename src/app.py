@@ -276,6 +276,7 @@ class App(ctk.CTk):
           upd_fps.extend([str(i)])
 
       self._target_fps_drpdwn.configure(values=upd_fps)
+      self._target_fps_drpdwn.set(upd_fps[0])
 
     completed, duration, err_msg = self._ffprobe.get_duration(self._input_file)
 
@@ -317,6 +318,9 @@ class App(ctk.CTk):
 
     if choice in ["libsvtav1", "libvpx-vp9"]:
       self._target_ext_drpdwn.configure(values=["mp4", "webm"])
+
+    elif choice in ["libx265", "hevc_nvenc", "hevc_amf", "hevc_qsv"]:
+      self._target_ext_drpdwn.configure(values=["mp4", "mov", "mkv"])
   
   def _ext_choice(self, choice):
     self._target_format = choice
