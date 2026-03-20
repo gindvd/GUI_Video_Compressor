@@ -166,12 +166,12 @@ class App(ctk.CTk):
     ctk.CTkLabel(self._central_frame, text="Video Format:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
     self._target_ext_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                              values=["mp4", "mkv", "mov", "webm"],
+                                              values=["mp4", "mkv", "mov"],
 		                                          state='readonly',
                                               command=self._ext_choice)
 
-    self._target_ext_drpdwn.set("mp4")
     self._target_ext_drpdwn.grid(row=2, column=1, padx=5, pady=5)
+    self._target_ext_drpdwn.set("mp4")
 
     ctk.CTkLabel(self._central_frame, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
@@ -317,11 +317,14 @@ class App(ctk.CTk):
     self._codec = choice
 
     if choice == "libsvtav1":
-      self._target_ext_drpdwn.configure(values=["mp4", "mkv", "webm"])
+      self._target_ext_drpdwn.configure(values=["mkv", "webm", "mp4"])
+      self._target_ext_drpdwn.set("mkv")
     elif choice == "libvpx-vp9":
       self._target_ext_drpdwn.configure(values=["webm", "mkv"])
+      self._target_ext_drpdwn.set("mebm")
     else:
       self._target_ext_drpdwn.configure(values=["mp4", "mkv", "mov"])
+      self._target_ext_drpdwn.set("mp4")
   
   def _ext_choice(self, choice):
     self._target_format = choice
