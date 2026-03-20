@@ -16,11 +16,6 @@ class FFmpegProcessor():
     scale = "scale={}:{}".format(width, height)
     
     crf = self._crf_converter(quality)
-    
-    if codec == "libvpx-vp9":
-      audio_codec = "libopus"
-    else:
-      audio_codec = "aac"
 
     cmd = [self._ffmpeg,
            "-i", input_file, 
@@ -31,9 +26,6 @@ class FFmpegProcessor():
 
     if not audio:
       cmd.extend(["-an"])
-    elif audio:
-        cmd.extend(["-c:a", audio_codec, 
-                    "-b:a", "128k"]) 
     
     cmd.extend([output_file])
 
@@ -75,7 +67,8 @@ class FFmpegProcessor():
       if rc != 0 and self._terminated == False:
         if os.path.exists(output_file):
                 os.remove(output_file)
-
+        
+        print(err)
         return False, "Compression Failed or Interupted"
 
       elif rc != 0 and self._terminated == True:
