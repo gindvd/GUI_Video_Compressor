@@ -183,5 +183,4 @@ class FFprobeProcessor():
         return False, None, err
       
       fps = fps[:2]
-      print(fps)
       return True, int(fps), None

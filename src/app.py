@@ -311,15 +311,15 @@ class App(ctk.CTk):
       return False
 
     return True
+
+  def _codec_choice(self, choice):
+    self._codec = choice
   
   def _ext_choice(self, choice):
     self._target_format = choice
 
   def _res_choice(self, choice):
     self._target_res = choice
-  
-  def _codec_choice(self, choice):
-    self._codec = choice 
 
   def _fps_choice(self, choice):
     self._target_fps = choice
