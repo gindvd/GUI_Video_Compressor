@@ -18,6 +18,9 @@ from components.progressbar_popup import ProgressbarPopup
 from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
+
+  _FPS_LIST = [270, 240, 210, 160, 144, 120, 60, 30, 24, 15]
+
   def __init__(self):
     super().__init__()
      
@@ -173,11 +176,11 @@ class App(ctk.CTk):
     ctk.CTkLabel(self._central_frame, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
     self._target_fps_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                              values=["60", "50", "30", "24", "15"],
+                                              values=["60", "30", "24", "15"],
 		                                          state='readonly',
                                               command=self._fps_choice)
 
-    self._target_fps_drpdwn.set("30")
+    self._target_fps_drpdwn.set("60")
     self._target_fps_drpdwn.grid(row=2, column=3, padx=5, pady=5)
 
     ctk.CTkLabel(self._central_frame, text="Video Quality:").grid(row=3, column=0, padx=5, pady=5, sticky="sw")
@@ -257,6 +260,22 @@ class App(ctk.CTk):
       self._target_res_drpdwn.set(res_list[0])
 
       self._vid_trimmer.set_video(self._input_file)
+    
+    completed, vid_fps, err_msg = self._ffprobe.get_fps(self._input_file)
+
+    if not completed:
+      CTkMessagebox(title="FFprobe Error", 
+                    message=f"Error getting video file's FPS!\n{err_msg}", 
+                    icon='cancel')
+    
+    elif completed:
+      upd_fps = []
+
+      for i in self._FPS_LIST:
+        if i <= vid_fps:
+          upd_fps.extend([str(i)])
+
+      self._target_fps_drpdwn.configure(values=upd_fps)
 
     completed, duration, err_msg = self._ffprobe.get_duration(self._input_file)
 
