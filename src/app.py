@@ -83,7 +83,7 @@ class App(ctk.CTk):
         
       return ffmpeg_path, ffprobe_path
     
-    if device_os == "Linux":
+    elif device_os == "Linux":
 
       if not shutil.which("ffmpeg"):
         close = CTkMessagebox(title="Missing FFmpeg", 
