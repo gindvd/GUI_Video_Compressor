@@ -16,6 +16,11 @@ class FFmpegProcessor():
     scale = "scale={}:{}".format(width, height)
     
     crf = self._crf_converter(quality)
+    
+    if codec in ["libvpx-vp9", "libsvtav1"]:
+      audio_codec = "libopus"
+    else:
+      audio_codec = "aac"
 
     cmd = [self._ffmpeg,
            "-i", input_file, 
@@ -26,6 +31,9 @@ class FFmpegProcessor():
 
     if not audio:
       cmd.extend(["-an"])
+    elif audio:
+        cmd.extend(["-c:a", audio_codec, 
+                    "-b:a", "128k"]) 
     
     cmd.extend([output_file])
 
