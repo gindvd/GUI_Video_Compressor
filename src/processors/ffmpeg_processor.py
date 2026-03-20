@@ -69,7 +69,7 @@ class FFmpegProcessor():
                 os.remove(output_file)
         
         print(err)
-        return False, "Compression Failed or Interupted"
+        return False, "Compression Failed or Interrupted"
 
       elif rc != 0 and self._terminated == True:
         if os.path.exists(output_file):
