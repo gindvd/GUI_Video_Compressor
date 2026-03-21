@@ -36,7 +36,7 @@ class FFprobeProcessor():
       return False, None, "FFprobe not found!"
 
     except Exception as e:
-      self._log_errors(err)
+      self._log_errors(e)
       return False, None, "Error Occured!\nCheck logs for details!"
     
     else:
@@ -70,15 +70,12 @@ class FFprobeProcessor():
 
       proc.wait()
       rc = proc.returncode
-      
-    except subprocess.CalledProcessError:
-      return False, None, err
     
     except FileNotFoundError:
       return False, None, "FFprobe not found!"
 
     except Exception as e:
-      self._log_errors(err)
+      self._log_errors(e)
       return False, None, "Error Occured!\nCheck logs for details!"
     
     else:
@@ -191,6 +188,7 @@ class FFprobeProcessor():
       fps = fps[:2]
       return True, int(fps), None
 
+  @staticmethod
   def _log_errors(self, err_msg):
     now = datetime.now()
 
