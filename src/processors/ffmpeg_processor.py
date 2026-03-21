@@ -1,8 +1,5 @@
 import os
 import subprocess
-import platform
-
-from datetime import datetime
 
 from utils import create_logs
 
