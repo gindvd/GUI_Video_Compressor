@@ -269,7 +269,7 @@ class App(ctk.CTk):
     self._codec = choice
 
     if choice == "libsvtav1":
-      self._target_ext_drpdwn.configure(values=["mkv", "mov", "mp4"])
+      self._target_ext_drpdwn.configure(values=["mkv", "mebm", "mp4"])
       self._target_ext_drpdwn.set("mkv")
     elif choice == "libvpx-vp9":
       self._target_ext_drpdwn.configure(values=["webm", "mkv"])
