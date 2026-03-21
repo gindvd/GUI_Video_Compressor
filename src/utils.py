@@ -12,7 +12,7 @@ def get_ffmpeg_cmd():
     fmmpeg_rel_path = "lib/win32/ffmpeg.exe"
 
     try:
-      ffmpeg_abs_path = ROOT_DIR / ffmpeg_abs_path
+      ffmpeg_abs_path = ROOT_DIR / ffmpeg_rel_path
     
     except FileNotFoundError:
       return None
@@ -31,7 +31,7 @@ def get_ffprboe_cmd():
     ffprobe_rel_path = "lib/win32/ffprobe.exe"
 
     try:
-      ffmpeg_abs_path = ROOT_DIR / ffprobe_abs_path
+      ffprobe_abs_path = ROOT_DIR / ffprobe_rel_path
     
     except FileNotFoundError:
       return None
