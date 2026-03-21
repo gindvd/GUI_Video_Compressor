@@ -2,13 +2,16 @@ import platform
 import subprocess
 import re
 
+from utils import create_logs
+from utils import DEVICE_OS
+
 class OSCompatibiltyError(Exception):
   def __init__(self, message, os):
     super().__init__(message)
     self.os = os
   
   def __str__(self):
-    return "{} (Non-Compatible OS: {}) List of compatible OS [Windows, Linux, Mac OS]".format(self.message, self.os)
+    return f"{self.message} (Non-Compatible OS: {self.os})\nList of compatible OS [Windows, Linux, Mac OS]"
 
 CMD_DICT = {
   "Linux" : "lspci | grep -iE VGA|3D|video",
@@ -20,12 +23,15 @@ CMD_DICT = {
 }
 
 def get_card_info():
-  device_os = platform.system()
+  try:
+    if DEVICE_OS not in ["Windows", "Linux", "Darwin"]:
+      raise OSCompatibiltyError("Current OS is not compatible with this module.", DEVICE_OS)
   
-  if device_os not in ["Windows", "Linux", "Darwin"]:
-    raise OSCompatibiltyError("Current OS is not compatible with this module.", device_os)
+  except OSCompatibiltyError as e:
+    create_logs(str(e))
+    raise
 
-  if device_os == "Windows":
+  if DEVICE_OS == "Windows":
     win_ver = platform.release()
   
     if win_ver != "11":
