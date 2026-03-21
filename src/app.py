@@ -5,8 +5,6 @@ from CTkMessagebox import CTkMessagebox
 from customtkinter import filedialog
 
 import os
-import platform
-import shutil
 import threading
 
 from utils import get_ffmpeg_cmd, get_ffprboe_cmd
