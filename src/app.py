@@ -9,6 +9,8 @@ import platform
 import shutil
 import threading
 
+from utils import get_ffmpeg_cmd, get_ffprboe_cmd
+
 import modules.GPUinfo as gpu
 
 from processors.ffmpeg_processor import FFmpegProcessor
@@ -19,14 +21,33 @@ from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
 
-  _FPS_LIST = [120, 60, 30, 24, 15]
+  FPS_LIST = [120, 60, 30, 24, 15]
 
   def __init__(self):
     super().__init__()
-     
-    self._ffmpeg_cmd, self._ffprobe_cmd = self._ffmpeg_ffprobe_sys_cmd()
-    self._ffmpeg = FFmpegProcessor(self._ffmpeg_cmd)
-    self._ffprobe = FFprobeProcessor(self._ffprobe_cmd)
+    ffmpeg_cmd = get_ffmpeg_cmd
+    ffprobe_cmd = get_ffprboe_cmd
+    
+    if ffmpeg_cmd is None:
+      close = CTkMessagebox(title="Missing FFmpeg", 
+                      message="FFmpeg command missing!", 
+                      icon="cancel",
+                      option_1="Ok")
+        
+      if close.get() == "Ok":
+        self.quit()
+    
+    if ffprobe_cmd is None:
+      close = CTkMessagebox(title="Missing FFprobe", 
+                      message="FFprobe command missing!", 
+                      icon="cancel",
+                      option_1="Ok")
+        
+      if close.get() == "Ok":
+        self.quit()
+    
+    self._ffmpeg = FFmpegProcessor(ffmpeg_cmd)
+    self._ffprobe = FFprobeProcessor(ffprobe_cmd)
 
     self._input_file = ""
     self._target_format = "mp4"
@@ -50,71 +71,6 @@ class App(ctk.CTk):
     self._vid_trimmer = VideoTrimmer(self)
     self._vid_trimmer.pack(fill='x')
 	
-  def _ffmpeg_ffprobe_sys_cmd(self):
-    # Currently only supports WIndows and Linux
-    # Possibly expand this to be compatible with Mac   
-    
-    device_os = platform.system() 
-    if device_os == "Windows":
-
-      try:
-        ffmpeg_path = os.path.abspath("lib/win32/ffmpeg.exe")
-      
-      except FileNotFoundError:
-        close = CTkMessagebox(title="Missing FFmpeg Exe", 
-                      message="FFmpeg.exe missing from lib/win32 folder!", 
-                      icon="cancel",
-                      option_1="Ok")
-        
-        if close.get() == "Ok":
-          self.quit()
-      
-      try:
-        ffprobe_path = os.path.abspath("lib/win32/ffprobe.exe")
-      
-      except FileNotFoundError:
-        close = CTkMessagebox(title="Missing FFprobe Exe", 
-                      message="FFprobe.exe missing from lib/win32 folder!", 
-                      icon="cancel",
-                      option_1="Ok")
-        
-        if close.get() == "Ok":
-          self.quit()
-        
-      return ffmpeg_path, ffprobe_path
-    
-    elif device_os == "Linux":
-
-      if not shutil.which("ffmpeg"):
-        close = CTkMessagebox(title="Missing FFmpeg", 
-                      message="FFmpeg not recognized command", 
-                      icon="cancel",
-                      option_1="Ok")
-        
-        if close.get() == "Ok":
-          self.quit()
-        
-      if not shutil.which("ffprobe"):
-        close = CTkMessagebox(title="Missing FFprobe", 
-                      message="FFmprobe not recognized command",
-                      icon="cancel",
-                      option_1="Ok")
-        
-        if close.get() == "Ok":
-          self.quit()
-        
-      return "ffmpeg", "ffprobe"
-    
-    # Terminate the program with a message to let users
-    # know the OS is not compatible 
-    close = CTkMessagebox(title="Incompatible Operating System", 
-                          message=f"Current program is not currently compatible with {device_os}!\nTerminating program!", 
-                          icon="cancel",
-                          option_1="Ok")
-        
-    if close.get() == "Ok":
-      self.quit()
-
   def _create_menu_gui(self):
     menubar = CTkMenuBar(self)
     
@@ -271,7 +227,7 @@ class App(ctk.CTk):
     elif completed:
       upd_fps = []
 
-      for i in self._FPS_LIST:
+      for i in self.FPS_LIST:
         if i <= vid_fps:
           upd_fps.extend([str(i)])
 
@@ -317,7 +273,7 @@ class App(ctk.CTk):
     self._codec = choice
 
     if choice == "libsvtav1":
-      self._target_ext_drpdwn.configure(values=["mkv", "webm", "mp4"])
+      self._target_ext_drpdwn.configure(values=["mkv", "mov", "mp4"])
       self._target_ext_drpdwn.set("mkv")
     elif choice == "libvpx-vp9":
       self._target_ext_drpdwn.configure(values=["webm", "mkv"])
