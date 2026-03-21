@@ -43,7 +43,7 @@ class FFprobeProcessor():
     
     else:
       if rc != 0:
-        create_logs(out)
+        create_logs(err)
         return False, None, "Error Occured!\nCheck logs for details!"
 
       return True, duration, None
@@ -181,11 +181,13 @@ class FFprobeProcessor():
       return False, None, "FFprobe not found!"
 
     except Exception as e:
-      return False, None, "Error occured! Check logs for details"
+      create_logs(e)
+      return False, None, "Error occured!\nCheck logs for details"
     
     else:
       if rc != 0:
-        return False, None, err
+        create_logs(err)
+        return False, None, "Error occured!\nCheck logs for details"
       
       fps = fps[:2]
       return True, int(fps), None
