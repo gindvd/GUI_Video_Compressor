@@ -2,6 +2,7 @@ import os
 import subprocess
 
 from utils import create_logs
+from utils import DEVICE_OS
 
 class FFmpegProcessor():
   def __init__(self, ffmpeg):
@@ -40,7 +41,7 @@ class FFmpegProcessor():
 
     creation_flags = {}
 
-    if platform.system() == "Windows":
+    if DEVICE_OS == "Windows":
       creation_flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     else:
       creation_flags["start_new_session"] = True
