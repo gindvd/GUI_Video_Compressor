@@ -66,7 +66,7 @@ class FFmpegProcessor():
       if os.path.exists(output_file):
         os.remove(output_file)
         
-      return False,  ""
+      return False,  None
     
     except FileNotFoundError:
       return False, "FFmpeg could not be found!"        
