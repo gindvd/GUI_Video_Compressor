@@ -145,7 +145,7 @@ class App(ctk.CTk):
     self._quality_slider.set(90)
     self._quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
 
-    self._quality_perc_lbl = ctk.CTkLabel(self._central_frame, text="{}%".format(self._quality_slider.get()))
+    self._quality_perc_lbl = ctk.CTkLabel(self._central_frame, text=f"{self._quality_slider.get()}%")
     self._quality_perc_lbl.grid(row=3, column=4, padx=5, pady=5, sticky="w")
 
     self._aud_on_off = ctk.IntVar()
