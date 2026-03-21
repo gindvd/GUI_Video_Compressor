@@ -205,4 +205,3 @@ class FFprobeProcessor():
 
     with open(log_file, 'w') as f:
       f.write(err_msg)
-
