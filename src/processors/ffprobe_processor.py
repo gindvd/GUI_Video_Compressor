@@ -2,6 +2,8 @@ import subprocess
 
 from datetime import datetime
 
+from utils import create_logs
+
 class FFprobeProcessor():
   def __init__(self, ffprobe):
     self._ffprobe = ffprobe
@@ -36,12 +38,12 @@ class FFprobeProcessor():
       return False, None, "FFprobe not found!"
 
     except Exception as e:
-      self._log_errors(e)
+      create_logs(e)
       return False, None, "Error Occured!\nCheck logs for details!"
     
     else:
       if rc != 0:
-        self._log_errors(err)
+        create_logs(out)
         return False, None, "Error Occured!\nCheck logs for details!"
 
       return True, duration, None
@@ -75,12 +77,12 @@ class FFprobeProcessor():
       return False, None, "FFprobe not found!"
 
     except Exception as e:
-      self._log_errors(e)
+      create_logs(e)
       return False, None, "Error Occured!\nCheck logs for details!"
     
     else:
       if rc != 0:
-        self._log_errors(err)
+        create_logs(err)
         return False, None, "Error Occured!\nCheck logs for details!"
 
       return True, self._res_opt_list(vid_res), None
@@ -187,19 +189,3 @@ class FFprobeProcessor():
       
       fps = fps[:2]
       return True, int(fps), None
-
-  @staticmethod
-  def _log_errors(self, err_msg):
-    now = datetime.now()
-
-    basename= now + ".log"
-    parent = os.path.abspath(os.path.join(cwd, os.pardir))
-
-    filepath = os.path.join(parent, 'log')
-
-    os.makedirs(filepath, exist_ok=True)
-
-    log_file = os.path.join(filepath, basename)
-
-    with open(log_file, 'w') as f:
-      f.write(err_msg)

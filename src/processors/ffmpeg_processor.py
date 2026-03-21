@@ -4,6 +4,8 @@ import platform
 
 from datetime import datetime
 
+from utils import create_logs
+
 class FFmpegProcessor():
   def __init__(self, ffmpeg):
     self._ffmpeg = ffmpeg
@@ -50,6 +52,7 @@ class FFmpegProcessor():
                               stdout=subprocess.PIPE, 
                               stderr=subprocess.PIPE,
                               shell=False,
+                              text=True,
                               **creation_flags)
 
     try:
@@ -71,7 +74,8 @@ class FFmpegProcessor():
       return False, "FFmpeg could not be found!"        
     
     except Exception as e: 
-      self._log_errors(e)
+      create_logs(e)
+
       return False, "Error Occured!\nCheck logs for details!"
     
     else:
@@ -79,14 +83,14 @@ class FFmpegProcessor():
         if os.path.exists(output_file):
                 os.remove(output_file)
         
-        self._log_errors(err)
+        create_logs(out)
         return False, "Compression Failed\nCheck logs for details!"
 
       elif rc != 0 and self._terminated == True:
         if os.path.exists(output_file):
                 os.remove(output_file)
         
-        return False,  ""
+        return False,  None
 
       else:
         return True, None
@@ -123,19 +127,3 @@ class FFmpegProcessor():
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 41 + 10
     return int(crf)
-
-  @staticmethod
-  def _log_errors( err_msg):
-    now = datetime.now()
-
-    basename= now + ".log"
-    parent = os.path.abspath(os.path.join(cwd, os.pardir))
-
-    filepath = os.path.join(parent, 'log')
-
-    os.makedirs(filepath, exist_ok=True)
-
-    log_file = os.path.join(filepath, basename)
-
-    with open(log_file, 'w') as f:
-      f.write(err_msg)  
