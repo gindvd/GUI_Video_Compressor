@@ -58,15 +58,15 @@ class App(ctk.CTk):
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
 
-    self._create_menu_gui()
+    self._create_menubar()
     self._central_frame = ctk.CTkFrame(self, corner_radius=0)
-    self._pack_central_frame()
+    self._populate_central_frame()
     self._central_frame.pack()
 
     self._vid_trimmer = VideoTrimmer(self)
     self._vid_trimmer.pack(fill='x')
 	
-  def _create_menu_gui(self):
+  def _create_menubar(self):
     menubar = CTkMenuBar(self)
     
     file_btn = menubar.add_cascade("File")
@@ -80,7 +80,7 @@ class App(ctk.CTk):
     help_drop = CustomDropdownMenu(widget=help_btn)
     help_drop.add_option(option="About", command=self._show_about)
 
-  def _pack_central_frame(self):  
+  def _populate_central_frame(self):  
     ctk.CTkLabel(self._central_frame, text="Input File:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
     self._file_entry = ctk.CTkEntry(self._central_frame)
