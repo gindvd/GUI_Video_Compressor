@@ -20,8 +20,8 @@ from components.video_trimmer import VideoTrimmer
 class App(ctk.CTk):
   def __init__(self):
     super().__init__()
-    ffmpeg_cmd = get_ffmpeg_cmd
-    ffprobe_cmd = get_ffprboe_cmd
+    ffmpeg_cmd = get_ffmpeg_cmd()
+    ffprobe_cmd = get_ffprboe_cmd()
     
     if ffmpeg_cmd is None:
       close = CTkMessagebox(title="Missing FFmpeg", 
