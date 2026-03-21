@@ -50,13 +50,13 @@ class FFmpegProcessor():
     
     self._proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
-                              stderr=subprocess.PIPE,
+                              stderr=subprocess.STDOUT,
                               shell=False,
                               text=True,
                               **creation_flags)
 
     try:
-      out, err = self._proc.communicate()
+      out, _ = self._proc.communicate()
       self._proc.wait()
     
       rc = self._proc.returncode
