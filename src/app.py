@@ -389,7 +389,7 @@ class App(ctk.CTk):
                     message="Success!\nVideo has been successfully compressed!", 
                     icon='info')
 
-    if not completed and err_msg != "":
+    if not completed and err_msg is not None:
       CTkMessagebox(title="Video Compression Error", 
                     message=f"ERROR\n{err_msg}", 
                     icon='cancel')
