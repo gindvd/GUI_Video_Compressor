@@ -1,7 +1,48 @@
 from pathlib import Path
 from datetime import datetime
 
+import platform
+
 ROOT_DIR = Path(__file__).parents[1]
+DEVICE_OS = platform.system()
+
+def get_ffmpeg_cmd():
+  if DEVICE_OS == "Windows":
+    fmmpeg_rel_path = "lib/win32/ffmpeg.exe"
+
+    try:
+      ffmpeg_abs_path = ROOT_DIR / ffmpeg_abs_path
+    
+    except FileNotFoundError:
+      return None
+
+    else:
+      return ffmpeg_abs_path
+  
+  elif DEVICE_OS == "Linux":
+    if not shutil.which("ffmpeg"):
+      return None
+    
+    return "ffmpeg"
+
+def get_ffprboe_cmd():
+  if DEVICE_OS == "Windows":
+    ffprobe_rel_path = "lib/win32/ffprobe.exe"
+
+    try:
+      ffmpeg_abs_path = ROOT_DIR / ffprobe_abs_path
+    
+    except FileNotFoundError:
+      return None
+
+    else:
+      return ffprobe_abs_path
+  
+  elif DEVICE_OS == "Linux":
+    if not shutil.which("ffprobe"):
+      return None
+    
+    return "ffprobe"
 
 def create_logs(err_msg):
   now = datetime.now()
