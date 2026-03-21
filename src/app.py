@@ -18,9 +18,6 @@ from components.progressbar_popup import ProgressbarPopup
 from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
-
-  FPS_LIST = [120, 60, 30, 24, 15]
-
   def __init__(self):
     super().__init__()
     ffmpeg_cmd = get_ffmpeg_cmd
@@ -224,8 +221,9 @@ class App(ctk.CTk):
     
     elif completed:
       upd_fps = []
+      fps_list = [120, 60, 30, 24, 15]
 
-      for i in self.FPS_LIST:
+      for i in fps_list:
         if i <= vid_fps:
           upd_fps.extend([str(i)])
 
