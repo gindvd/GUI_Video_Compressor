@@ -2,6 +2,8 @@ import os
 import subprocess
 import platform
 
+from datetime import datetime
+
 class FFmpegProcessor():
   def __init__(self, ffmpeg):
     self._ffmpeg = ffmpeg
@@ -77,7 +79,7 @@ class FFmpegProcessor():
         if os.path.exists(output_file):
                 os.remove(output_file)
         
-        print(err)
+        self._log_errors(err)
         return False, "Compression Failed\nCheck logs for details!"
 
       elif rc != 0 and self._terminated == True:
