@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 
-ROOT_DIR = Path(__file__).parent[1]
+ROOT_DIR = Path(__file__).parents[1]
 
 def create_logs(err_msg):
   now = datetime.now()
