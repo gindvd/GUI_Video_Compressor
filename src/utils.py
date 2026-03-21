@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 
+import shutil
 import platform
 
 ROOT_DIR = Path(__file__).parents[1]
