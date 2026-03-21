@@ -69,7 +69,8 @@ class FFmpegProcessor():
       return False, "FFmpeg could not be found!"        
     
     except Exception as e: 
-      return False, str(e)
+      self._log_errors(e)
+      return False, "Error Occured!\nCheck logs for details!"
     
     else:
       if rc != 0 and self._terminated == False:
@@ -77,7 +78,7 @@ class FFmpegProcessor():
                 os.remove(output_file)
         
         print(err)
-        return False, "Compression Failed or Interrupted"
+        return False, "Compression Failed\nCheck logs for details!"
 
       elif rc != 0 and self._terminated == True:
         if os.path.exists(output_file):
@@ -120,4 +121,19 @@ class FFmpegProcessor():
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 41 + 10
     return int(crf)
-  
+
+  @staticmethod
+  def _log_errors( err_msg):
+    now = datetime.now()
+
+    basename= now + ".log"
+    parent = os.path.abspath(os.path.join(cwd, os.pardir))
+
+    filepath = os.path.join(parent, 'log')
+
+    os.makedirs(filepath, exist_ok=True)
+
+    log_file = os.path.join(filepath, basename)
+
+    with open(log_file, 'w') as f:
+      f.write(err_msg)  
