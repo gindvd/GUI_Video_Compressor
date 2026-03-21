@@ -2,10 +2,9 @@ import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 
 import vlc
-import platform
 import shutil
 
-from utils import ROOT_DIR
+from utils import ROOT_DIR, DEVICE_OS
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, parent):
@@ -34,7 +33,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
   def _platform_specific_inst(self):
 
-    if platform.system() == "Windows":
+    if DEVICE_OS == "Windows":
 
       try:
         vlc_path = ROOT_DIR / "lib/win32/vlc-win32.exe"
@@ -49,7 +48,7 @@ class VideoTrimmer(ctk.CTkFrame):
           self.destroy()
         
     
-      else:
+      elif DEVICE_OS == "Linux":
         return vlc.Instance("--plugin-path={}".format(vlc_path))
     
     else:
