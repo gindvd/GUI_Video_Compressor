@@ -48,10 +48,10 @@ class VideoTrimmer(ctk.CTkFrame):
           self.destroy()
         
     
-      elif DEVICE_OS == "Linux":
+      else:
         return vlc.Instance("--plugin-path={}".format(vlc_path))
     
-    else:
+    elif DEVICE_OS == "Linux":
       if not shutil.which("vlc"):
           close = CTkMessagebox(title="Missing VLC", 
                               message="VLC not a recognized command!", 
