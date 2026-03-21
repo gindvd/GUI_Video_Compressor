@@ -5,6 +5,8 @@ import vlc
 import platform
 import shutil
 
+from utils import ROOT_DIR
+
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, parent):
     super().__init__(parent, corner_radius=0)
@@ -35,7 +37,7 @@ class VideoTrimmer(ctk.CTkFrame):
     if platform.system() == "Windows":
 
       try:
-        vlc_path = os.path.abspath("lib/win32/vlc-win32.exe")
+        vlc_path = ROOT_DIR / "lib/win32/vlc-win32.exe"
 
       except FileNotFoundError:
         close = CTkMessagebox(title="Missing VLC Exe", 
