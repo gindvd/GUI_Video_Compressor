@@ -215,6 +215,7 @@ class App(ctk.CTk):
 
       self._target_res_drpdwn.configure(values=res_list)
       self._target_res_drpdwn.set(res_list[0])
+      self._target_res = res_list[0]
 
       self._vid_trimmer.set_video(self._input_file)
     
@@ -233,6 +234,7 @@ class App(ctk.CTk):
       
       elif vid_fps < fps_list[-1]:
         self._target_fps_drpdwn.configure(values=vid_fps)
+        self._target_fps = vid_fps
         return
 
       upd_fps = []
@@ -243,6 +245,7 @@ class App(ctk.CTk):
 
       self._target_fps_drpdwn.configure(values=upd_fps)
       self._target_fps_drpdwn.set(upd_fps[0])
+      self._target_fps = upd_fps[0]
 
     completed, duration, err_msg = self._ffprobe.get_duration(self._input_file)
 
@@ -254,7 +257,7 @@ class App(ctk.CTk):
       return
     
     elif completed:
-      self._vid_trimmer.set_duration(duration)
+      self._vid_trimmer.set_duration(duration)   
 
 
   def _compatible_file(self, item: os.PathLike | str) -> bool:
