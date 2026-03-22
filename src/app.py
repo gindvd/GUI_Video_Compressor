@@ -333,7 +333,7 @@ class App(ctk.CTk):
         case "Intel":
           # Older itel GPUs on Linux have qsv support depreciated and or lacking :(
           if DEVICE_OS == "Linux":
-            codecs.extend(["h264_vaaqi", "hevc_vaaqi"])
+            codecs.extend(["h264_vaapi", "hevc_vaap`i"])
           else:
             codecs.extend(["h264_qsv", "hevc_qsv"])
         case _:
