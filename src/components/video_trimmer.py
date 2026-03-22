@@ -32,7 +32,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._create_time_panel()
 
-  def _platform_specific_inst(self) -> vlc.Instance[str]:
+  def _platform_specific_inst(self) -> vlc.Instance:
 
     if DEVICE_OS == "Windows":
 
@@ -114,9 +114,9 @@ class VideoTrimmer(ctk.CTkFrame):
     self._update_progress()
 
   def _display_video(self) -> None:
-    if platform.system() == "Linux":
+    if DEVICE_OS == "Linux":
       self._vid_player.set_xwindow(self._vid_panel.winfo_id())
-    elif platform.system() == "Windows":
+    elif DEVICE_OS == "Windows":
       self._vid_player.set_hwnd(self._vid_panel.winfo_id())
 
   def _update_progress(self):
