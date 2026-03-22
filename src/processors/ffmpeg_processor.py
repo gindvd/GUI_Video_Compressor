@@ -34,14 +34,21 @@ class FFmpegProcessor():
 
     hw_spec_args = self._select_quality_control(codec, self._quality_converter(quality))
 
+    # ARgs for hardware spcific codecs to have ffmpeg to use hardware acceleration
     if hw_spec_args[1] is not None:
       cmd.extend(hw_spec_arg[1])
 
-    cmd.extend(["-i", input_file, 
-                "-c:v", codec,
+    cmd.extend(["-i", input_file])
+
+    # Specific arg needed for vaaqi codec
+    if hw_spec_args[2] is not None:
+      cmd.extend(hw_spec_args[2])
+
+    cmd.extend(["-c:v", codec,
                 "-r", fps,
                 "-vf", scale])
     
+    # Specific quality control args for bitrate
     assert hw_spec_args[0] is not None, "Command arg is set to None!"
     cmd.extend(hw_spec_args[0])
 
