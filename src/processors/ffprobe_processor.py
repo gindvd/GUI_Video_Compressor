@@ -44,6 +44,9 @@ class FFprobeProcessor():
       if rc != 0:
         create_logs(err)
         return False, None, "Error Occured!\nCheck logs for details!"
+      
+      if duration is None:
+        return False, None, "Error Occured!\nVideo Duration not found!"
 
       return True, duration, None
 
@@ -83,6 +86,9 @@ class FFprobeProcessor():
       if rc != 0:
         create_logs(err)
         return False, None, "Error Occured!\nCheck logs for details!"
+      
+      if vid_res is None:
+        return False, None, "Error Occured!\nVideo Resolution not found!"
 
       return True, self._res_opt_list(vid_res), None
 
@@ -144,6 +150,10 @@ class FFprobeProcessor():
 
         if w >= 360:
           resolutions.extend([x])
+    
+    # Return video resolution if it has a height or width smaller than 360
+    if not resolutions:
+      return [vid_res]
 
     return resolutions
 
@@ -187,6 +197,9 @@ class FFprobeProcessor():
       if rc != 0:
         create_logs(err)
         return False, None, "Error occured!\nCheck logs for details"
+      
+      if fps is None:
+        return False, None, "Error Occurred!\nFPS not found!"
       
       fps = fps[:2]
       return True, int(fps), None
