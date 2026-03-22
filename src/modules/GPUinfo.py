@@ -9,11 +9,12 @@ from utils import DEVICE_OS
 
 class OSCompatibiltyError(Exception):
   def __init__(self, message: str, os: str) -> None:
-    super().__init__(message)
-    self.os = os
+    super().__init__()
+    self._os = os
+    self._message = message
   
   def __str__(self) -> str:
-    return f"{self.message} (Non-Compatible OS: {self.os})\nList of compatible OS [Windows, Linux, Mac OS]"
+    return f"{self._message} (Non-Compatible OS: {self._os})\nCompatible OS: Windows , Linux"
 
 CMD_DICT = {
   "Linux" : "lspci | grep -iE VGA|3D|video",
