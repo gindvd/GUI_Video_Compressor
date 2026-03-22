@@ -34,7 +34,7 @@ class FFmpegProcessor():
 
     hw_spec_args = self._select_quality_control(codec, self._quality_converter(quality))
 
-    # ARgs for hardware spcific codecs to have ffmpeg to use hardware acceleration
+    # Args for hardware spcific codecs to have ffmpeg to use hardware acceleration
     if hw_spec_args[1] is not None:
       cmd.extend(hw_spec_arg[1])
 
