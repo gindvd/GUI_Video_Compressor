@@ -8,6 +8,7 @@ import os
 import threading
 
 from utils import get_ffmpeg_cmd, get_ffprboe_cmd
+from utils import DEVICE_OS
 
 import modules.GPUinfo as gpu
 

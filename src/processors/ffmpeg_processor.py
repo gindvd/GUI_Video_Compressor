@@ -157,9 +157,9 @@ class FFmpegProcessor():
       return [[-"rc", "vbr","-cq", f"{str(quality)}", "-b:v", "0"], ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]]
     
     elif re.search('amf', codec):
-      if DEVICE_OS == "Linux":
+      if  DEVICE_OS == "Linux":
         hwaccel_method = "vaapi"
-      elif DEVICE_OS == "Windows":
+      elif DEVICE_OS  == "Windows":
         hwaccel_method = "d3d11va"
 
       return [["-rc", "qvbr", "-qvbr_quality_level", f"{str(quality)}"], ["-hwaccel", f"{hwaccel_method}"]]
