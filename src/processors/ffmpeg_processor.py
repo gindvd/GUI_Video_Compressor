@@ -80,7 +80,7 @@ class FFmpegProcessor():
       return False, "FFmpeg could not be found!"        
     
     except Exception as e: 
-      create_logs(e)
+      create_logs(str(e))
 
       return False, "Error Occured!\nCheck logs for details!"
     
