@@ -31,8 +31,6 @@ class ProgressbarPopup(ctk.CTkToplevel):
                                                  command=self._parent.cancel_compression)  
 
     self._cancel_compression_btn.pack(side="right", padx=10, pady=10)
-
-    
   
   def run_progressbar(self) -> None:
     self._progressbar.start()
