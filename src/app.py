@@ -18,39 +18,39 @@ from components.progressbar_popup import ProgressbarPopup
 from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
-  def __init__(self):
+  def __init__(self) -> None:
     super().__init__()
     ffmpeg_cmd = get_ffmpeg_cmd()
     ffprobe_cmd = get_ffprboe_cmd()
     
     if ffmpeg_cmd is None:
       close = CTkMessagebox(title="Missing FFmpeg", 
-                      message="FFmpeg command missing!", 
-                      icon="cancel",
-                      option_1="Ok")
+                            message="FFmpeg command missing!", 
+                            icon="cancel",
+                            option_1="Ok")
         
       if close.get() == "Ok":
         self.quit()
     
     if ffprobe_cmd is None:
       close = CTkMessagebox(title="Missing FFprobe", 
-                      message="FFprobe command missing!", 
-                      icon="cancel",
-                      option_1="Ok")
+                            message="FFprobe command missing!", 
+                            icon="cancel",
+                            option_1="Ok")
         
       if close.get() == "Ok":
         self.quit()
     
-    self._ffmpeg = FFmpegProcessor(ffmpeg_cmd)
-    self._ffprobe = FFprobeProcessor(ffprobe_cmd)
+    self._ffmpeg: FFmpegProcessor = FFmpegProcessor(ffmpeg_cmd)
+    self._ffprobe: FFprobeProcessor = FFprobeProcessor(ffprobe_cmd)
 
-    self._input_file = ""
-    self._target_format = "mp4"
-    self._target_res = "1920x1080"
-    self._codec = "libx264"
-    self._target_fps = "30"
-    self._quality = 90
-    self._audio = True
+    self._input_file: os.PathLike | str = ""
+    self._target_format: str = "mp4"
+    self._target_res: str = "1920x1080"
+    self._codec: str = "libx264"
+    self._target_fps: str = "30"
+    self._quality: int = 90
+    self._audio: bool = True
         
     self.title("Video Compression Tool")
     self.resizable(False, False)
@@ -59,14 +59,14 @@ class App(ctk.CTk):
     ctk.set_default_color_theme("blue")
 
     self._create_menubar()
-    self._central_frame = ctk.CTkFrame(self, corner_radius=0)
+    self._central_frame: ctk.CTkFrame = ctk.CTkFrame(self, corner_radius=0)
     self._populate_central_frame()
     self._central_frame.pack()
 
-    self._vid_trimmer = VideoTrimmer(self)
+    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self)
     self._vid_trimmer.pack(fill='x')
 	
-  def _create_menubar(self):
+  def _create_menubar(self) -> None:
     menubar = CTkMenuBar(self)
     
     file_btn = menubar.add_cascade("File")
@@ -80,67 +80,67 @@ class App(ctk.CTk):
     help_drop = CustomDropdownMenu(widget=help_btn)
     help_drop.add_option(option="About", command=self._show_about)
 
-  def _populate_central_frame(self):  
+  def _populate_central_frame(self) -> None:  
     ctk.CTkLabel(self._central_frame, text="Input File:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
-    self._file_entry = ctk.CTkEntry(self._central_frame)
+    self._file_entry: ctk.CTkEntry = ctk.CTkEntry(self._central_frame)
     self._file_entry.bind("<Return>", self._file_entered)
     self._file_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
 
-    self._browse_btn = ctk.CTkButton(self._central_frame, 
-                                     text="Browse", 
-                                     command=self._browse_files)
+    self._browse_btn: ctk.CTkButton = ctk.CTkButton(self._central_frame, 
+                                                    text="Browse",
+                                                    command=self._browse_files)
     
     self._browse_btn.grid(row=0, column=4, padx=5, pady=5)
 
     ctk.CTkLabel(self._central_frame, text="Codec:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
-    self._codec_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                         values=self._codec_values(),
-		                                     state='readonly',
-                                         command=self._codec_choice)
+    self._codec_drpdwn: ctk.CTkButton = ctk.CTkComboBox(self._central_frame, 
+                                                        values=self._codec_values(),
+                                                        state='readonly',
+                                                        command=self._codec_choice)
 
     self._codec_drpdwn.set("libx264")
     self._codec_drpdwn.grid(row=1, column=1, padx=5, pady=5)
 
     ctk.CTkLabel(self._central_frame, text="Resolution:").grid(row=1, column=2, padx=5, pady=5, sticky="w")
 
-    self._target_res_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                              values=["3840x2160", "2560x1440", "1920x1080", 
-                                                      "1280x720", "854x480", "640x360"],
-		                                          state='readonly',
-                                              command=self._res_choice)
+    self._target_res_drpdwn: ctk.CTkButton = ctk.CTkComboBox(self._central_frame, 
+                                                             values=["3840x2160", "2560x1440", "1920x1080", 
+                                                                     "1280x720", "854x480", "640x360"],
+                                                             state='readonly',
+                                                             command=self._res_choice)
 
     self._target_res_drpdwn.set("1920x1080")
     self._target_res_drpdwn.grid(row=1, column=3, padx=5, pady=5)
 
     ctk.CTkLabel(self._central_frame, text="Video Format:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
-    self._target_ext_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                              values=["mp4", "mkv", "mov"],
-		                                          state='readonly',
-                                              command=self._ext_choice)
+    self._target_ext_drpdwn: ctk.CTkButton = ctk.CTkComboBox(self._central_frame, 
+                                                             values=["mp4", "mkv", "mov"],
+                                                             state='readonly',
+                                                             command=self._ext_choice)
 
     self._target_ext_drpdwn.grid(row=2, column=1, padx=5, pady=5)
     self._target_ext_drpdwn.set("mp4")
 
     ctk.CTkLabel(self._central_frame, text="FPS:").grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
-    self._target_fps_drpdwn = ctk.CTkComboBox(self._central_frame, 
-                                              values=["60", "30", "24", "15"],
-		                                          state='readonly',
-                                              command=self._fps_choice)
+    self._target_fps_drpdwn: ctk.CTkButton = ctk.CTkComboBox(self._central_frame, 
+                                                             values=["60", "30", "24", "15"],
+                                                             state='readonly',
+                                                             command=self._fps_choice)
 
     self._target_fps_drpdwn.set("60")
     self._target_fps_drpdwn.grid(row=2, column=3, padx=5, pady=5)
 
     ctk.CTkLabel(self._central_frame, text="Video Quality:").grid(row=3, column=0, padx=5, pady=5, sticky="sw")
 
-    self._quality_slider = ctk.CTkSlider(self._central_frame, 
-                                         from_=0, 
-                                         to=100,
-                                         number_of_steps=100, 
-                                         command=self._quality_choice)
+    self._quality_slider: ctk.CTkSlider = ctk.CTkSlider(self._central_frame, 
+                                                        from_=0, 
+                                                        to=100,
+                                                        number_of_steps=100, 
+                                                        command=self._quality_choice)
 
     self._quality_slider.set(90)
     self._quality_slider.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky="nsew")
@@ -148,22 +148,22 @@ class App(ctk.CTk):
     self._quality_perc_lbl = ctk.CTkLabel(self._central_frame, text=f"{self._quality_slider.get()}%")
     self._quality_perc_lbl.grid(row=3, column=4, padx=5, pady=5, sticky="w")
 
-    self._aud_on_off = ctk.IntVar()
-    self._rm_aud_chkbox = ctk.CTkCheckBox(self._central_frame, 
-                                          text="Remove Audio",
-                                          variable=self._aud_on_off,
-                                          command=self._remove_audio)
+    self._aud_on_off: ctk.IntVar = ctk.IntVar()
+    self._rm_aud_chkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(self._central_frame, 
+                                                           text="Remove Audio",
+                                                           variable=self._aud_on_off,
+                                                           command=self._remove_audio)
 
     self._rm_aud_chkbox.grid(row=4, column=0, padx=5, pady=5)
 
-    self._compress_btn = ctk.CTkButton(self._central_frame, 
-                                       text="Compress",
-                                       state="disabled",
-                                       command=self._compress_video)
+    self._compress_btn: ctk.CTkButton = ctk.CTkButton(self._central_frame, 
+                                                      text="Compress",
+                                                      state="disabled",
+                                                      command=self._compress_video)
     
     self._compress_btn.grid(row=4, column=4, padx=5, pady=5)
 
-  def _show_about(self):
+  def _show_about(self) -> None:
     CTkMessagebox(title="About", 
                   message="""GUI Video Compression Tool\n""", 
                   icon="info")
@@ -182,7 +182,7 @@ class App(ctk.CTk):
     
     self._update_gui()
  
-  def _file_entered(self, event):
+  def _file_entered(self, event: 'ctk.Event[ctk.CTkButton]') -> None:
     item = event.widget.get()
 
     if not self._compatible_file(item):
@@ -192,7 +192,7 @@ class App(ctk.CTk):
     
     self._update_gui()
     
-  def _update_gui(self):
+  def _update_gui(self) -> None:
     self._compress_btn.configure(state="normal")
 
     # ffprobe.get_resolutions will return list of common resolutions 
@@ -243,7 +243,7 @@ class App(ctk.CTk):
       self._vid_trimmer.set_duration(duration)
 
 
-  def _compatible_file(self, item):
+  def _compatible_file(self, item: os.PathLike | str) -> bool:
     if item == "" or item == ():
       return False
 
@@ -265,7 +265,7 @@ class App(ctk.CTk):
 
     return True
 
-  def _codec_choice(self, choice):
+  def _codec_choice(self, choice: 'ctk.Event[ctk.CTkComboBox]') -> None:
     self._codec = choice
 
     if choice == "libsvtav1":
@@ -278,23 +278,23 @@ class App(ctk.CTk):
       self._target_ext_drpdwn.configure(values=["mp4", "mkv", "mov"])
       self._target_ext_drpdwn.set("mp4")
   
-  def _ext_choice(self, choice):
+  def _ext_choice(self, choice: 'ctk.Event[ctk.CTkComboBox]') -> None:
     self._target_format = choice
 
-  def _res_choice(self, choice):
+  def _res_choice(self, choice: 'ctk.Event[ctk.CTkComboBox]') -> None:
     self._target_res = choice
 
-  def _fps_choice(self, choice):
+  def _fps_choice(self, choice: 'ctk.Event[ctk.CTkComboBox]') -> None:
     self._target_fps = choice
   
-  def _quality_choice(self, value):
+  def _quality_choice(self, value: 'ctk.Value[ctk.CTkSlider]') -> None:
     self._quality = value
-    self._quality_perc_lbl.configure(text="{}%".format(value))
+    self._quality_perc_lbl.configure(text=f"{value}%")
 
-  def _remove_audio(self):
+  def _remove_audio(self) -> None:
     self._audio = False if self._aud_on_off.get() else True
 
-  def _codec_values(self):
+  def _codec_values(self) -> list[str]:
     codecs = ["libx264", "libx265", "libsvtav1", "libvpx-vp9"]
 
     for name in gpu.manufacturer():
@@ -310,10 +310,10 @@ class App(ctk.CTk):
   
     return codecs
 
-  def _compress_video(self):
+  def _compress_video(self) -> None:
     self._compress_btn.configure(state="disabled")
     
-    self._progressbar_popup = ProgressbarPopup(self)
+    self._progressbar_popup: ProgressbarPopup = ProgressbarPopup(self)
     self._progressbar_popup.run_progressbar()
 
     # Run FFmpeg executable/binary in separate thread 
@@ -321,7 +321,7 @@ class App(ctk.CTk):
  
     threading.Thread(target=self._run_compression_cmd, daemon=True).start()
 
-  def _run_compression_cmd(self): 
+  def _run_compression_cmd(self) -> None: 
     completed, err_msg = self._ffmpeg.compress(self._input_file, 
                                                self._target_format, 
                                                self._target_res,
@@ -332,7 +332,7 @@ class App(ctk.CTk):
 
     self.after(0, self._compression_finished, completed, err_msg)
   
-  def _compression_finished(self, completed, err_msg):
+  def _compression_finished(self, completed: bool, err_msg: str) -> None:
     self._progressbar_popup.destroy_window()
     self._compress_btn.configure(state="normal")
 
@@ -346,7 +346,7 @@ class App(ctk.CTk):
                     message=f"ERROR\n{err_msg}", 
                     icon='cancel')
   
-  def cancel_compression(self):
+  def cancel_compression(self) -> None:
     killed, msg = self._ffmpeg.terminate_compression()
 
     if not killed:
@@ -354,14 +354,14 @@ class App(ctk.CTk):
       
     elif killed:
       close = CTkMessagebox(title="Video Compression Terminated", 
-                          message=f"{msg}!", 
-                          icon="info",
-                          option_1="Ok")
+                            message=f"{msg}!", 
+                            icon="info",
+                            option_1="Ok")
         
       if close.get() == "Ok":
         return
   
-  def on_quit(self):
+  def on_quit(self) -> None:
     self.cancel_compression()
     
     self.quit()
