@@ -153,7 +153,7 @@ class FFprobeProcessor():
   def _round_to_even(f: float) -> int:
     return round(f / 2.) * 2
 
-  def get_fps(self, filepath: PathLike | str) -> tuple[bool, str | None, str | None]:
+  def get_fps(self, filepath: PathLike | str) -> tuple[bool, int | None, str | None]:
     cmd = [self._ffprobe, 
               "-v", 
               "error",
