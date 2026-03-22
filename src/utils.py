@@ -1,13 +1,14 @@
 from pathlib import Path
 from datetime import datetime
+from os import PathLike
 
 import shutil
 import platform
 
-ROOT_DIR = Path(__file__).parents[1]
-DEVICE_OS = platform.system()
+ROOT_DIR: PathLike = Path(__file__).parents[1]
+DEVICE_OS: str = platform.system()
 
-def get_ffmpeg_cmd():
+def get_ffmpeg_cmd() -> PathLike | None:
   if DEVICE_OS == "Windows":
     fmmpeg_rel_path = "lib/win32/ffmpeg.exe"
 
@@ -26,7 +27,7 @@ def get_ffmpeg_cmd():
     
     return "ffmpeg"
 
-def get_ffprboe_cmd():
+def get_ffprboe_cmd() -> PathLike | None:
   if DEVICE_OS == "Windows":
     ffprobe_rel_path = "lib/win32/ffprobe.exe"
 
@@ -45,7 +46,7 @@ def get_ffprboe_cmd():
     
     return "ffprobe"
 
-def create_logs(err_msg):
+def create_logs(err_msg: str):
   now = datetime.now()
   basename = str(now) + ".log"
 
