@@ -150,13 +150,16 @@ class FFmpegProcessor():
   @staticmethod
   def _select_quality_control(codec: str) -> list[list[str] | None]:
     if re.search('nvenc', codec):
-      return [[-"rc", "vbr","-cq", "-b:v" "0"]]
+      # All modern Nvidia GPUs support cuda, so using cuda
+      # If gpu doesn't support Cuda, then command will fail, might add Cuda check later
+      return [[-"rc", "vbr","-cq", "-b:v" "0"], ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]]
     
     elif re.search('amf', codec):
       if DEVICE_OS == "Linux":
         hwaccel_method = "vaapi"
       elif DEVICE_OS == "Windows":
         hwaccel_method = "d3d11va"
+
       return [["-rc", "qvbr", "-qvbr_quality_level"], ["-hwaccel", f"{hwaccel_method}"]]
 
     elif re.search('qsv', codec):
