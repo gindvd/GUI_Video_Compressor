@@ -24,7 +24,7 @@ CMD_DICT = {
     }
 }
 
-def get_card_info() -> Callable[[list[str]], list[str]] | Callable[[list[str], list[str]] list[str]]:
+def get_card_info() -> Callable[[list[str]], list[str]] | Callable[[list[str], list[str]], list[str]]:
   try:
     if DEVICE_OS not in ["Windows", "Linux", "Darwin"]:
       raise OSCompatibiltyError("Current OS is not compatible with this module.", DEVICE_OS)
