@@ -25,14 +25,14 @@ CMD_DICT = {
     }
 }
 
-def get_card_info() -> Callable[[list[str]], list[str]] | Callable[[list[str], list[str]], list[str]]:
+def get_card_info() -> list[str] | None:
   try:
     if DEVICE_OS not in ["Windows", "Linux", "Darwin"]:
       raise OSCompatibiltyError("Current OS is not compatible with this module.", DEVICE_OS)
   
   except OSCompatibiltyError as e:
     create_logs(str(e))
-    raise
+    return None
 
   if DEVICE_OS == "Windows":
     win_ver = platform.release()
@@ -53,18 +53,25 @@ def get_card_info() -> Callable[[list[str]], list[str]] | Callable[[list[str], l
 
   primary_cmd: list[str] = cmd_lists[0]
   secondary_cmd: list[str] | None = None
+
+  try:
+    if primary_cmd is None:
+      raise AttributeError
+
+  except AttributeError:
+    create_logs("Parent command set to None")
+
+    return None
   
   if len(cmd_lists) == 2:
     secondary_cmd = cmd_lists[1]
-
-  assert primary_cmd != None, "Primary command is set to None"
 
   if secondary_cmd == None:
     return run_cmd(primary_cmd)
 
   return run_piped_cmd(primary_cmd, secondary_cmd)
 
-def run_cmd(cmd: list[str]) -> list[str]:
+def run_cmd(cmd: list[str]) -> list[str] | None:
   proc = subprocess.Popen(cmd, 
                           stdout=subprocess.PIPE, 
                           stderr=subprocess.PIPE, 
@@ -78,20 +85,25 @@ def run_cmd(cmd: list[str]) -> list[str]:
     rc = proc.returncode
 
   except FileNotFoundError as e:
-    create_logs(e)
+    create_logs(str(e))
+
+    return None
   
   except Exception as e:
-    create_logs(e)
+    create_logs(str(e))
+
+    return None
 
   else:
     if rc != 0:
       create_logs(err)
+      
+      return None
 
-    else:
-      return out.split()
+    return out.split()
 
 
-def run_piped_cmd(cmd1: list[str], cmd2: list[str]) -> list[str]:
+def run_piped_cmd(cmd1: list[str], cmd2: list[str]) -> list[str] | None:
   proc1 = subprocess.Popen(cmd1,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
@@ -113,17 +125,22 @@ def run_piped_cmd(cmd1: list[str], cmd2: list[str]) -> list[str]:
     rc = proc2.returncode
 
   except FileNotFoundError as e:
-    create_logs(e)
+    create_logs(str(e))
+
+    return None
   
   except Exception as e:
-    create_logs(e)
+    create_logs(str(e))
+
+    return None
     
   else:
     if rc != 0:
       create_logs(err)
 
-    else:
-      return out.split()
+      return None
+
+    return out.split()
 
 def clean_data(gpu_list: list[str]) -> list[str]:
   clean_list = []
@@ -134,8 +151,13 @@ def clean_data(gpu_list: list[str]) -> list[str]:
 
   return clean_list
   
-def manufacturer() -> list[str]:
-  gpus = clean_data(get_card_info())
+def manufacturer() -> list[str] | None:
+  gpus = get_card_info()
+
+  if gpus is None:
+    return None
+
+  gpus = clean_data(gpus)
   
   manufacturers = []
   
