@@ -1,5 +1,6 @@
 import os
 import subprocess
+import re
 
 from utils import create_logs
 from utils import DEVICE_OS
@@ -24,9 +25,7 @@ class FFmpegProcessor():
     
     width, height = resolution.split("x")
     scale = "scale={}:{}".format(width, height)
-    
-    crf = self._crf_converter(quality)
-    
+        
     if codec in ["libvpx-vp9", "libsvtav1"]:
       audio_codec = "libopus"
     else:
@@ -36,8 +35,13 @@ class FFmpegProcessor():
            "-i", input_file, 
            "-c:v", codec,
            "-r", fps,
-           "-crf", str(crf), 
            "-vf", scale]
+
+    qual = self._quality_converter(quality)
+
+    qual_cntrl = self._select_quality_control(codec)
+
+    cmd.extend([qual_cntrl, qual])
 
     if not audio:
       cmd.extend(["-an"])
@@ -89,7 +93,7 @@ class FFmpegProcessor():
         if os.path.exists(output_file):
                 os.remove(output_file)
         
-        create_logs(out)
+        create_logs(f"{' '.join(cmd)}\n" + out)
         return False, "Compression Failed\nCheck logs for details!"
 
       elif rc != 0 and self._terminated == True:
@@ -128,8 +132,22 @@ class FFmpegProcessor():
       return False, ""
 
   @staticmethod
-  def _crf_converter(quality: int) -> int:
+  def _quality_converter(quality: int) -> str:
     # Quality needs be inverted as the lower the CRF number, the better the quality
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 41 + 10
-    return int(crf)
+    return str(int(crf))
+
+  @staticmethod
+  def _select_quality_control(codec: str) -> str:
+    if re.fullmatch('nvenc', codec):
+      return "-cq"
+    
+    elif re.fullmatch('amf', codec):
+      return "-qvbr_quality_level"
+
+    elif re.fullmatch('qsv', codec):
+      return "-global_quality"
+    
+    else:
+      return "-crf"
