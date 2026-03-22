@@ -1,14 +1,15 @@
 import subprocess
+from os import PathLike
 
-from datetime import datetime
+from collections.abc import Callable
 
 from utils import create_logs
 
 class FFprobeProcessor():
-  def __init__(self, ffprobe):
-    self._ffprobe = ffprobe
+  def __init__(self, ffprobe: PathLike | str):
+    self._ffprobe: PathLike | str = ffprobe
     
-  def get_duration(self, filepath):
+  def get_duration(self, filepath: PathLike | str) -> tuple[bool, str | None, str | None]:
     cmd = [self._ffprobe, 
               "-v", 
               "error",
@@ -48,7 +49,7 @@ class FFprobeProcessor():
 
       return True, duration, None
 
-  def get_resolutions(self, filepath):
+  def get_resolutions(self, filepath: PathLike | str) -> tuple[bool, Callable[[str], list[str]] | None, str | None]:
     cmd = [self._ffprobe, 
               "-v", 
               "error", 
@@ -87,7 +88,7 @@ class FFprobeProcessor():
 
       return True, self._res_opt_list(vid_res), None
 
-  def _res_opt_list(self, vid_res):
+  def _res_opt_list(self, vid_res: str) -> list[str]:
     dimensions = vid_res.split('x')
     
     width = int(dimensions[0])
@@ -149,10 +150,10 @@ class FFprobeProcessor():
     return resolutions
 
   @staticmethod
-  def _round_to_even(f):
+  def _round_to_even(f: float) -> int:
     return round(f / 2.) * 2
 
-  def get_fps(self, filepath):
+  def get_fps(self, filepath: PathLike | str) -> tuple[bool, str | None, str | None]:
     cmd = [self._ffprobe, 
               "-v", 
               "error",
