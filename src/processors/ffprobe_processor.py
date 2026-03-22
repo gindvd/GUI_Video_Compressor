@@ -49,7 +49,7 @@ class FFprobeProcessor():
 
       return True, duration, None
 
-  def get_resolutions(self, filepath: PathLike | str) -> tuple[bool, Callable[[str], list[str]] | None, str | None]:
+  def get_resolutions(self, filepath: PathLike | str) -> tuple[bool, list[str] | None, str | None]:
     cmd = [self._ffprobe, 
               "-v", 
               "error", 
