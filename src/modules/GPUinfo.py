@@ -77,14 +77,14 @@ def run_cmd(cmd: list[str]) -> list[str]:
     rc = proc.returncode
 
   except FileNotFoundError as e:
-    print(e)
+    create_logs(e)
   
   except Exception as e:
-    print(e)
+    create_logs(e)
 
   else:
     if rc != 0:
-      print(f"{str(rc)}: {err}")
+      create_logs(err)
 
     else:
       return out.split()
@@ -112,14 +112,14 @@ def run_piped_cmd(cmd1: list[str], cmd2: list[str]) -> list[str]:
     rc = proc2.returncode
 
   except FileNotFoundError as e:
-    print(e)
+    create_logs(e)
   
   except Exception as e:
-    print(e)
+    create_logs(e)
     
   else:
     if rc != 0:
-      print(f"{str(rc)}: {err}")
+      create_logs(err)
 
     else:
       return out.split()
