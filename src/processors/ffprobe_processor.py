@@ -1,8 +1,6 @@
 import subprocess
 from os import PathLike
 
-from collections.abc import Callable
-
 from utils import create_logs
 
 class FFprobeProcessor():
