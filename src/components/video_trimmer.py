@@ -8,9 +8,9 @@ from os import PathLike
 from utils import ROOT_DIR, DEVICE_OS
 
 class VideoTrimmer(ctk.CTkFrame):
-  def __init__(self, parent: ctk.CTk) -> None:
+  def __init__(self, parent) -> None:
     super().__init__(parent, corner_radius=0)
-    self._parent: ctkCTk = parent
+    self._parent = parent
 
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
