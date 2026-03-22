@@ -39,7 +39,7 @@ class FFprobeProcessor():
       return False, None, "FFprobe not found!"
 
     except Exception as e:
-      create_logs(e)
+      create_logs(str(e))
       return False, None, "Error Occured!\nCheck logs for details!"
     
     else:
@@ -78,7 +78,7 @@ class FFprobeProcessor():
       return False, None, "FFprobe not found!"
 
     except Exception as e:
-      create_logs(e)
+      create_logs(str(e))
       return False, None, "Error Occured!\nCheck logs for details!"
     
     else:
@@ -182,7 +182,7 @@ class FFprobeProcessor():
       return False, None, "FFprobe not found!"
 
     except Exception as e:
-      create_logs(e)
+      create_logs(str(e))
       return False, None, "Error occured!\nCheck logs for details"
     
     else:
