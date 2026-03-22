@@ -32,9 +32,10 @@ class FFmpegProcessor():
       audio_codec = "aac"
 
     cmd = [self._ffmpeg]
-           
+    
+    qual = self._quality_converter(quality)
 
-    hw_spec_arg = self._select_quality_control(codec)
+    hw_spec_arg = self._select_quality_control(codec, qual)
 
     if hw_spec_arg[1] is not None:
       cmd.extend(hw_spec_arg[1])
@@ -47,8 +48,7 @@ class FFmpegProcessor():
     assert hw_spec_arg[0] is not None, "Command arg is set to None!"
     cmd.extend(hw_spec_arg[0])
 
-    qual = self._quality_converter(quality)
-    cmd.extend([qual])
+    
 
     if not audio:
       cmd.extend(["-an"])
@@ -148,11 +148,11 @@ class FFmpegProcessor():
     return str(int(crf))
 
   @staticmethod
-  def _select_quality_control(codec: str) -> list[list[str] | None]:
+  def _select_quality_control(codec: str, quality: int) -> list[list[str] | None]:
     if re.search('nvenc', codec):
       # All modern Nvidia GPUs support cuda, so using cuda
       # If gpu doesn't support Cuda, then command will fail, might add Cuda check later
-      return [[-"rc", "vbr","-cq", "-b:v" "0"], ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]]
+      return [[-"rc", "vbr","-cq", f"{str(quality)}", "-b:v", "0"], ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]]
     
     elif re.search('amf', codec):
       if DEVICE_OS == "Linux":
@@ -160,13 +160,13 @@ class FFmpegProcessor():
       elif DEVICE_OS == "Windows":
         hwaccel_method = "d3d11va"
 
-      return [["-rc", "qvbr", "-qvbr_quality_level"], ["-hwaccel", f"{hwaccel_method}"]]
+      return [["-rc", "qvbr", "-qvbr_quality_level", f"{str(quality)}"], ["-hwaccel", f"{hwaccel_method}"]]
 
     elif re.search('qsv', codec):
-      return [["-global_quality"], ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw", "-hwaccel", "qsv"]]
+      return [["-global_quality", f"{str(quality)}", "-look_ahead", "1"], ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw", "-hwaccel", "qsv", "-hwaccel_output_format", "qsv"]]
     
     elif re.search('vaaqi', codec):
-      return [["-rc_mode", "CQP", "-qp"], ["-hwaccel", "vaapi", "hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], ["-vf", "format=nv12,hwupload"]]
+      return [["-rc_mode", "CQP", "-qp", f"{str(quality)}"], ["-hwaccel", "vaapi", "hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], ["-vf", "format=nv12,hwupload"]]
     
     else:
       return [["-crf"]]
