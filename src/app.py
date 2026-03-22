@@ -301,7 +301,16 @@ class App(ctk.CTk):
   def _codec_values(self) -> list[str]:
     codecs = ["libx264", "libx265", "libsvtav1", "libvpx-vp9"]
 
-    for name in gpu.manufacturer():
+    connected_gpus = gpu.manufacturer()
+
+    if connected_gpus is None:
+      CTkMessagebox(title="System GPU Command Error",
+                    message="Error getting connected GPU info!\nCheck logs for details!",
+                    icon="warning")
+
+      return codecs
+
+    for name in connected_gpus:
       match name:
         case "NVIDIA":
           codecs.extend(["h264_nvenc", "hevc_nvenc"])
