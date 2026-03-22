@@ -22,7 +22,6 @@ class FFmpegProcessor():
 
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
-    
     width, height = resolution.split("x")
     scale = "scale={}:{}".format(width, height)
         
@@ -32,12 +31,10 @@ class FFmpegProcessor():
       audio_codec = "aac"
 
     cmd = [self._ffmpeg]
-    
-    qual = self._quality_converter(quality)
 
-    hw_spec_arg = self._select_quality_control(codec, qual)
+    hw_spec_args = self._select_quality_control(codec, self._quality_converter(quality))
 
-    if hw_spec_arg[1] is not None:
+    if hw_spec_args[1] is not None:
       cmd.extend(hw_spec_arg[1])
 
     cmd.extend(["-i", input_file, 
@@ -45,10 +42,8 @@ class FFmpegProcessor():
                 "-r", fps,
                 "-vf", scale])
     
-    assert hw_spec_arg[0] is not None, "Command arg is set to None!"
-    cmd.extend(hw_spec_arg[0])
-
-    
+    assert hw_spec_args[0] is not None, "Command arg is set to None!"
+    cmd.extend(hw_spec_args[0])
 
     if not audio:
       cmd.extend(["-an"])
@@ -169,4 +164,4 @@ class FFmpegProcessor():
       return [["-rc_mode", "CQP", "-qp", f"{str(quality)}"], ["-hwaccel", "vaapi", "hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], ["-vf", "format=nv12,hwupload"]]
     
     else:
-      return [["-crf"]]
+      return [["-crf", f"{quality}"]]
