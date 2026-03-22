@@ -4,13 +4,23 @@ import subprocess
 from utils import create_logs
 from utils import DEVICE_OS
 
-class FFmpegProcessor():
-  def __init__(self, ffmpeg):
-    self._ffmpeg = ffmpeg
-    self._proc = None
-    self._terminated = False
+from typing import Optional, List, Tuple, Union
 
-  def compress(self, input_file, file_format, resolution, codec, fps, quality, audio):
+class FFmpegProcessor():
+  def __init__(self, ffmpeg: Union[os.PathLike, str]):
+    self._ffmpeg: Union[os.PathLike, str] = ffmpeg
+    self._proc: bool = None
+    self._terminated: bool = False
+
+  def compress(self, 
+              input_file: Union[os.PathLike, str], 
+              file_format: str, 
+              resolution: str, 
+              codec: str, 
+              fps: str, 
+              quality: int, 
+              audio: bool) -> Tuple[bool, Optional[str]]:
+
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
     
@@ -97,7 +107,7 @@ class FFmpegProcessor():
       self._proc = None
       self._terminated = False
     
-  def terminate_compression(self):
+  def terminate_compression(self) -> Tuple[bool, Optional[str]]:
     # _proc_poll will only be None when process is running
     if self._proc and self._proc.poll() is None:
       self._proc.terminate()
@@ -120,7 +130,7 @@ class FFmpegProcessor():
       return False, ""
 
   @staticmethod
-  def _crf_converter(quality):
+  def _crf_converter(quality: int) -> int:
     # Quality needs be inverted as the lower the CRF number, the better the quality
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 41 + 10
