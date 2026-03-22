@@ -16,7 +16,7 @@ class OSCompatibiltyError(Exception):
   def __str__(self) -> str:
     return f"{self._message} (Non-Compatible OS: {self._os})\nCompatible OS: Windows , Linux"
 
-CMD_DICT = {
+CMD_DICT: dict = {
   "Linux" : "lspci | grep -iE VGA|3D|video",
   "Darwin" : "system_profiler SPDisplaysDataType",
   "Windows" : {
@@ -118,7 +118,8 @@ def run_piped_cmd(cmd1: list[str], cmd2: list[str]) -> list[str] | None:
                              text=True) 
   
   try:
-    proc1.stdout.close() 
+    assert proc1.stdout is not None
+    proc1.stdout.close()
     out, err = proc2.communicate()
 
     proc2.wait()
