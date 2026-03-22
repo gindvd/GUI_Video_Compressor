@@ -150,13 +150,20 @@ class FFmpegProcessor():
   @staticmethod
   def _select_quality_control(codec: str) -> list[list[str] | None]:
     if re.search('nvenc', codec):
-      return [["-cq"]]
+      return [[-"rc", "vbr","-cq", "-b:v" "0"]]
     
     elif re.search('amf', codec):
-      return [["-qvbr_quality_level"]]
+      if DEVICE_OS == "Linux":
+        hwaccel_method = "vaapi"
+      elif DEVICE_OS == "Windows":
+        hwaccel_method = "d3d11va"
+      return [["-rc", "qvbr", "-qvbr_quality_level"], ["-hwaccel", f"{hwaccel_method}"]]
 
     elif re.search('qsv', codec):
       return [["-global_quality"], ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw", "-hwaccel", "qsv"]]
+    
+    elif re.search('vaaqi', codec):
+      return [["-rc_mode", "CQP", "-qp"], ["-hwaccel", "vaapi", "hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], ["-vf", "format=nv12,hwupload"]]
     
     else:
       return [["-crf"]]
