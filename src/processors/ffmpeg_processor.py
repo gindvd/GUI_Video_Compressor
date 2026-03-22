@@ -4,22 +4,20 @@ import subprocess
 from utils import create_logs
 from utils import DEVICE_OS
 
-from typing import Optional, List, Tuple, Union
-
 class FFmpegProcessor():
-  def __init__(self, ffmpeg: Union[os.PathLike, str]):
-    self._ffmpeg: Union[os.PathLike, str] = ffmpeg
+  def __init__(self, ffmpeg: os.PathLike | str):
+    self._ffmpeg: os.PathLike | str = ffmpeg
     self._proc: bool = None
     self._terminated: bool = False
 
   def compress(self, 
-              input_file: Union[os.PathLike, str], 
+              input_file: os.PathLike | str, 
               file_format: str, 
               resolution: str, 
               codec: str, 
               fps: str, 
               quality: int, 
-              audio: bool) -> Tuple[bool, Optional[str]]:
+              audio: bool) -> tuple[bool, str | None]:
 
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
@@ -107,7 +105,7 @@ class FFmpegProcessor():
       self._proc = None
       self._terminated = False
     
-  def terminate_compression(self) -> Tuple[bool, Optional[str]]:
+  def terminate_compression(self) -> tuple[bool, str | None]:
     # _proc_poll will only be None when process is running
     if self._proc and self._proc.poll() is None:
       self._proc.terminate()
