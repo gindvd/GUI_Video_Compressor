@@ -1,9 +1,9 @@
 import customtkinter as ctk
 
 class ProgressbarPopup(ctk.CTkToplevel):
-  def __init__(self, parent: object):
+  def __init__(self, parent: ctk.CTk):
     super().__init__(parent)
-    self._parent: object = parent
+    self._parent: ctk.CTk = parent
 
     self.title("Compression in Progress")
     self.resizable(False, False)
