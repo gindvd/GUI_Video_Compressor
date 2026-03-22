@@ -210,7 +210,9 @@ class App(ctk.CTk):
       
       return
 
-    elif completed:    
+    elif completed:
+      assert res_list is not None
+
       self._target_res_drpdwn.configure(values=res_list)
       self._target_res_drpdwn.set(res_list[0])
 
@@ -225,7 +227,7 @@ class App(ctk.CTk):
     
     elif completed:
       fps_list = [120, 60, 30, 24, 15]
-      
+
       if vid_fps is None:
         return
       
