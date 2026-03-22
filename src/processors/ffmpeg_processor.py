@@ -36,7 +36,7 @@ class FFmpegProcessor():
 
     # Args for hardware spcific codecs to have ffmpeg to use hardware acceleration
     if hw_spec_args[1] is not None:
-      cmd.extend(hw_spec_arg[1])
+      cmd.extend(hw_spec_args[1])
 
     cmd.extend(["-i", input_file])
 
