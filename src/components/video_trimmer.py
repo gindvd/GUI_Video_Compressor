@@ -85,9 +85,13 @@ class VideoTrimmer(ctk.CTkFrame):
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._curtime_lbl.grid(row=0, column=3, padx=10, pady=5)
   
-  def set_duration(self, duration: str) -> None:
-    vid_dur_ms = duration[:duration.find('.')+4]
-    self._dur_lbl.configure(text=vid_dur_ms)
+  def set_duration(self, duration: str | None) -> None:
+    if duration is None:
+      return
+      
+    else:
+      vid_dur_ms = duration[:duration.find('.')+4]
+      self._dur_lbl.configure(text=vid_dur_ms)
 
   def _play_pause(self) -> None:
     playing = self._vid_player.is_playing()
