@@ -224,8 +224,16 @@ class App(ctk.CTk):
                     icon='cancel')
     
     elif completed:
-      upd_fps = []
       fps_list = [120, 60, 30, 24, 15]
+      
+      if vid_fps is None:
+        return
+      
+      elif vid_fps < fps_list[-1]:
+        self._target_fps_drpdwn.configure(values=vid_fps)
+        return
+
+      upd_fps = []
 
       for i in fps_list:
         if i <= vid_fps:
