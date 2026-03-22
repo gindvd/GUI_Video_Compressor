@@ -51,11 +51,11 @@ def get_card_info() -> list[str] | None:
   
   assert len(cmd_lists) <= 2, "Command list contains too many lists of commands, Max Num of list: 2"
 
-  primary_cmd: list[str] = cmd_lists[0]
-  secondary_cmd: list[str] | None = None
+  parent_cmd: list[str] = cmd_lists[0]
+  child_cmd: list[str] | None = None
 
   try:
-    if primary_cmd is None:
+    if parent_cmd is None:
       raise AttributeError
 
   except AttributeError:
@@ -64,12 +64,12 @@ def get_card_info() -> list[str] | None:
     return None
   
   if len(cmd_lists) == 2:
-    secondary_cmd = cmd_lists[1]
+    child_cmd = cmd_lists[1]
 
-  if secondary_cmd == None:
-    return run_cmd(primary_cmd)
+  if child_cmd == None:
+    return run_cmd(parent_cmd)
 
-  return run_piped_cmd(primary_cmd, secondary_cmd)
+  return run_piped_cmd(parent_cmd, child_cmd)
 
 def run_cmd(cmd: list[str]) -> list[str] | None:
   proc = subprocess.Popen(cmd, 
