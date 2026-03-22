@@ -2,27 +2,29 @@ import platform
 import subprocess
 import re
 
+from collections.abc import Callable
+
 from utils import create_logs
 from utils import DEVICE_OS
 
 class OSCompatibiltyError(Exception):
-  def __init__(self, message, os):
+  def __init__(self, message: str, os: str) -> None:
     super().__init__(message)
     self.os = os
   
-  def __str__(self):
+  def __str__(self) -> str:
     return f"{self.message} (Non-Compatible OS: {self.os})\nList of compatible OS [Windows, Linux, Mac OS]"
 
 CMD_DICT = {
   "Linux" : "lspci | grep -iE VGA|3D|video",
-  "Darwin" : "system_profiler SPDisplaysDataType",
+  "Darwin" : "system_profiler SPDisplaysDataType"
   "Windows" : {
     "11" : "powershell -Command Get-CimInstance Win32_VideoController | Select-Object name",
     "legacy" : "wmic path win32_VideoController get name"
     }
 }
 
-def get_card_info():
+def get_card_info() -> Callable[[list[str]], list[str]] | Callable[[list[str], list[str]] list[str]]:
   try:
     if DEVICE_OS not in ["Windows", "Linux", "Darwin"]:
       raise OSCompatibiltyError("Current OS is not compatible with this module.", DEVICE_OS)
@@ -44,12 +46,12 @@ def get_card_info():
     
   # Need to seperate commands in 2 if it contains a pipe
   # Then turn both commands into lists
-  cmd_lists = [word.split() for word in cmd.split('|', 1)]
+  cmd_lists: list[list[str]] = [word.split() for word in cmd.split('|', 1)]
   
   assert len(cmd_lists) <= 2, "Command list contains too many lists of commands, Max Num of list: 2"
 
-  primary_cmd = cmd_lists[0]
-  secondary_cmd = None
+  primary_cmd: list[str] = cmd_lists[0]
+  secondary_cmd: list[str] | None = None
   
   if len(cmd_lists) == 2:
     secondary_cmd = cmd_lists[1]
@@ -61,7 +63,7 @@ def get_card_info():
 
   return run_piped_cmd(primary_cmd, secondary_cmd)
 
-def run_cmd(cmd):
+def run_cmd(cmd: list[str]) -> list[str]:
   proc = subprocess.Popen(cmd, 
                           stdout=subprocess.PIPE, 
                           stderr=subprocess.PIPE, 
@@ -88,7 +90,7 @@ def run_cmd(cmd):
       return out.split()
 
 
-def run_piped_cmd(cmd1, cmd2):
+def run_piped_cmd(cmd1: list[str], cmd2: list[str]) -> list[str]:
   proc1 = subprocess.Popen(cmd1,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
@@ -122,7 +124,7 @@ def run_piped_cmd(cmd1, cmd2):
     else:
       return out.split()
 
-def clean_data(gpu_list):
+def clean_data(gpu_list: list[str]) -> list[str]:
   clean_list = []
   
   for string in gpu_list:
@@ -131,7 +133,7 @@ def clean_data(gpu_list):
 
   return clean_list
   
-def manufacturer():
+def manufacturer() -> list[str]:
   gpus = clean_data(get_card_info())
   
   manufacturers = []
