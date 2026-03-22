@@ -39,10 +39,10 @@ def get_card_info() -> Callable[[list[str]], list[str]] | Callable[[list[str], l
     if win_ver != "11":
       win_ver = "legacy"
       
-    cmd =  CMD_DICT.get(device_os, {}).get(win_ver)
+    cmd =  CMD_DICT.get(DEVICE_OS, {}).get(win_ver)
   
   else:
-    cmd = CMD_DICT.get(device_os)
+    cmd = CMD_DICT.get(DEVICE_OS)
     
   # Need to seperate commands in 2 if it contains a pipe
   # Then turn both commands into lists
