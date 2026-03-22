@@ -23,7 +23,7 @@ class FFmpegProcessor():
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
     width, height = resolution.split("x")
-    scale = "scale={}:{}".format(width, height)
+    scale = f"scale={width}:{height}"
         
     if codec in ["libvpx-vp9", "libsvtav1"]:
       audio_codec = "libopus"
@@ -32,7 +32,7 @@ class FFmpegProcessor():
 
     cmd = [self._ffmpeg]
 
-    hw_spec_args = self._select_quality_control(codec, self._quality_converter(quality))
+    hw_spec_args = self._select_quality_control(codec, self._quality_converter(quality), width, height)
 
     # Args for hardware spcific codecs to have ffmpeg to use hardware acceleration
     if hw_spec_args[1] is not None:
@@ -43,10 +43,12 @@ class FFmpegProcessor():
     # Specific arg needed for vaaqi codec
     if hw_spec_args[2] is not None:
       cmd.extend(hw_spec_args[2])
+    
+    else:
+      cmd.extend(["-vf", scale])
 
     cmd.extend(["-c:v", codec,
-                "-r", fps,
-                "-vf", scale])
+                "-r", fps])
     
     # Specific quality control args for bitrate
     assert hw_spec_args[0] is not None, "Command arg is set to None!"
@@ -150,7 +152,7 @@ class FFmpegProcessor():
     return str(int(crf))
 
   @staticmethod
-  def _select_quality_control(codec: str, quality: int) -> list[list[str] | None]:
+  def _select_quality_control(codec: str, quality: int, width: str, height: str) -> list[list[str] | None]:
     if re.search('nvenc', codec):
       # All modern Nvidia GPUs support cuda, so using cuda
       # If gpu doesn't support Cuda, then command will fail, might add Cuda check later
@@ -168,7 +170,7 @@ class FFmpegProcessor():
       return [["-global_quality", f"{str(quality)}", "-look_ahead", "1"], ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw", "-hwaccel", "qsv", "-hwaccel_output_format", "qsv"]]
     
     elif re.search('vaaqi', codec):
-      return [["-rc_mode", "CQP", "-qp", f"{str(quality)}"], ["-hwaccel", "vaapi", "-hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], ["-vf", "format=nv12,hwupload"]]
+      return [["-rc_mode", "CQP", "-qp", f"{str(quality)}"], ["-hwaccel", "vaapi", "-hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], ["-vf", f"scale_vaapi={width}:{height}"]]
     
     else:
       return [["-crf", f"{quality}"]]
