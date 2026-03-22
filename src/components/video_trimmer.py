@@ -3,7 +3,9 @@ from CTkMessagebox import CTkMessagebox
 
 import vlc
 import shutil
+
 from os import PathLike
+from pathlib import Path
 
 from utils import ROOT_DIR, DEVICE_OS
 
@@ -37,7 +39,7 @@ class VideoTrimmer(ctk.CTkFrame):
     if DEVICE_OS == "Windows":
 
       try:
-        vlc_path = ROOT_DIR / "lib/win32/vlc-win32.exe"
+        vlc_path = ROOT_DIR / Path("lib/win32/vlc-win32.exe")
 
       except FileNotFoundError:
         close = CTkMessagebox(title="Missing VLC Exe", 
