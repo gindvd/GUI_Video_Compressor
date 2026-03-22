@@ -6,7 +6,7 @@ from collections.abc import Callable
 from utils import create_logs
 
 class FFprobeProcessor():
-  def __init__(self, ffprobe: PathLike | str):
+  def __init__(self, ffprobe: PathLike | str) -> None:
     self._ffprobe: PathLike | str = ffprobe
     
   def get_duration(self, filepath: PathLike | str) -> tuple[bool, str | None, str | None]:
