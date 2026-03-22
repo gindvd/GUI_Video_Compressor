@@ -1,6 +1,6 @@
 import customtkinter  as ctk
 
-from CTkMenuBar import *
+from CTkMenuBar import CTkMenuBar, CustomDropdownMenu
 from CTkMessagebox import CTkMessagebox
 from customtkinter import filedialog
 
@@ -31,6 +31,8 @@ class App(ctk.CTk):
         
       if close.get() == "Ok":
         self.quit()
+      
+      return
     
     if ffprobe_cmd is None:
       close = CTkMessagebox(title="Missing FFprobe", 
@@ -40,6 +42,8 @@ class App(ctk.CTk):
         
       if close.get() == "Ok":
         self.quit()
+      
+      return
     
     self._ffmpeg: FFmpegProcessor = FFmpegProcessor(ffmpeg_cmd)
     self._ffprobe: FFprobeProcessor = FFprobeProcessor(ffprobe_cmd)
