@@ -31,17 +31,24 @@ class FFmpegProcessor():
     else:
       audio_codec = "aac"
 
-    cmd = [self._ffmpeg,
-           "-i", input_file, 
-           "-c:v", codec,
-           "-r", fps,
-           "-vf", scale]
+    cmd = [self._ffmpeg]
+           
+
+    hw_spec_arg = self._select_quality_control(codec)
+
+    if hw_spec_arg[1] is not None:
+      cmd.extend(hw_spec_arg[1])
+
+    cmd.extend(["-i", input_file, 
+                "-c:v", codec,
+                "-r", fps,
+                "-vf", scale])
+    
+    assert hw_spec_arg[0] is not None, "Command arg is set to None!"
+    cmd.extend(hw_spec_arg[0])
 
     qual = self._quality_converter(quality)
-
-    qual_cntrl = self._select_quality_control(codec)
-
-    cmd.extend([qual_cntrl, qual])
+    cmd.extend([qual])
 
     if not audio:
       cmd.extend(["-an"])
@@ -57,6 +64,8 @@ class FFmpegProcessor():
       creation_flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     else:
       creation_flags["start_new_session"] = True
+
+    print(" ".join(cmd))
     
     self._proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
@@ -139,15 +148,15 @@ class FFmpegProcessor():
     return str(int(crf))
 
   @staticmethod
-  def _select_quality_control(codec: str) -> str:
-    if re.fullmatch('nvenc', codec):
-      return "-cq"
+  def _select_quality_control(codec: str) -> list[list[str] | None]:
+    if re.search('nvenc', codec):
+      return [["-cq"]]
     
-    elif re.fullmatch('amf', codec):
-      return "-qvbr_quality_level"
+    elif re.search('amf', codec):
+      return [["-qvbr_quality_level"]]
 
-    elif re.fullmatch('qsv', codec):
-      return "-global_quality"
+    elif re.search('qsv', codec):
+      return [["-global_quality"], ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw"],]
     
     else:
-      return "-crf"
+      return [["-crf"]]
