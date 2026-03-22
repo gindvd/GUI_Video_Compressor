@@ -8,9 +8,9 @@ import platform
 ROOT_DIR: PathLike = Path(__file__).parents[1]
 DEVICE_OS: str = platform.system()
 
-def get_ffmpeg_cmd() -> PathLike | None:
+def get_ffmpeg_cmd() -> PathLike | str | None:
   if DEVICE_OS == "Windows":
-    fmmpeg_rel_path = "lib/win32/ffmpeg.exe"
+    ffmpeg_rel_path = Path("lib/win32/ffmpeg.exe")
 
     try:
       ffmpeg_abs_path = ROOT_DIR / ffmpeg_rel_path
@@ -26,10 +26,12 @@ def get_ffmpeg_cmd() -> PathLike | None:
       return None
     
     return "ffmpeg"
+  
+  return None
 
-def get_ffprboe_cmd() -> PathLike | None:
+def get_ffprboe_cmd() -> PathLike | str | None:
   if DEVICE_OS == "Windows":
-    ffprobe_rel_path = "lib/win32/ffprobe.exe"
+    ffprobe_rel_path = Path("lib/win32/ffprobe.exe")
 
     try:
       ffprobe_abs_path = ROOT_DIR / ffprobe_rel_path
@@ -46,11 +48,13 @@ def get_ffprboe_cmd() -> PathLike | None:
     
     return "ffprobe"
 
+  return None
+
 def create_logs(err_msg: str) -> None:
   now = datetime.now()
-  basename = str(now) + ".log"
+  basename = Path(str(now) + ".log")
 
-  log_directory = ROOT_DIR / 'logs'
+  log_directory = ROOT_DIR / Path('logs')
   log_directory.mkdir(exist_ok=True)
   log_file = log_directory / basename
 
