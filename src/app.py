@@ -233,8 +233,8 @@ class App(ctk.CTk):
         return
       
       elif vid_fps < fps_list[-1]:
-        self._target_fps_drpdwn.configure(values=vid_fps)
-        self._target_fps = vid_fps
+        self._target_fps_drpdwn.configure(values=str(vid_fps))
+        self._target_fps = str(vid_fps)
         return
 
       upd_fps = []
