@@ -46,7 +46,7 @@ def get_ffprboe_cmd() -> PathLike | None:
     
     return "ffprobe"
 
-def create_logs(err_msg: str):
+def create_logs(err_msg: str) -> None:
   now = datetime.now()
   basename = str(now) + ".log"
 

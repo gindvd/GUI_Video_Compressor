@@ -8,7 +8,7 @@ from os import PathLike
 from utils import ROOT_DIR, DEVICE_OS
 
 class VideoTrimmer(ctk.CTkFrame):
-  def __init__(self, parent: ctk.CTk):
+  def __init__(self, parent: ctk.CTk) -> None:
     super().__init__(parent, corner_radius=0)
     self._parent: ctkCTk = parent
 
@@ -55,24 +55,24 @@ class VideoTrimmer(ctk.CTkFrame):
     elif DEVICE_OS == "Linux":
       if not shutil.which("vlc"):
           close = CTkMessagebox(title="Missing VLC", 
-                              message="VLC not a recognized command!", 
-                              icon="cancel",
-                              option_1="Ok")
+                                message="VLC not a recognized command!", 
+                                icon="cancel",
+                                option_1="Ok")
         
           if close.get() == "Ok":
             self.destroy()
 
       return vlc.Instance("--no-xlib")
       
-  def _create_control_panel(self):
+  def _create_control_panel(self) -> None:
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel, 
-                                         text="Play",
-                                         state="disabled",
-                                         command=self._play_pause)
+                                                        text="Play",
+                                                        state="disabled",
+                                                        command=self._play_pause)
 
     self._play_pause_btn.pack(padx=5, pady=5)
 
-  def _create_time_panel(self):
+  def _create_time_panel(self) -> None:
     ctk.CTkLabel(self._time_panel, text="Video Duration:").grid(row=0, column=0, padx=10, pady=5)
 
     self._dur_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
@@ -83,11 +83,11 @@ class VideoTrimmer(ctk.CTkFrame):
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._curtime_lbl.grid(row=0, column=3, padx=10, pady=5)
   
-  def set_duration(self, duration: str):
+  def set_duration(self, duration: str) -> None:
     vid_dur_ms = duration[:duration.find('.')+4]
     self._dur_lbl.configure(text=vid_dur_ms)
 
-  def _play_pause(self):
+  def _play_pause(self) -> None:
     playing = self._vid_player.is_playing()
 
     if not playing:
@@ -98,7 +98,7 @@ class VideoTrimmer(ctk.CTkFrame):
       self._vid_player.pause()
       self._play_pause_btn.configure(text="Play")
   
-  def set_video(self, vid_file: PathLike | str):
+  def set_video(self, vid_file: PathLike | str) -> None:
     self.update()
 
     video = self._instance.media_new(vid_file)
@@ -113,7 +113,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._update_progress()
 
-  def _display_video(self):
+  def _display_video(self) -> None:
     if platform.system() == "Linux":
       self._vid_player.set_xwindow(self._vid_panel.winfo_id())
     elif platform.system() == "Windows":

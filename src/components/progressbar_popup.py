@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
 class ProgressbarPopup(ctk.CTkToplevel):
-  def __init__(self, parent: ctk.CTk):
+  def __init__(self, parent: ctk.CTk) -> None:
     super().__init__(parent)
     self._parent: ctk.CTk = parent
 
@@ -34,8 +34,8 @@ class ProgressbarPopup(ctk.CTkToplevel):
 
     
   
-  def run_progressbar(self):
+  def run_progressbar(self) -> None:
     self._progressbar.start()
 
-  def destroy_window(self):
+  def destroy_window(self) -> None:
     self.destroy()

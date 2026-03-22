@@ -5,7 +5,7 @@ from utils import create_logs
 from utils import DEVICE_OS
 
 class FFmpegProcessor():
-  def __init__(self, ffmpeg: os.PathLike | str):
+  def __init__(self, ffmpeg: os.PathLike | str) -> None:
     self._ffmpeg: os.PathLike | str = ffmpeg
     self._proc: bool = None
     self._terminated: bool = False
