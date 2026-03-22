@@ -156,7 +156,7 @@ class FFmpegProcessor():
       return [["-qvbr_quality_level"]]
 
     elif re.search('qsv', codec):
-      return [["-global_quality"], ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw"],]
+      return [["-global_quality"], ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw", "-hwaccel", "qsv"]]
     
     else:
       return [["-crf"]]
