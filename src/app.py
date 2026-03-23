@@ -330,9 +330,9 @@ class App(ctk.CTk):
       elif name == "AMD":
         codecs.extend(["h264_amf", "hevc_amf"])
       # Older itel GPUs on Linux have qsv support depreciated and or lacking :(
-      elif name == "Intel" && DEVICE_OS == "Linux":
+      elif name == "Intel" and DEVICE_OS == "Linux":
         codecs.extend(["h264_vaapi", "hevc_vaapi"])
-      elif name == "Intel" && DEVICE_OS != "Linux":
+      elif name == "Intel" and DEVICE_OS != "Linux":
         codecs.extend(["h264_qsv", "hevc_qsv"])
       else:
         continue
