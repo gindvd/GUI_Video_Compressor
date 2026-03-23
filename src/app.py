@@ -309,16 +309,16 @@ class App(ctk.CTk):
       self._target_ext_drpdwn.configure(values=["mp4", "mkv", "mov"])
       self._target_ext_drpdwn.set("mp4")
   
-  def _ext_choice(self, choice: 'ctk.Event[ctk.CTkComboBox]') -> None:
+  def _ext_choice(self, choice) -> None:
     self._target_format = choice
 
-  def _res_choice(self, choice: 'ctk.Event[ctk.CTkComboBox]') -> None:
+  def _res_choice(self, choice) -> None:
     self._target_res = choice
 
-  def _fps_choice(self, choice: 'ctk.Event[ctk.CTkComboBox]') -> None:
+  def _fps_choice(self, choice) -> None:
     self._target_fps = choice
   
-  def _quality_choice(self, value: 'ctk.Value[ctk.CTkSlider]') -> None:
+  def _quality_choice(self, value) -> None:
     self._quality = value
     self._quality_perc_lbl.configure(text=f"{value}%")
 
