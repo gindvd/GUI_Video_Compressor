@@ -229,11 +229,8 @@ class App(ctk.CTk):
     
     elif completed:
       fps_list = [120, 60, 30, 24, 15]
-
-      if vid_fps is None:
-        return
       
-      elif vid_fps < fps_list[-1]:
+      if vid_fps < fps_list[-1]:
         self._target_fps_drpdwn.configure(values=str(vid_fps))
         self._target_fps = str(vid_fps)
         return
