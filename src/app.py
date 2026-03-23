@@ -252,7 +252,7 @@ class App(ctk.CTk):
       return
     
     elif completed:
-      self._vid_trimmer.set_duration(duration_sexa)
+      self._vid_trimmer.set_duration_lbl(duration_sexa)
 
     # Getting video's duration is milliseconds to do several 
     completed, duration_ms, err_msg = self._ffprobe.get_duration_sexagesimal(self._input_file)
@@ -265,7 +265,7 @@ class App(ctk.CTk):
       return
 
     elif completed:
-      self._vid_trimmer.set_duration(duration_ms)
+      self._vid_trimmer.set_duration_ms(duration_ms)
 
     # Only allowing compression and video play back if 
     # video duration, fps, and resolutions are successfully gotten
