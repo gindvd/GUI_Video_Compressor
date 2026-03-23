@@ -256,7 +256,20 @@ class App(ctk.CTk):
       return
     
     elif completed:
-      self._vid_trimmer.set_duration(duration_sexa)   
+      self._vid_trimmer.set_duration(duration_sexa)
+
+    # Getting video's duration is milliseconds to do several 
+    completed, duration_ms, err_msg = self._ffprobe.get_duration_sexagesimal(self._input_file)
+
+    if not completed:
+      CTkMessagebox(title="FFprobe Error", 
+                    message=f"{err_msg}", 
+                    icon='cancel')
+      
+      return
+
+    elif completed:
+      self._vid_trimmer.set_duration(duration_ms)
 
 
   def _compatible_file(self, item: os.PathLike | str) -> bool:
