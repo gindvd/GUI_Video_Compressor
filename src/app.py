@@ -198,8 +198,6 @@ class App(ctk.CTk):
     self._update_gui()
     
   def _update_gui(self) -> None:
-    self._compress_btn.configure(state="normal")
-
     # Getting video's resolution, and list on several smaller resolutions with same aspect ratio
     completed, res_list, err_msg = self._ffprobe.get_resolutions(self._input_file)
     
@@ -216,8 +214,6 @@ class App(ctk.CTk):
       self._target_res_drpdwn.configure(values=res_list)
       self._target_res_drpdwn.set(res_list[0])
       self._target_res = res_list[0]
-
-      self._vid_trimmer.set_video(self._input_file)
     
     # Getting video FPS to ensure FFmpeg doesn't  generate frame
     completed, vid_fps, err_msg = self._ffprobe.get_fps(self._input_file)
@@ -270,6 +266,12 @@ class App(ctk.CTk):
 
     elif completed:
       self._vid_trimmer.set_duration(duration_ms)
+
+    # Only allowing compression and video play back if 
+    # video duration, fps, and resolutions are successfully gotten
+    # Ensure video can't be compverted with options that cause upscaling    
+    self._compress_btn.configure(state="normal")
+    self._vid_trimmer.set_video(self._input_file)
 
 
   def _compatible_file(self, item: os.PathLike | str) -> bool:
