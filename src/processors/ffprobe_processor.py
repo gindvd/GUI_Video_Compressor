@@ -7,7 +7,8 @@ class FFprobeProcessor():
   def __init__(self, ffprobe: PathLike | str) -> None:
     self._ffprobe: PathLike | str = ffprobe
     
-  def get_duration(self, filepath: PathLike | str) -> tuple[bool, str | None, str | None]:
+  def get_duration_sexagesimal(self, filepath: PathLike | str) -> tuple[bool, str | None, str | None]:
+    # Returns duration string in HH:MM:SS.MICROSECOND format
     cmd = [self._ffprobe, 
               "-v", 
               "error",
@@ -18,6 +19,49 @@ class FFprobeProcessor():
               "-of", 
               "default=noprint_wrappers=1:nokey=1", 
               "-sexagesimal", 
+              filepath]
+    
+    
+    proc = subprocess.Popen(cmd, 
+                            stdout=subprocess.PIPE, 
+                            stderr=subprocess.PIPE, 
+                            shell=False, 
+                            text=True)
+    
+    try: 
+      duration, err = proc.communicate()
+
+      proc.wait()
+      rc = proc.returncode
+    
+    except FileNotFoundError:
+      return False, None, "FFprobe not found!"
+
+    except Exception as e:
+      create_logs(str(e))
+      return False, None, "Error Occured!\nCheck logs for details!"
+    
+    else:
+      if rc != 0:
+        create_logs(err)
+        return False, None, "Error Occured!\nCheck logs for details!"
+      
+      if duration is None:
+        return False, None, "Error Occured!\nVideo Duration not found!"
+
+      return True, duration, None
+
+  def get_duration_milliseconds(self, filepath: PathLike | str) -> tuple[bool, float | None, str | None]:
+    # Returns duration in milliseconds as a float
+    cmd = [self._ffprobe, 
+              "-v", 
+              "error",
+              "-select_streams",
+              "v:0",
+              "-show_entries",
+              "stream=duration",
+              "-of", 
+              "default=noprint_wrappers=1:nokey=1", 
               filepath]
     
     
