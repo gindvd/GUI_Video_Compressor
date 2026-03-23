@@ -256,7 +256,7 @@ class App(ctk.CTk):
       return
     
     elif completed:
-      self._vid_trimmer.set_duration(duration)   
+      self._vid_trimmer.set_duration(duration_sexa)   
 
 
   def _compatible_file(self, item: os.PathLike | str) -> bool:
