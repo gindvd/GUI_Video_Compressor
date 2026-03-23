@@ -164,13 +164,17 @@ class FFmpegProcessor():
       elif DEVICE_OS  == "Windows":
         hwaccel_method = "d3d11va"
 
-      return [["-rc", "qvbr", "-qvbr_quality_level", f"{str(quality)}"], ["-hwaccel", f"{hwaccel_method}"]]
+      return [["-rc", "qvbr", "-qvbr_quality_level", f"{str(quality)}"], 
+              ["-hwaccel", f"{hwaccel_method}"]]
 
     elif re.search('qsv', codec):
-      return [["-global_quality", f"{str(quality)}", "-look_ahead", "1"], ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw", "-hwaccel", "qsv", "-hwaccel_output_format", "qsv"]]
+      return [["-global_quality", f"{str(quality)}", "-look_ahead", "1"], 
+              ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw", "-hwaccel", "qsv", "-hwaccel_output_format", "qsv"]]
     
     elif re.search('vaapi', codec):
-      return [["-rc_mode", "CQP", "-qp", f"{str(quality)}"], ["-hwaccel", "vaapi", "-hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], ["-vf", f"scale_vaapi={width}:{height}"]]
+      return [["-rc_mode", "CQP", "-qp", f"{str(quality)}"], 
+              ["-hwaccel", "vaapi", "-hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], 
+              ["-vf", f"scale_vaapi={width}:{height}"]]
     
     else:
       return [["-crf", f"{quality}"]]
