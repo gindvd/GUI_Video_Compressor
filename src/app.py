@@ -325,19 +325,17 @@ class App(ctk.CTk):
       return codecs
 
     for name in connected_gpus:
-      match name:
-        case "NVIDIA":
-          codecs.extend(["h264_nvenc", "hevc_nvenc"])
-        case "AMD":
-          codecs.extend(["h264_amf", "hevc_amf"])
-        case "Intel":
-          # Older itel GPUs on Linux have qsv support depreciated and or lacking :(
-          if DEVICE_OS == "Linux":
-            codecs.extend(["h264_vaapi", "hevc_vaapi"])
-          else:
-            codecs.extend(["h264_qsv", "hevc_qsv"])
-        case _:
-          continue
+      if name == "NVIDIA":
+        codecs.extend(["h264_nvenc", "hevc_nvenc"])
+      elif name == "AMD":
+        codecs.extend(["h264_amf", "hevc_amf"])
+      # Older itel GPUs on Linux have qsv support depreciated and or lacking :(
+      elif name == "Intel" && DEVICE_OS == "Linux":
+        codecs.extend(["h264_vaapi", "hevc_vaapi"])
+      elif name == "Intel" && DEVICE_OS != "Linux":
+        codecs.extend(["h264_qsv", "hevc_qsv"])
+      else:
+        continue
   
     return codecs
 
