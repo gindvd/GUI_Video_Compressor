@@ -200,8 +200,7 @@ class App(ctk.CTk):
   def _update_gui(self) -> None:
     self._compress_btn.configure(state="normal")
 
-    # ffprobe.get_resolutions will return list of common resolutions 
-    # smaller that the videos current resolution that maintain the same aspect ratio
+    # Getting video's resolution, and list on several smaller resolutions with same aspect ratio
     completed, res_list, err_msg = self._ffprobe.get_resolutions(self._input_file)
     
     if not completed:
@@ -220,6 +219,7 @@ class App(ctk.CTk):
 
       self._vid_trimmer.set_video(self._input_file)
     
+    # Getting video FPS to ensure FFmpeg doesn't  generate frame
     completed, vid_fps, err_msg = self._ffprobe.get_fps(self._input_file)
 
     if not completed:
@@ -245,7 +245,8 @@ class App(ctk.CTk):
       self._target_fps_drpdwn.set(upd_fps[0])
       self._target_fps = upd_fps[0]
 
-    completed, duration, err_msg = self._ffprobe.get_duration(self._input_file)
+    # Getting video's duration in sexagesimal format to set label value on trimmer
+    completed, duration_sexa, err_msg = self._ffprobe.get_duration_sexagesimal(self._input_file)
 
     if not completed:
       CTkMessagebox(title="FFprobe Error", 
