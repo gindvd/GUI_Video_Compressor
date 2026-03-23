@@ -148,7 +148,7 @@ class FFmpegProcessor():
   def _quality_converter(quality: int) -> str:
     # Quality needs be inverted as the lower the CRF number, the better the quality
     quality_inverted = abs(quality / 100 - 1)
-    crf = quality_inverted * 41 + 10
+    crf = quality_inverted * 32 + 19
     return str(int(crf))
 
   @staticmethod
@@ -156,7 +156,8 @@ class FFmpegProcessor():
     if re.search('nvenc', codec):
       # All modern Nvidia GPUs support cuda, so using cuda
       # If gpu doesn't support Cuda, then command will fail, might add Cuda check later
-      return [[-"rc", "vbr","-cq", f"{str(quality)}", "-b:v", "0"], ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]]
+      return [[-"rc", "vbr","-cq", f"{str(quality)}", "-b:v", "0"], 
+              ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]]
     
     elif re.search('amf', codec):
       if  DEVICE_OS == "Linux":
@@ -172,9 +173,13 @@ class FFmpegProcessor():
               ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw", "-hwaccel", "qsv", "-hwaccel_output_format", "qsv"]]
     
     elif re.search('vaapi', codec):
+      if re.search("hevc", codec):
+        vf_opt = f"format=nv12,hwupload,scale_vaapi={width}:{height}" 
+      else:
+        vf_opt = f"scale_vaapi={width}:{height}"
       return [["-rc_mode", "CQP", "-qp", f"{str(quality)}"], 
               ["-hwaccel", "vaapi", "-hwaccel_output_format", "vaapi", "-vaapi_device", "/dev/dri/renderD128"], 
-              ["-vf", f"scale_vaapi={width}:{height}"]]
+              ["-vf", vf_opt]]
     
     else:
       return [["-crf", f"{quality}"]]
