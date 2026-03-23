@@ -389,6 +389,8 @@ class App(ctk.CTk):
         
       if close.get() == "Ok":
         return
+      
+      return
   
   def on_quit(self) -> None:
     self.cancel_compression()
