@@ -23,8 +23,10 @@ class FFmpegProcessor():
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
 
+    if os.path.exist(output_file):
+      output_file = self._uniquify(output_file)
+
     width, height = resolution.split("x")
-    scale = f"scale={width}:{height}"
 
     crf = self._quality_converter(quality)
         
@@ -39,7 +41,7 @@ class FFmpegProcessor():
       aud_opts = ["-c:a", audio_codec, "-b:a", "128k"]
 
     hwaccel_args = None
-    scale_args = ["-vf", f"{scale},fps={fps}"]
+    scale_args = ["-vf", f"scale={width}:{height},fps={fps}"]
 
     if re.search('nvenc', codec):
       quality_args = ["-rc", "vbr","-cq", str(crf), "-b:v", "0"]
@@ -64,12 +66,12 @@ class FFmpegProcessor():
     if hwaccel_args is not None:
       cmd.extend(hwaccel_args)
     
-    cmd.extend(["-i", input_file])
-    cmd.extend(["-c:v", codec])
-    cmd.extend(scale_args )
-    cmd.extend(quality_args) 
-    cmd.extend(aud_opts)
-    cmd.append(output_file)  
+    cmd.extend(["-i", input_file,
+                "-c:v", codec, 
+                *scale_args, 
+                *quality_args, 
+                *aud_opts, 
+                output_file])  
 
     creation_flags = {}
 
@@ -154,3 +156,14 @@ class FFmpegProcessor():
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 32 + 19
     return int(crf)
+
+  @staticmethod
+  def _uniquify(path: os.PathLike | str) -> os.PathLike | str:
+    filename, extension = os.path.splitext(path)
+    counter = 1
+
+    while os.path.exists(path):
+        path = filename + " (" + str(counter) + ")" + extension
+        counter += 1
+
+    return path
