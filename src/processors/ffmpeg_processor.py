@@ -144,15 +144,12 @@ class FFmpegProcessor():
       
       else:
         return True, "Video compression terminated"
-
-      finally:
-        self._proc = None
     
     else:
       return False, ""
 
   @staticmethod
-  def _quality_converter(quality: int) -> str:
+  def _quality_converter(quality: int) -> int:
     # Quality needs be inverted as the lower the CRF number, the better the quality
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 32 + 19
