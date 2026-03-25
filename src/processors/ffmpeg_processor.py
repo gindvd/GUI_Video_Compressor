@@ -18,7 +18,9 @@ class FFmpegProcessor():
               codec: str, 
               fps: str, 
               quality: int, 
-              audio: bool) -> tuple[bool, str | None]:
+              audio: bool,
+              start_time: str ,
+              duration: str) -> tuple[bool, str | None]:
 
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
@@ -70,7 +72,9 @@ class FFmpegProcessor():
                 "-c:v", codec, 
                 *scale_args, 
                 *quality_args, 
-                *aud_opts, 
+                *aud_opts,
+                "-ss", start_time,
+                "-t", end_time, 
                 output_file])  
 
     creation_flags = {}
