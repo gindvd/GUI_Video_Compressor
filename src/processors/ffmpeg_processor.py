@@ -158,7 +158,7 @@ class FFmpegProcessor():
   def _quality_converter(quality: int) -> int:
     # Quality needs be inverted as the lower the CRF number, the better the quality
     quality_inverted = abs(quality / 100 - 1)
-    crf = quality_inverted * 32 + 19
+    crf = quality_inverted * 33 + 18  # Range 18 to 51
     return int(crf)
 
   @staticmethod
