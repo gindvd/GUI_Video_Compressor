@@ -20,6 +20,8 @@ from components.progressbar_popup import ProgressbarPopup
 from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
+  VIDEO_ATTR: tuple = ("resolution", "fps", "duration")
+
   def __init__(self) -> None:
     super().__init__()
     ffmpeg_cmd = get_ffmpeg_cmd()
@@ -199,78 +201,62 @@ class App(ctk.CTk):
     self._update_gui()
     
   def _update_gui(self) -> None:
-    # Getting video's resolution, and list on several smaller resolutions with same aspect ratio
-    completed, res_list, err_msg = self._ffprobe.get_resolutions(self._input_file)
+    attr_vals = []
     
-    if not completed:
-      CTkMessagebox(title="FFprobe Error", 
-                    message=f"Error getting video file's resolution!\n{err_msg}", 
-                    icon='cancel')
+    for attr in self.VIDEO_ATTR:
+      completed, val, err_msg = self._ffprobe.get_video_attr_value(attr, self._input_file)
+    
+      if not completed:
+        CTkMessagebox(title="FFprobe Error", 
+                      message=f"Error getting video file's {attr}!\n{err_msg}", 
+                      icon='cancel')
       
-      return
-
-    elif completed:
-      assert res_list is not None
-
-      self._target_res_drpdwn.configure(values=res_list)
-      self._target_res_drpdwn.set(res_list[0])
-      self._target_res = res_list[0]
-    
-    # Getting video FPS to ensure FFmpeg doesn't  generate frame
-    completed, vid_fps, err_msg = self._ffprobe.get_fps(self._input_file)
-
-    if not completed:
-      CTkMessagebox(title="FFprobe Error", 
-                    message=f"Error getting video file's FPS!\n{err_msg}", 
-                    icon='cancel')
-    
-    elif completed:
-      fps_list = [120, 60, 30, 24, 15]
-      
-      if vid_fps < fps_list[-1]:
-        self._target_fps_drpdwn.configure(values=str(vid_fps))
-        self._target_fps = str(vid_fps)
         return
-
-      upd_fps = []
-
-      for i in fps_list:
-        if i <= vid_fps:
-          upd_fps.extend([str(i)])
-
-      self._target_fps_drpdwn.configure(values=upd_fps)
-      self._target_fps_drpdwn.set(upd_fps[0])
-      self._target_fps = upd_fps[0]
-
-    # Getting video's duration in sexagesimal format to set label value on trimmer
-    completed, duration_sexa, err_msg = self._ffprobe.get_duration_sexagesimal(self._input_file)
-
-    if not completed:
-      CTkMessagebox(title="FFprobe Error", 
-                    message=f"{err_msg}", 
-                    icon='cancel')
-      
-      return
+       
+      attr_vals.append(val)
     
-    elif completed:
-      self._vid_trimmer.set_duration_lbl(duration_sexa)
+    # Update combo box with list of resolution options lower than video's current resolution
+    vid_res = attr_vals[0]
+    
+    res_list = get_list_of_smaller_res(vid_res)
 
-    # Getting video's duration is milliseconds to do several 
-    completed, duration_ms, err_msg = self._ffprobe.get_duration_sexagesimal(self._input_file)
-
-    if not completed:
-      CTkMessagebox(title="FFprobe Error", 
-                    message=f"{err_msg}", 
-                    icon='cancel')
-      
+    self._target_res_drpdwn.configure(values=res_list)
+    self._target_res_drpdwn.set(res_list[0])
+    self._target_res = res_list[0]
+    
+    # Update combo box with list of FPS options lower than video's current FPS
+    vid_fps = attr_vals[1]
+    
+    numer, denom = vid_fps.split("/")
+    fps = int(int(numer) / int(denom))
+    
+    fps_list = [120, 60, 30, 24, 15]
+    
+    if fps < fps_list[-1]:
+      self._target_fps_drpdwn.configure(values=str(fps))
+      self._target_fps = str(fps)
       return
 
-    elif completed:
-      self._vid_trimmer.set_duration_ms(duration_ms)
+    upd_fps = []
 
-    # Only allowing compression and video play back if 
-    # video duration, fps, and resolutions are successfully gotten
-    # Ensure video can't be compverted with options that cause upscaling    
+    for i in fps_list:
+      if i <= fps:
+        upd_fps.extend([str(i)])
+
+    self._target_fps_drpdwn.configure(values=upd_fps)
+    self._target_fps_drpdwn.set(upd_fps[0])
+    self._target_fps = upd_fps[0]
+
+    # Update label with the videos current duration
+    vid_dur = attr_vals[2]
+    
+    self._vid_trimmer.set_duration_lbl(vid_dur)
+
+    self._vid_trimmer.duration_ms = vid_dur
+    self._vid_trimmer.start_time = 0.0
+    self._vid_trimmer.end_time = vid_dur
+
+    # Enable compression button and display the video file
     self._compress_btn.configure(state="normal")
     self._vid_trimmer.set_video(self._input_file)
 
