@@ -13,7 +13,10 @@ class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, parent) -> None:
     super().__init__(parent, corner_radius=0)
     self._parent = parent
-    self._duration_ms: float | None = None
+    
+    self.duration_ms: float  = 0.0
+    self.start_time: float  = 0.0
+    self.end_time: float  = 0.0
 
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
@@ -86,13 +89,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._curtime_lbl.grid(row=0, column=3, padx=10, pady=5)
   
-  def set_duration_lbl(self, duration: str | None) -> None:
-    if duration is None:
-      return
-
-    else:
-      vid_dur_ms = duration[:duration.find('.')+4]
-      self._dur_lbl.configure(text=vid_dur_ms)
+   
 
   def set_duration_ms(self, duration: float | None) -> None:
     self._duration_ms = duration
@@ -107,7 +104,23 @@ class VideoTrimmer(ctk.CTkFrame):
     elif playing:
       self._vid_player.pause()
       self._play_pause_btn.configure(text="Play")
-  
+
+  def _display_video(self) -> None:
+    if DEVICE_OS == "Linux":
+      self._vid_player.set_xwindow(self._vid_panel.winfo_id())
+    elif DEVICE_OS == "Windows":
+      self._vid_player.set_hwnd(self._vid_panel.winfo_id())
+
+  def _update_progress(self):
+    current_time_ms = self._vid_player.get_time()
+    current_time = self._ms_to_isoformat(current_time_ms)
+
+    self._curtime_lbl.configure(text=current_time)
+    self.after(100, self._update_progress)
+
+  def set_duration_lbl(self, duration: str) -> None:
+    self._dur_lbl.configure(text=self._ms_to_isoformat(vid_dur))
+
   def set_video(self, vid_file: PathLike | str) -> None:
     self.update()
 
@@ -122,19 +135,6 @@ class VideoTrimmer(ctk.CTkFrame):
     self.after(50, self._play_pause)
 
     self._update_progress()
-
-  def _display_video(self) -> None:
-    if DEVICE_OS == "Linux":
-      self._vid_player.set_xwindow(self._vid_panel.winfo_id())
-    elif DEVICE_OS == "Windows":
-      self._vid_player.set_hwnd(self._vid_panel.winfo_id())
-
-  def _update_progress(self):
-    current_time_ms = self._vid_player.get_time()
-    current_time = self._ms_to_isoformat(current_time_ms)
-
-    self._curtime_lbl.configure(text=current_time)
-    self.after(100, self._update_progress)
 
   @staticmethod
   def _ms_to_isoformat(ms: int) -> str:
