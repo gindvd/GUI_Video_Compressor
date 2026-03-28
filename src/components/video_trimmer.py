@@ -119,7 +119,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self.after(100, self._update_progress)
 
   def set_duration_lbl(self, duration: str) -> None:
-    self._dur_lbl.configure(text=self._ms_to_isoformat(vid_dur))
+    self._dur_lbl.configure(text=self._ms_to_isoformat(duration))
 
   def set_video(self, vid_file: PathLike | str) -> None:
     self.update()
