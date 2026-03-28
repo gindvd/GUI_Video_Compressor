@@ -1,4 +1,4 @@
-def get_list_of_smaller_res(self, vid_res: str) -> list[str]:
+def get_list_of_smaller_res(vid_res: str) -> list[str]:
   dimensions = vid_res.split('x')
     
   width = int(dimensions[0])
