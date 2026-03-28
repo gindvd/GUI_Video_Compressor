@@ -22,14 +22,14 @@ def get_list_of_smaller_res(vid_res: str) -> list[str]:
 
   for size in std_width:
     if size <= width:
-      h = self.round_to_even(size / aspect_ratio)
+      h = round_to_even(size / aspect_ratio)
       new = str(size) + "x" + str(h)
 
       temp_res.extend([new])
 
   for size in std_height:
     if size <= height:
-      w = self.round_to_even(size * aspect_ratio)
+      w = round_to_even(size * aspect_ratio)
       new = str(w) + "x" + str(size)
 
       temp_res.extend([new])
