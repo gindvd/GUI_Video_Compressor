@@ -118,7 +118,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._curtime_lbl.configure(text=current_time)
     self.after(100, self._update_progress)
 
-  def set_duration_lbl(self, duration: str) -> None:
+  def set_duration_lbl(self, duration: float) -> None:
     self._dur_lbl.configure(text=self._ms_to_isoformat(duration))
 
   def set_video(self, vid_file: PathLike | str) -> None:
@@ -137,7 +137,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._update_progress()
 
   @staticmethod
-  def _ms_to_isoformat(ms: int) -> str:
+  def _ms_to_isoformat(ms: float) -> str:
     seconds = ms // 1000
     ms_remainder = ms % 1000
 
