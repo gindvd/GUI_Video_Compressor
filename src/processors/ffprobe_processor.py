@@ -4,7 +4,7 @@ from os import PathLike
 from utils import create_logs
 
 class FFprobeProcessor():
-  self._CMD_ARGS: dict = {
+  _CMD_ARGS: dict = {
     "duration" : {
        "entry" : "stream=duration",
         "-of_arg" : "default=noprint_wrappers=1:nokey=1"
@@ -22,7 +22,8 @@ class FFprobeProcessor():
   def __init__(self, ffprobe: PathLike | str) -> None:
     self._ffprobe: PathLike | str = ffprobe
     
-  def get_video_stream(self, vid_attr: str, filepath: PathLike | str) -> tuple[bool, Any | None, str | None]:
+  def get_video_attr_value(self, vid_attr: str, filepath: PathLike | str) -> tuple[bool, str | float | None, str | None]:
+    
     entries_arg = self._CMD_ARGS.get(vid_attr, {}).get("entry")
     of_arg = self._CMD_ARGS.get(vid_attr, {}).get("-of_arg")
     
