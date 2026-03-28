@@ -350,14 +350,19 @@ class App(ctk.CTk):
  
     threading.Thread(target=self._run_compression_cmd, daemon=True).start()
 
-  def _run_compression_cmd(self) -> None: 
+  def _run_compression_cmd(self) -> None:
+    start_time = self._vid_trimmer.start_time
+    duration = self._vid_trimmer.start_time
+
     completed, err_msg = self._ffmpeg.compress(self._input_file, 
                                                self._target_format, 
                                                self._target_res,
                                                self._codec,
                                                self._target_fps,
                                                self._quality,
-                                               self._audio)
+                                               self._audio,
+                                               start_time,
+                                               duration)
 
     self.after(0, self._compression_finished, completed, err_msg)
   
