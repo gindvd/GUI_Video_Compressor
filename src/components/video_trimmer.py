@@ -127,7 +127,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause_btn.configure(state="normal")
 
     self._play_pause()
-    self.after(50, self._play_pause)
+    self.after(100, self._play_pause)
 
     self._update_progress()
   
@@ -139,11 +139,11 @@ class VideoTrimmer(ctk.CTkFrame):
 
   @staticmethod
   def _ms_to_isoformat(ms: float) -> str:
-    seconds = ms // 1000
-    ms_remainder = ms % 1000
+    seconds = int(ms // 1000)
+    ms_remainder = int(ms % 1000)
 
-    hours = seconds // 3600
-    minutes = (seconds % 3600) // 60
-    seconds = seconds % 60
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds = int(seconds % 60)
 
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{ms_remainder:03d}"
