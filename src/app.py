@@ -199,6 +199,28 @@ class App(ctk.CTk):
     self.input_file = item
     
     self._update_gui()
+  
+  def _compatible_file(self, item: os.PathLike | str) -> bool:
+    if item == "" or item == ():
+      return False
+
+    if not os.path.isfile(item):
+      CTkMessagebox(title="File Warning", 
+                    message="Warning!\nFile does not exist!", 
+                    icon='warning')
+     
+      return False
+
+    _, ext = os.path.splitext(item)   
+
+    if ext not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
+      CTkMessagebox(title="Video File Warning", 
+                    message="Warning!\nFile is not supported video file!", 
+                    icon='warning')
+      
+      return False
+
+    return True
     
   def _update_gui(self) -> None:
     attr_vals = []
@@ -259,29 +281,6 @@ class App(ctk.CTk):
     # Enable compression button and display the video file
     self._compress_btn.configure(state="normal")
     self._vid_trimmer.set_video(self._input_file)
-
-
-  def _compatible_file(self, item: os.PathLike | str) -> bool:
-    if item == "" or item == ():
-      return False
-
-    if not os.path.isfile(item):
-      CTkMessagebox(title="File Warning", 
-                    message="Warning!\nFile does not exist!", 
-                    icon='warning')
-     
-      return False
-
-    _, ext = os.path.splitext(item)   
-
-    if ext not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
-      CTkMessagebox(title="Video File Warning", 
-                    message="Warning!\nFile is not supported video file!", 
-                    icon='warning')
-      
-      return False
-
-    return True
 
   def _codec_choice(self, choice) -> None:
     self._codec = choice
