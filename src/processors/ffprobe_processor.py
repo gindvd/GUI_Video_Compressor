@@ -22,8 +22,8 @@ class FFprobeProcessor():
   def __init__(self, ffprobe: PathLike | str) -> None:
     self._ffprobe: PathLike | str = ffprobe
     
-  def get_video_attr_value(self, vid_attr: str, filepath: PathLike | str) -> tuple[bool, str | float | None, str | None]:
-    
+  def get_video_attr_value(self, vid_attr: str, filepath: PathLike | str) -> tuple[bool, str | None, str | None]:
+
     entries_arg = self._CMD_ARGS.get(vid_attr, {}).get("entry")
     of_arg = self._CMD_ARGS.get(vid_attr, {}).get("-of_arg")
     

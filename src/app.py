@@ -234,7 +234,8 @@ class App(ctk.CTk):
                       icon='cancel')
       
         return
-       
+      
+      assert val is not None, "Video attribute value can't be None" 
       attr_vals.append(val)
     
     # Update combo box with list of resolution options lower than video's current resolution
@@ -270,7 +271,7 @@ class App(ctk.CTk):
     self._target_fps = upd_fps[0]
 
     # Update label with the videos current duration
-    vid_dur = attr_vals[2]
+    vid_dur = float(attr_vals[2])
     
     self._vid_trimmer.set_duration_lbl(vid_dur)
 
