@@ -74,7 +74,7 @@ class FFmpegProcessor():
                 *quality_args, 
                 *aud_opts,
                 "-ss", start_time,
-                "-t", end_time, 
+                "-t", duration, 
                 output_file])  
 
     creation_flags = {}
