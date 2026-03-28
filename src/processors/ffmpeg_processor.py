@@ -25,7 +25,7 @@ class FFmpegProcessor():
     basename, _ = os.path.splitext(input_file)
     output_file = basename + "_compressed." + file_format
 
-    if os.path.exist(output_file):
+    if os.path.exists(output_file):
       output_file = self._uniquify(output_file)
 
     width, height = resolution.split("x")
