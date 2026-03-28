@@ -10,7 +10,8 @@ import threading
 from utils import get_ffmpeg_cmd, get_ffprboe_cmd
 from utils import DEVICE_OS
 
-import modules.GPUinfo as gpu
+import modules.gpu_utils as gpu
+from modules.resolution_utils import get_list_of_smaller_res
 
 from processors.ffmpeg_processor import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
@@ -56,7 +57,7 @@ class App(ctk.CTk):
     self._target_fps: str = "30"
     self._quality: int = 90
     self._audio: bool = True
-        
+
     self.title("Video Compression Tool")
     self.resizable(False, False)
     
