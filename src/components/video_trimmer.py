@@ -14,7 +14,7 @@ class VideoTrimmer(ctk.CTkFrame):
     super().__init__(parent, corner_radius=0)
     self._parent = parent
     
-    self.duration_ms: float  = 0.0
+    self.duration: float  = 0.0
     self.start_time: float  = 0.0
     self.end_time: float  = 0.0
 
@@ -88,11 +88,6 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._curtime_lbl.grid(row=0, column=3, padx=10, pady=5)
-  
-   
-
-  def set_duration_ms(self, duration: float | None) -> None:
-    self._duration_ms = duration
 
   def _play_pause(self) -> None:
     playing = self._vid_player.is_playing()
@@ -135,6 +130,12 @@ class VideoTrimmer(ctk.CTkFrame):
     self.after(50, self._play_pause)
 
     self._update_progress()
+  
+  def get_start_time(self) -> str:
+    return _ms_to_isoformat(self.start_time)
+  
+  def get_duration(self) -> str:
+    return _ms_to_isoformat(self.duration)
 
   @staticmethod
   def _ms_to_isoformat(ms: float) -> str:

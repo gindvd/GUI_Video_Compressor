@@ -275,7 +275,7 @@ class App(ctk.CTk):
     
     self._vid_trimmer.set_duration_lbl(vid_dur)
 
-    self._vid_trimmer.duration_ms = vid_dur
+    self._vid_trimmer.duration = vid_dur
     self._vid_trimmer.start_time = 0.0
     self._vid_trimmer.end_time = vid_dur
 
@@ -351,8 +351,8 @@ class App(ctk.CTk):
     threading.Thread(target=self._run_compression_cmd, daemon=True).start()
 
   def _run_compression_cmd(self) -> None:
-    start_time = self._vid_trimmer.start_time
-    duration = self._vid_trimmer.start_time
+    start_time = self._vid_trimmer.get_start_time()
+    duration = self._vid_trimmer.get_duration()
 
     completed, err_msg = self._ffmpeg.compress(self._input_file, 
                                                self._target_format, 
