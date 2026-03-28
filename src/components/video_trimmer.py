@@ -132,10 +132,10 @@ class VideoTrimmer(ctk.CTkFrame):
     self._update_progress()
   
   def get_start_time(self) -> str:
-    return _ms_to_isoformat(self.start_time)
+    return self._ms_to_isoformat(self.start_time)
   
   def get_duration(self) -> str:
-    return _ms_to_isoformat(self.duration)
+    return self._ms_to_isoformat(self.duration)
 
   @staticmethod
   def _ms_to_isoformat(ms: float) -> str:
