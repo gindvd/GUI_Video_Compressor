@@ -119,7 +119,7 @@ class FFmpegProcessor():
         if os.path.exists(output_file):
                 os.remove(output_file)
         
-        create_logs(f"{' '.join(cmd)}\n" + out)
+        create_logs(f"{' '.join(cmd)}\n\n" + out)
         return False, "Compression Failed\nCheck logs for details!"
 
       elif rc != 0 and self._terminated == True:
