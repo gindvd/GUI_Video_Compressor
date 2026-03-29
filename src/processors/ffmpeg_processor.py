@@ -45,23 +45,26 @@ class FFmpegProcessor():
     hwaccel_args = None
     scale_args = ["-vf", f"scale={width}:{height},fps={fps}"]
 
-    if re.search('nvenc', codec):
-      quality_args = ["-rc", "vbr","-cq", str(crf), "-b:v", "0"]
-    
-    elif re.search('amf', codec):
-      quality_args = ["-rc", "qvbr", "-qvbr_quality_level", str(crf)]
+    _,__, hw_id = codec.partition("_")
 
-    elif re.search('qsv', codec):
-      hwaccel_args = ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw"]
-      quality_args = ["-global_quality", str(crf), "-look_ahead", "1"]
+    match hw_id:
+      case 'nvenc':
+        quality_args = ["-rc", "vbr","-cq", str(crf), "-b:v", "0"]
     
-    elif re.search("vaapi", codec):
-      hwaccel_args = ["-vaapi_device", "/dev/dri/renderD128"]
-      scale_args = ["-vf", f"format=nv12,fps={fps},hwupload,scale_vaapi=w={width}:h={height}"]
-      quality_args = ["-qp", str(crf)]
+      case 'amf':
+        quality_args = ["-rc", "qvbr", "-qvbr_quality_level", str(crf)]
+
+      case 'qsv':
+        hwaccel_args = ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw"]
+        quality_args = ["-global_quality", str(crf), "-look_ahead", "1"]
     
-    else:
-      quality_args = ["-crf", str(crf)]
+      case "vaapi":
+        hwaccel_args = ["-vaapi_device", "/dev/dri/renderD128"]
+        scale_args = ["-vf", f"format=nv12,fps={fps},hwupload,scale_vaapi=w={width}:h={height}"]
+        quality_args = ["-qp", str(crf)]
+    
+      case _:
+        quality_args = ["-crf", str(crf)]
     
     cmd = [self._ffmpeg] 
     
@@ -75,7 +78,9 @@ class FFmpegProcessor():
                 *aud_opts,
                 "-ss", start_time,
                 "-t", duration, 
-                output_file])  
+                output_file])
+    
+    print(f"{' '.join(cmd)}")
 
     creation_flags = {}
 
