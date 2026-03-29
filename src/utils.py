@@ -50,6 +50,23 @@ def get_ffprboe_cmd() -> PathLike | str | None:
 
   return None
 
+def get_vlc_cmd() -> PathLike | str | None:
+    if DEVICE_OS == "Windows":
+      try:
+        vlc_path = ROOT_DIR / Path("lib/win32/vlc-win32.exe")
+
+      except FileNotFoundError:
+        return None
+    
+      else:
+        return vlc_path
+    
+    elif DEVICE_OS == "Linux":
+      if not shutil.which("vlc"):
+        return None
+
+      return "vlc"
+
 def create_logs(err_msg: str) -> None:
   now = datetime.now()
   basename = Path(str(now) + ".log")
