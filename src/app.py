@@ -249,9 +249,11 @@ class App(ctk.CTk):
     
     # Update combo box with list of FPS options lower than video's current FPS
     vid_fps = attr_vals[1]
+    print(vid_fps)
     
     numer, denom = vid_fps.split("/")
-    fps = int(int(numer) / int(denom))
+    fps = round(int(numer) / int(denom))
+    print(fps)
     
     fps_list = [120, 60, 30, 24, 15]
     
@@ -273,11 +275,8 @@ class App(ctk.CTk):
     # Update label with the videos current duration
     vid_dur = float(attr_vals[2])
     
-    self._vid_trimmer.set_duration_lbl(vid_dur)
+    self._vid_trimmer.set_vid_values(vid_dur)
 
-    self._vid_trimmer.duration = vid_dur
-    self._vid_trimmer.start_time = 0.0
-    self._vid_trimmer.end_time = vid_dur
 
     # Enable compression button and display the video file
     self._compress_btn.configure(state="normal")
@@ -351,8 +350,10 @@ class App(ctk.CTk):
     threading.Thread(target=self._run_compression_cmd, daemon=True).start()
 
   def _run_compression_cmd(self) -> None:
-    start_time = self._vid_trimmer.get_start_time()
-    duration = self._vid_trimmer.get_duration()
+    start_time: str = self._vid_trimmer.get_start_time()
+    duration: str = self._vid_trimmer.get_duration()
+    print(start_time)
+    print(duration)
 
     completed, err_msg = self._ffmpeg.compress(self._input_file, 
                                                self._target_format, 
