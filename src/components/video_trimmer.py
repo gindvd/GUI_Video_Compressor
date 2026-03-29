@@ -14,9 +14,9 @@ class VideoTrimmer(ctk.CTkFrame):
     super().__init__(parent, corner_radius=0)
     self._parent = parent
     
-    self.duration: float  = 0.0
-    self.start_time: float  = 0.0
-    self.end_time: float  = 0.0
+    self.duration_ms: int  = 0
+    self.start_time_ms: int  = 0
+    self.end_time_ms: int  = 0
 
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
@@ -108,13 +108,16 @@ class VideoTrimmer(ctk.CTkFrame):
 
   def _update_progress(self):
     current_time_ms = self._vid_player.get_time()
-    current_time = self._ms_to_isoformat(current_time_ms)
+    current_time = self._ms_text_converter(current_time_ms)
 
     self._curtime_lbl.configure(text=current_time)
     self.after(100, self._update_progress)
 
-  def set_duration_lbl(self, duration: float) -> None:
-    self._dur_lbl.configure(text=self._ms_to_isoformat(duration))
+  def set_vid_values(self, duration: float) -> None:
+    self.duration_ms = int(duration * 1000)
+    self.end_time_ms = self.duration_ms
+
+    self._dur_lbl.configure(text=self._ms_text_converter(self.duration_ms))
 
   def set_video(self, vid_file: PathLike | str) -> None:
     self.update()
@@ -132,18 +135,17 @@ class VideoTrimmer(ctk.CTkFrame):
     self._update_progress()
   
   def get_start_time(self) -> str:
-    return self._ms_to_isoformat(self.start_time)
+    return self._ms_text_converter(self.start_time_ms)
   
   def get_duration(self) -> str:
-    return self._ms_to_isoformat(self.duration)
+    return self._ms_text_converter(self.duration_ms)
 
   @staticmethod
-  def _ms_to_isoformat(ms: float) -> str:
-    seconds = int(ms // 1000)
-    ms_remainder = int(ms % 1000)
+  def _ms_text_converter(ms: int) -> str:
+    s = ms // 1000
+    ms_remainder = ms % 1000
 
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    seconds = int(seconds % 60)
+    m, sec = divmod(s, 60)
+    h, m = divmod(m, 60)
 
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{ms_remainder:03d}"
+    return f"{h:02d}:{m:02d}:{sec:02d}.{ms_remainder:03d}"
