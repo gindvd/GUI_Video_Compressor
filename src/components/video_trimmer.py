@@ -39,7 +39,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._create_time_panel()
 
   def _platform_specific_inst(self):
-    if DEVICE_OS == "Windows"
+    if DEVICE_OS == "Windows":
         return vlc.Instance(f"--plugin-path={self._vlc_cmd}")
 
     return vlc.Instance("--no-xlib")
