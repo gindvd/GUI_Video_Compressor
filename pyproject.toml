@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "GUI_Video_Converter"
+version = "0.1.0"
+description = "A GUI interface to select options and trim videos to compress and convert video files with FFmpeg"
+readme = "README.md"
+authors = [
+    {name = "David Gingerich", email = "gingerichdvd@gmail.com"}
+]
+requires-python = ">=3.11"
+
+dependencies = [
+    "CTkMenuBar==0.9",
+    "CTkMessagebox==2.7",
+    "customtkinter==5.2.2",
+    "darkdetect==0.8.0",
+    "packaging==26.0",
+    "pillow==12.1.1",
+    "python-vlc==3.0.21203"
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy==1.19.1",
+]
+
+[tool.mypy]
+strict = false
+
+[[tool.mypy.overrides]]
+module = [
+  "CTkMenuBar",
+  "CTkMenuBar.*",
+  "CTkMessagebox",
+  "CTkMessagebox.*",
+  "customtkinter",
+  "customtkinter.*",
+  "vlc",
+  "vlc.*"
+]
+ignore_missing_imports = true
