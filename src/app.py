@@ -19,7 +19,22 @@ from components.progressbar_popup import ProgressbarPopup
 from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
-  VIDEO_ATTR: tuple = ("resolution", "fps", "duration")
+  HW_CODEC_OPTS: dict[str] = {
+    "NVIDIA" :  {
+      "Windows" : ["h264_nvenc", "hevc_nvenc"],
+      "Linux" : ["h264_nvenc", "hevc_nvenc"],
+    },
+    "AMD" : {
+      "Windows" : ["h264_amf", "hevc_amf"],
+      "Linux" : ["h264_amf", "hevc_amf"],
+    },
+    "Intel" : {
+      "Windows" : ["h264_qsv", "hevc_qsv"],
+      "Linux" : ["h264_vaapi", "hevc_vaapi"],
+    },
+  }
+
+  VIDEO_ATTR: tuple[str] = ("resolution", "fps", "duration")
 
   def __init__(self) -> None:
     super().__init__()
@@ -334,17 +349,7 @@ class App(ctk.CTk):
       return codecs
 
     for name in connected_gpus:
-      if name == "NVIDIA":
-        codecs.extend(["h264_nvenc", "hevc_nvenc"])
-      elif name == "AMD":
-        codecs.extend(["h264_amf", "hevc_amf"])
-      # Older itel GPUs on Linux have qsv support depreciated and or lacking :(
-      elif name == "Intel" and DEVICE_OS == "Linux":
-        codecs.extend(["h264_vaapi", "hevc_vaapi"])
-      elif name == "Intel" and DEVICE_OS != "Linux":
-        codecs.extend(["h264_qsv", "hevc_qsv"])
-      else:
-        continue
+      codecs.extend(self.HW_CODEC_OPTS.get(name, {}).get(DEVICE_OS))
   
     return codecs
 
