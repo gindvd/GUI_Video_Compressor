@@ -7,12 +7,13 @@ import shutil
 from os import PathLike
 from pathlib import Path
 
-from utils import ROOT_DIR, DEVICE_OS
+from utils import DEVICE_OS
 
 class VideoTrimmer(ctk.CTkFrame):
-  def __init__(self, parent) -> None:
+  def __init__(self, parent, vlc_cmd: PathLike | str) -> None:
     super().__init__(parent, corner_radius=0)
     self._parent = parent
+    self._vlc_cmd = vlc_cmd
     
     self.duration_ms: int  = 0
     self.start_time_ms: int  = 0
