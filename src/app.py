@@ -7,8 +7,7 @@ from customtkinter import filedialog
 import os
 import threading
 
-from utils import get_ffmpeg_cmd, get_ffprboe_cmd
-from utils import DEVICE_OS
+from utils import *
 
 import modules.gpu_utils as gpu
 from modules.resolution_utils import get_list_of_smaller_res
@@ -26,6 +25,7 @@ class App(ctk.CTk):
     super().__init__()
     ffmpeg_cmd = get_ffmpeg_cmd()
     ffprobe_cmd = get_ffprboe_cmd()
+    vlc_cmd = get_vlc_cmd()
     
     if ffmpeg_cmd is None:
       close = CTkMessagebox(title="Missing FFmpeg", 
@@ -36,7 +36,7 @@ class App(ctk.CTk):
       if close.get() == "Ok":
         self.quit()
       
-      return
+      self.quit()
     
     if ffprobe_cmd is None:
       close = CTkMessagebox(title="Missing FFprobe", 
@@ -47,7 +47,7 @@ class App(ctk.CTk):
       if close.get() == "Ok":
         self.quit()
       
-      return
+      self.quit()
     
     self._ffmpeg: FFmpegProcessor = FFmpegProcessor(ffmpeg_cmd)
     self._ffprobe: FFprobeProcessor = FFprobeProcessor(ffprobe_cmd)
@@ -71,7 +71,7 @@ class App(ctk.CTk):
     self._populate_central_frame()
     self._central_frame.pack()
 
-    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self)
+    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self, vlc_cmd)
     self._vid_trimmer.pack(fill='x')
 	
   def _create_menubar(self) -> None:
@@ -276,7 +276,6 @@ class App(ctk.CTk):
     vid_dur = float(attr_vals[2])
     
     self._vid_trimmer.set_vid_values(vid_dur)
-
 
     # Enable compression button and display the video file
     self._compress_btn.configure(state="normal")

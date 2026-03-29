@@ -38,38 +38,12 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._create_time_panel()
 
-  def _platform_specific_inst(self) -> vlc.Instance:
+  def _platform_specific_inst(self):
+    if DEVICE_OS == "Windows"
+        return vlc.Instance(f"--plugin-path={self._vlc_cmd}")
 
-    if DEVICE_OS == "Windows":
-
-      try:
-        vlc_path = ROOT_DIR / Path("lib/win32/vlc-win32.exe")
-
-      except FileNotFoundError:
-        close = CTkMessagebox(title="Missing VLC Exe", 
-                              message="vlc-win32.exe is missing from lib/win32 folder!", 
-                              icon="cancel",
-                              option_1="Ok")
-        
-        if close.get() == "Ok":
-          self.destroy()
-        
-    
-      else:
-        return vlc.Instance(f"--plugin-path={vlc_path}")
-    
-    elif DEVICE_OS == "Linux":
-      if not shutil.which("vlc"):
-          close = CTkMessagebox(title="Missing VLC", 
-                                message="VLC not a recognized command!", 
-                                icon="cancel",
-                                option_1="Ok")
-        
-          if close.get() == "Ok":
-            self.destroy()
-
-      return vlc.Instance("--no-xlib")
-      
+    return vlc.Instance("--no-xlib")
+  
   def _create_control_panel(self) -> None:
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel, 
                                                         text="Play",
