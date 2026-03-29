@@ -49,6 +49,17 @@ class App(ctk.CTk):
       
       self.quit()
     
+    if vlc_cmd is None:
+      close = CTkMessagebox(title="Missing FFprobe", 
+                            message="VLC command missing!", 
+                            icon="cancel",
+                            option_1="Ok")
+        
+      if close.get() == "Ok":
+        self.quit()
+      
+      self.quit()
+    
     self._ffmpeg: FFmpegProcessor = FFmpegProcessor(ffmpeg_cmd)
     self._ffprobe: FFprobeProcessor = FFprobeProcessor(ffprobe_cmd)
 
@@ -284,15 +295,15 @@ class App(ctk.CTk):
   def _codec_choice(self, choice) -> None:
     self._codec = choice
 
-    if choice == "libsvtav1":
-      self._target_ext_drpdwn.configure(values=["mkv", "mebm", "mp4"])
+    if choice in ["libsvtav1", "libvpx-vp9"]:
+      self._target_ext_drpdwn.configure(values=[ "mkv", "webm", "mp4"])
       self._target_ext_drpdwn.set("mkv")
-    elif choice == "libvpx-vp9":
-      self._target_ext_drpdwn.configure(values=["webm", "mkv"])
-      self._target_ext_drpdwn.set("mebm")
+      self._ext_choice = "mkv"
+    
     else:
       self._target_ext_drpdwn.configure(values=["mp4", "mkv", "mov"])
       self._target_ext_drpdwn.set("mp4")
+      self._ext_choice = "mp4"
   
   def _ext_choice(self, choice) -> None:
     self._target_format = choice
