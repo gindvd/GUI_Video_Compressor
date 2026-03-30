@@ -10,17 +10,16 @@ DEVICE_OS: str = platform.system()
 
 EXTERNAL_PROCS: tuple = ("ffmpeg", "ffprobe", "vlc")
 
-def get_external_procs() -> tuple:
+def get_external_procs() -> list:
   if DEVICE_OS == "Windows":
-    return tuple(get_win_procs())
-  
+    return get_win_procs() 
   elif DEVICE_OS == "Linux":
-    return tuple(get_linux_procs())
-  
-  return None, None, None
+    return get_linux_procs()
+
+  return [None, None, None]
 
 def get_win_procs() -> list:
-  proc_paths = []
+  proc_paths: list = []
 
   for proc in EXTERNAL_PROCS:
     try:
@@ -35,7 +34,7 @@ def get_win_procs() -> list:
   return proc_paths
 
 def get_linux_procs() -> list:
-  proc_paths = []
+  proc_paths: list = []
 
   for proc in EXTERNAL_PROCS:
     if shutil.which(proc):

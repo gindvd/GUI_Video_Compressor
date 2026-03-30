@@ -38,7 +38,7 @@ class App(ctk.CTk):
 
   def __init__(self) -> None:
     super().__init__()
-    self._external_procs: tuple = get_external_procs()
+    self._external_procs: list = get_external_procs()
     assert len(self._external_procs) == 3, "Not enough external processors for app to function"
 
     self._check_procs_exist()
