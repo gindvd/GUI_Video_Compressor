@@ -79,8 +79,6 @@ class FFmpegProcessor():
                 "-ss", start_time,
                 "-t", duration, 
                 output_file])
-    
-    print(f"{' '.join(cmd)}")
 
     creation_flags = {}
 
