@@ -8,66 +8,43 @@ import platform
 ROOT_DIR: PathLike = Path(__file__).parents[1]
 DEVICE_OS: str = platform.system()
 
-def get_ffmpeg_cmd() -> PathLike | str | None:
+EXTERNAL_PROCS: tuple = ("ffmpeg", "ffprobe", "vlc")
+
+def get_external_procs() -> tuple:
   if DEVICE_OS == "Windows":
-    ffmpeg_rel_path = Path("lib/win32/ffmpeg.exe")
-
-    try:
-      ffmpeg_abs_path = ROOT_DIR / ffmpeg_rel_path
-    
-    except FileNotFoundError:
-      return None
-
-    else:
-      return ffmpeg_abs_path
+    return tuple(get_win_procs())
   
   elif DEVICE_OS == "Linux":
-    if not shutil.which("ffmpeg"):
-      return None
-    
-    return "ffmpeg"
+    return tuple(get_linux_procs())
   
-  return None
+  return None, None, None
 
-def get_ffprboe_cmd() -> PathLike | str | None:
-  if DEVICE_OS == "Windows":
-    ffprobe_rel_path = Path("lib/win32/ffprobe.exe")
+def get_win_procs() -> list:
+  proc_paths = []
 
+  for proc in EXTERNAL_PROCS:
     try:
-      ffprobe_abs_path = ROOT_DIR / ffprobe_rel_path
-    
+      abs_path = ROOT_DIR / Path(f"lib/win32/f{proc}.exe")
+
     except FileNotFoundError:
-      return None
+      proc_paths.append(None)
 
     else:
-      return ffprobe_abs_path
+      proc_paths.append(abs_path)
   
-  elif DEVICE_OS == "Linux":
-    if not shutil.which("ffprobe"):
-      return None
-    
-    return "ffprobe"
+  return proc_paths
 
-  return None
+def get_linux_procs() -> list:
+  proc_paths = []
 
-def get_vlc_cmd() -> PathLike | str | None:
-    if DEVICE_OS == "Windows":
-      try:
-        vlc_path = ROOT_DIR / Path("lib/win32/vlc-win32.exe")
-
-      except FileNotFoundError:
-        return None
+  for proc in EXTERNAL_PROCS:
+    if shutil.which(proc):
+      proc_paths.append(proc)
     
-      else:
-        return vlc_path
-    
-    elif DEVICE_OS == "Linux":
-      if not shutil.which("vlc"):
-        return None
-
-      return "vlc"
-    
-    return None
+    else:
+      proc_paths.append(None)
+  
+  return proc_paths
 
 def create_logs(err_msg: str) -> None:
   now = datetime.now()

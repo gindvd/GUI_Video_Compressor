@@ -38,45 +38,13 @@ class App(ctk.CTk):
 
   def __init__(self) -> None:
     super().__init__()
-    ffmpeg_cmd = get_ffmpeg_cmd()
-    ffprobe_cmd = get_ffprboe_cmd()
-    vlc_cmd = get_vlc_cmd()
+    self._external_procs: tuple = get_external_procs()
+    assert len(self._external_procs) == 3, "Not enough external processors for app to function"
+
+    self._check_procs_exist()
     
-    if ffmpeg_cmd is None:
-      close = CTkMessagebox(title="Missing FFmpeg", 
-                            message="FFmpeg command missing!", 
-                            icon="cancel",
-                            option_1="Ok")
-        
-      if close.get() == "Ok":
-        self.quit()
-      
-      self.quit()
-    
-    if ffprobe_cmd is None:
-      close = CTkMessagebox(title="Missing FFprobe", 
-                            message="FFprobe command missing!", 
-                            icon="cancel",
-                            option_1="Ok")
-        
-      if close.get() == "Ok":
-        self.quit()
-      
-      self.quit()
-    
-    if vlc_cmd is None:
-      close = CTkMessagebox(title="Missing FFprobe", 
-                            message="VLC command missing!", 
-                            icon="cancel",
-                            option_1="Ok")
-        
-      if close.get() == "Ok":
-        self.quit()
-      
-      self.quit()
-    
-    self._ffmpeg: FFmpegProcessor = FFmpegProcessor(ffmpeg_cmd)
-    self._ffprobe: FFprobeProcessor = FFprobeProcessor(ffprobe_cmd)
+    self._ffmpeg: FFmpegProcessor = FFmpegProcessor(self._external_procs[0])
+    self._ffprobe: FFprobeProcessor = FFprobeProcessor(self._external_procs[1])
 
     self._input_file: os.PathLike | str = ""
     self._target_format: str = "mp4"
@@ -97,8 +65,25 @@ class App(ctk.CTk):
     self._populate_central_frame()
     self._central_frame.pack()
 
-    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self, vlc_cmd)
+    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self, self._external_procs[2])
     self._vid_trimmer.pack(fill='x')
+
+  def _check_procs_exist(self) -> None:
+    idx = 0
+
+    for proc in self._external_procs:
+      if proc is None:
+        close = CTkMessagebox(title="Missing Dependency", 
+                            message=f"Missing External Processor:\n {EXTERNAL_PROCS[idx]}!", 
+                            icon="cancel",
+                            option_1="Ok")
+        
+        if close.get() == "Ok":
+          self.quit()
+      
+        self.quit()
+      
+      idx += 1
 	
   def _create_menubar(self) -> None:
     menubar = CTkMenuBar(self)
