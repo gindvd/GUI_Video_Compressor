@@ -19,7 +19,7 @@ from components.progressbar_popup import ProgressbarPopup
 from components.video_trimmer import VideoTrimmer
 
 class App(ctk.CTk):
-  HW_CODEC_OPTS: dict[str] = {
+  HW_CODEC_OPTS: dict = {
     "NVIDIA" :  {
       "Windows" : ["h264_nvenc", "hevc_nvenc"],
       "Linux" : ["h264_nvenc", "hevc_nvenc"],
@@ -34,7 +34,7 @@ class App(ctk.CTk):
     },
   }
 
-  VIDEO_ATTR: tuple[str] = ("resolution", "fps", "duration")
+  VIDEO_ATTR: tuple = ("resolution", "fps", "duration")
 
   def __init__(self) -> None:
     super().__init__()
