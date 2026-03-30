@@ -4,7 +4,7 @@ from os import PathLike
 from utils import create_logs
 
 class FFprobeProcessor():
-  _CMD_ARGS: dict = {
+  _CMD_ARGS: dict[str] = {
     "duration" : {
        "entry" : "stream=duration",
         "-of_arg" : "default=noprint_wrappers=1:nokey=1"
