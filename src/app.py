@@ -367,8 +367,6 @@ class App(ctk.CTk):
   def _run_compression_cmd(self) -> None:
     start_time: str = self._vid_trimmer.get_start_time()
     duration: str = self._vid_trimmer.get_duration()
-    print(start_time)
-    print(duration)
 
     completed, err_msg = self._ffmpeg.compress(self._input_file, 
                                                self._target_format, 
