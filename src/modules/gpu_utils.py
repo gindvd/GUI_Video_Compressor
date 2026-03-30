@@ -14,7 +14,7 @@ class OSCompatibiltyError(Exception):
   def __str__(self) -> str:
     return f"{self._message} (Non-Compatible OS: {self._os})\nCompatible OS: Windows , Linux"
 
-CMD_DICT: dict = {
+CMD_DICT: dict[str, str] = {
   "Linux" : "lspci | grep -iE VGA|3D|video",
   "Darwin" : "system_profiler SPDisplaysDataType",
   "Windows" : {
