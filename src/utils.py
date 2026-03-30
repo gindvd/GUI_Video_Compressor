@@ -66,6 +66,8 @@ def get_vlc_cmd() -> PathLike | str | None:
         return None
 
       return "vlc"
+    
+    return None
 
 def create_logs(err_msg: str) -> None:
   now = datetime.now()
