@@ -275,11 +275,9 @@ class App(ctk.CTk):
     
     # Update combo box with list of FPS options lower than video's current FPS
     vid_fps = attr_vals[1]
-    print(vid_fps)
     
     numer, denom = vid_fps.split("/")
     fps = round(int(numer) / int(denom))
-    print(fps)
     
     fps_list = [120, 60, 30, 24, 15]
     
