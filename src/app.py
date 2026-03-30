@@ -138,7 +138,7 @@ class App(ctk.CTk):
     self._target_ext_drpdwn = ctk.CTkComboBox(self._central_frame, 
                                                              values=["mp4", "mkv", "mov"],
                                                              state='readonly',
-                                                             command=self._ext_choice)
+                                                             command=self._format_choice)
 
     self._target_ext_drpdwn.grid(row=2, column=1, padx=5, pady=5)
     self._target_ext_drpdwn.set("mp4")
@@ -303,7 +303,7 @@ class App(ctk.CTk):
       self._target_ext_drpdwn.set("mp4")
       self._target_format = "mp4"
   
-  def _ext_choice(self, choice) -> None:
+  def _format_choice(self, choice) -> None:
     self._target_format = choice
 
   def _res_choice(self, choice) -> None:
