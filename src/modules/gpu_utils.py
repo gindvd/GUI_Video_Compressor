@@ -2,8 +2,6 @@ import platform
 import subprocess
 import re
 
-from collections.abc import Callable
-
 from utils import create_logs
 from utils import DEVICE_OS
 
@@ -105,17 +103,17 @@ def run_cmd(cmd: list[str]) -> list[str] | None:
 
 def run_piped_cmd(cmd1: list[str], cmd2: list[str]) -> list[str] | None:
   proc1 = subprocess.Popen(cmd1,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            shell=False,
-                            text=True)
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           shell=False,
+                           text=True)
 
   proc2 = subprocess.Popen(cmd2,
-                             stdin=proc1.stdout,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             shell=False,
-                             text=True) 
+                           stdin=proc1.stdout,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           shell=False,
+                           text=True) 
   
   try:
     assert proc1.stdout is not None
