@@ -311,12 +311,12 @@ class App(ctk.CTk):
     if choice in ["libsvtav1", "libvpx-vp9"]:
       self._target_ext_drpdwn.configure(values=[ "mkv", "webm", "mp4"])
       self._target_ext_drpdwn.set("mkv")
-      self._ext_choice = "mkv"
+      self._target_format = "mkv"
     
     else:
       self._target_ext_drpdwn.configure(values=["mp4", "mkv", "mov"])
       self._target_ext_drpdwn.set("mp4")
-      self._ext_choice = "mp4"
+      self._target_format = "mp4"
   
   def _ext_choice(self, choice) -> None:
     self._target_format = choice
