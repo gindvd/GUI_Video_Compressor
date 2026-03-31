@@ -2,10 +2,8 @@ import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 
 import vlc
-import shutil
 
 from os import PathLike
-from pathlib import Path
 
 from utils import DEVICE_OS
 
