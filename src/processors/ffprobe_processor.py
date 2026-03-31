@@ -6,18 +6,18 @@ from utils import create_logs
 class FFprobeProcessor():
   _CMD_ARGS: dict = {
     "duration" : {
-       "entry" : "stream=duration",
-        "-of_arg" : "default=noprint_wrappers=1:nokey=1"
-      },
-      "resolution" : {
-        "entry" : "stream=width,height",
-        "-of_arg" : "csv=s=x:p=0"
-      },
-       "fps" : {
-           "entry" : "stream=avg_frame_rate",
-            "-of_arg" : "default=noprint_wrappers=1:nokey=1"
-      },
-    }
+      "entry" : "stream=duration",
+      "-of_arg" : "default=noprint_wrappers=1:nokey=1"
+    },
+    "resolution" : {
+      "entry" : "stream=width,height",
+      "-of_arg" : "csv=s=x:p=0"
+    },
+    "fps" : {
+      "entry" : "stream=avg_frame_rate",
+      "-of_arg" : "default=noprint_wrappers=1:nokey=1"
+    },
+  }
 
   def __init__(self, ffprobe: PathLike | str) -> None:
     self._ffprobe: PathLike | str = ffprobe
