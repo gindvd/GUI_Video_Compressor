@@ -99,7 +99,8 @@ class App(ctk.CTk):
     help_drop = CustomDropdownMenu(widget=help_btn)
     help_drop.add_option(option="About", command=self._show_about)
 
-  def _populate_central_frame(self) -> None:  
+  def _populate_central_frame(self) -> None: 
+    # Row 0
     ctk.CTkLabel(self._central_frame, text="Input File:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
     self._file_entry = ctk.CTkEntry(self._central_frame)
@@ -111,7 +112,8 @@ class App(ctk.CTk):
                                      command=self._browse_files)
     
     self._browse_btn.grid(row=0, column=4, padx=5, pady=5)
-
+    
+    # Row 1
     ctk.CTkLabel(self._central_frame, text="Codec:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
     self._codec_drpdwn = ctk.CTkComboBox(self._central_frame, 
@@ -132,7 +134,8 @@ class App(ctk.CTk):
 
     self._target_res_drpdwn.set("1920x1080")
     self._target_res_drpdwn.grid(row=1, column=3, padx=5, pady=5)
-
+    
+    # Row 2
     ctk.CTkLabel(self._central_frame, text="Video Format:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
     self._target_ext_drpdwn = ctk.CTkComboBox(self._central_frame, 
@@ -152,7 +155,8 @@ class App(ctk.CTk):
 
     self._target_fps_drpdwn.set("60")
     self._target_fps_drpdwn.grid(row=2, column=3, padx=5, pady=5)
-
+    
+    # Row 3
     ctk.CTkLabel(self._central_frame, text="Video Quality:").grid(row=3, column=0, padx=5, pady=5, sticky="sw")
 
     self._quality_slider = ctk.CTkSlider(self._central_frame, 
@@ -172,7 +176,8 @@ class App(ctk.CTk):
                                           text="Remove Audio",
                                           variable=self._aud_on_off,
                                           command=self._remove_audio)
-
+    
+    # Row 4
     self._rm_aud_chkbox.grid(row=4, column=0, padx=5, pady=5)
 
     self._compress_btn = ctk.CTkButton(self._central_frame, 
