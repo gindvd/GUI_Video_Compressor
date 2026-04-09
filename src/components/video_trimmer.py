@@ -1,11 +1,12 @@
+import tkinter as tk
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 
 import vlc
-
 from os import PathLike
 
 from utils import DEVICE_OS
+from CTkTrimSlider.ctk_trimslider import CTkTrimSlider
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, parent, vlc_cmd: PathLike | str) -> None:
@@ -14,8 +15,10 @@ class VideoTrimmer(ctk.CTkFrame):
     self._vlc_cmd = vlc_cmd
     
     self.duration_ms: int  = 0
-    self.start_time_ms: int  = 0
-    self.end_time_ms: int  = 0
+    
+    self._start_time: tk.Variable = tk.DoubleVar(self, value=0)
+    self._end_time: tk.Variable = tk.DoubleVar(self, value=1)
+    self._current_time: tk.Variable = tk.DoubleVar(self, value=0.5)
 
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
@@ -24,15 +27,15 @@ class VideoTrimmer(ctk.CTkFrame):
     self._instance.log_unset()
     self._vid_player = self._instance.media_player_new()
 
-    self._vid_panel: ctk.CTkFrame = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
+    self._vid_panel = ctk.CTkFrame(self, width=800, height=400, fg_color="black", corner_radius=0)
     self._vid_panel.pack(fill='both', expand=True, padx=5, pady=10)
 
-    self._control_panel: ctk.CTkFrame  = ctk.CTkFrame(self, corner_radius=0)
+    self._control_panel  = ctk.CTkFrame(self, corner_radius=0)
     self._control_panel.pack(fill='x', padx=5)
 
     self._create_control_panel()
 
-    self._time_panel: ctk.CTkFrame  = ctk.CTkFrame(self, corner_radius=0)
+    self._time_panel = ctk.CTkFrame(self, corner_radius=0)
     self._time_panel.pack(fill='x', padx=5, pady=(0,5))
 
     self._create_time_panel()
@@ -44,12 +47,17 @@ class VideoTrimmer(ctk.CTkFrame):
     return vlc.Instance("--no-xlib")
   
   def _create_control_panel(self) -> None:
-    self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel, 
+    self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
+                                                        width=30,
+                                                        height=26,
                                                         text="Play",
                                                         state="disabled",
                                                         command=self._play_pause)
 
-    self._play_pause_btn.pack(padx=5, pady=5)
+    self._play_pause_btn.grid(row=0, column=0, padx=10, pady=5, sticky="nswe")
+
+    self._trim_slider = CTkTrimSlider(self._control_panel, width=650, state="disabled", start_variable=self._start_time, end_variable=self._end_time, center_variable=self._current_time)
+    self._trim_slider.grid(row=0, column=1, padx=10, pady=5, sticky="nswe")
 
   def _create_time_panel(self) -> None:
     ctk.CTkLabel(self._time_panel, text="Video Duration:").grid(row=0, column=0, padx=10, pady=5)
