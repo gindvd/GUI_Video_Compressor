@@ -59,6 +59,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._trim_slider = CTkTrimSlider(self._control_panel, 
                                       width=600, 
                                       state="disabled", 
+                                      cbutton_command=self._seek,
                                       start_variable=self._start_time, 
                                       end_variable=self._end_time, 
                                       center_variable=self._current_time)
@@ -98,6 +99,9 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._curtime_lbl.configure(text=current_time)
     self.after(100, self._update_progress)
+  
+  def _seek(self, value):
+    self._vid_player.set_time(int(value))
 
   def set_vid_values(self, duration: float) -> None:
     self._duration = int(duration * 1000)

@@ -237,7 +237,7 @@ class App(ctk.CTk):
       return False
 
     return True
-    
+  
   def _update_gui(self) -> None:
     attr_vals = []
     
