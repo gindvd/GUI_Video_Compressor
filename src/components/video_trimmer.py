@@ -48,27 +48,31 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _create_control_panel(self) -> None:
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
-                                                        width=30,
-                                                        height=26,
+                                                        width=60,
+                                                        height=30,
                                                         text="Play",
                                                         state="disabled",
                                                         command=self._play_pause)
 
     self._play_pause_btn.grid(row=0, column=0, padx=10, pady=5, sticky="nswe")
 
-    self._trim_slider = CTkTrimSlider(self._control_panel, width=650, state="disabled", start_variable=self._start_time, end_variable=self._end_time, center_variable=self._current_time)
+    self._trim_slider = CTkTrimSlider(self._control_panel, 
+                                      width=600, 
+                                      state="disabled", 
+                                      start_variable=self._start_time, 
+                                      end_variable=self._end_time, 
+                                      center_variable=self._current_time)
+
     self._trim_slider.grid(row=0, column=1, padx=10, pady=5, sticky="nswe")
+
+    self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._control_panel, text="00:00:00.000")
+    self._curtime_lbl.grid(row=0, column=2, padx=10, pady=5, sticky="nswe")
 
   def _create_time_panel(self) -> None:
     ctk.CTkLabel(self._time_panel, text="Video Duration:").grid(row=0, column=0, padx=10, pady=5)
 
     self._dur_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._dur_lbl.grid(row=0, column=1, padx=10, pady=5)
-
-    ctk.CTkLabel(self._time_panel, text="Current Time:").grid(row=0, column=2, padx=10, pady=5)
-
-    self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
-    self._curtime_lbl.grid(row=0, column=3, padx=10, pady=5)
 
   def _play_pause(self) -> None:
     playing = self._vid_player.is_playing()
