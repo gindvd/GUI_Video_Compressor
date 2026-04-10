@@ -14,7 +14,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._parent = parent
     self._vlc_cmd = vlc_cmd
     
-    self.duration_ms: int  = 0
+    self._duration: int  = 0
     
     self._start_time: tk.Variable = tk.DoubleVar(self, value=0)
     self._end_time: tk.Variable = tk.DoubleVar(self, value=1)
@@ -94,15 +94,19 @@ class VideoTrimmer(ctk.CTkFrame):
   def _update_progress(self):
     current_time_ms = self._vid_player.get_time()
     current_time = self._ms_text_converter(current_time_ms)
+    self._current_time.set(current_time_ms)
 
     self._curtime_lbl.configure(text=current_time)
     self.after(100, self._update_progress)
 
   def set_vid_values(self, duration: float) -> None:
-    self.duration_ms = int(duration * 1000)
-    self.end_time_ms = self.duration_ms
+    self._duration = int(duration * 1000)
+    self._trim_slider.configure(require_redraw=True, to=self._duration, number_of_steps=self._duration, state="normal")
 
-    self._dur_lbl.configure(text=self._ms_text_converter(self.duration_ms))
+    self._current_time.set(0)
+    self._end_time.set(self._duration)
+
+    self._dur_lbl.configure(text=self._ms_text_converter(self._duration))
 
   def set_video(self, vid_file: PathLike | str) -> None:
     self.update()
