@@ -9,9 +9,8 @@ from utils import DEVICE_OS
 from CTkTrimSlider.ctk_trimslider import CTkTrimSlider
 
 class VideoTrimmer(ctk.CTkFrame):
-  def __init__(self, parent, vlc_cmd: PathLike | str) -> None:
-    super().__init__(parent, corner_radius=0)
-    self._parent = parent
+  def __init__(self, master, vlc_cmd: PathLike | str) -> None:
+    super().__init__(master=master, corner_radius=0)
     self._vlc_cmd = vlc_cmd
     
     self._duration: int  = 0
