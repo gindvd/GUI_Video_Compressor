@@ -4,6 +4,7 @@ from CTkMessagebox import CTkMessagebox
 
 import vlc
 from os import PathLike
+from threading import Thread
 
 from utils import DEVICE_OS
 from CTkTrimSlider.ctk_trimslider import CTkTrimSlider
@@ -24,7 +25,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._instance: vlc.Instance = self._platform_specific_inst()
     self._instance.log_unset()
-    self._vid_player = self._instance.media_player_new()
+    self._media_player: vlc.MediaPlayer = self._instance.media_player_new()
 
     self._vid_panel = ctk.CTkFrame(self, width=800, height=400, fg_color="black", corner_radius=0)
     self._vid_panel.pack(fill='both', expand=True, padx=5, pady=10)
@@ -77,45 +78,64 @@ class VideoTrimmer(ctk.CTkFrame):
     self._dur_lbl.grid(row=0, column=1, padx=10, pady=5)
 
   def _play_pause(self) -> None:
-    playing = self._vid_player.is_playing()
+    playing = self._media_player.is_playing()
 
     if not playing:
-      self._vid_player.play()
+      if self._current_time.get() >= self._end_time.get():
+        self._current_time.set(self._start_time.get())
+
+      self._media_player.play()
       self._play_pause_btn.configure(text='Pause')
+
+      Thread(target=self._update_progress, daemon=True).start()
     
     elif playing:
-      self._vid_player.pause()
+      self._media_player.pause()
       self._play_pause_btn.configure(text="Play")
 
-  def _display_video(self) -> None:
-    if DEVICE_OS == "Linux":
-      self._vid_player.set_xwindow(self._vid_panel.winfo_id())
-    elif DEVICE_OS == "Windows":
-      self._vid_player.set_hwnd(self._vid_panel.winfo_id())
+  def _update_progress(self) -> None:
+    while True:
+      state = self._media_player.get_state()
 
-  def _update_progress(self):
-    current_time_ms = self._vid_player.get_time()
-    current_time = self._ms_text_converter(current_time_ms)
-    self._current_time.set(current_time_ms)
+      if state == vlc.State.Ended:
+        self._play_pause_btn.configure(text="Play")
+        break
+      
+      if state == vlc.State.Paused:
+        break
 
-    self._curtime_lbl.configure(text=current_time)
-    self.after(100, self._update_progress)
+      current_time = self._media_player.get_time()
+      self._current_time.set(current_time)
+      self._curtime_lbl.configure(text=self._ms_text_converter(current_time))
+
+      if self._current_time.get() >= self._end_time.get():
+        self._media_player.pause()
+        self._play_pause_btn.configure(text="Play")
+        break
   
   def _seek(self, value):
-    self._vid_player.set_time(int(value))
+    self._media_player.set_time(int(value))
   
   def _set_start_time(self, value):
     self._current_time.set(value)
-    self._vid_player.set_time(int(value))
+    self._media_player.set_time(int(value))
 
   def _set_end_time(self, value):
     self._current_time.set(value)
-    self._vid_player.set_time(int(value))
+    self._media_player.set_time(int(value))
+    self._media_player.pause()
+
+  def _display_video(self) -> None:
+    if DEVICE_OS == "Linux":
+      self._media_player.set_xwindow(self._vid_panel.winfo_id())
+    elif DEVICE_OS == "Windows":
+      self._media_player.set_hwnd(self._vid_panel.winfo_id())
 
   def set_vid_values(self, duration: float) -> None:
     self._duration = int(duration * 1000)
     self._trim_slider.configure(require_redraw=True, to=self._duration, number_of_steps=self._duration, state="normal")
 
+    self._start_time.set(0)
     self._current_time.set(0)
     self._end_time.set(self._duration)
 
@@ -124,8 +144,8 @@ class VideoTrimmer(ctk.CTkFrame):
   def set_video(self, vid_file: PathLike | str) -> None:
     self.update()
 
-    video = self._instance.media_new(vid_file)
-    self._vid_player.set_media(video)
+    media = self._instance.media_new(vid_file)
+    self._media_player.set_media(media)
 
     self._display_video()
 
@@ -133,8 +153,6 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._play_pause()
     self.after(100, self._play_pause)
-
-    self._update_progress()
   
   def get_start_time(self) -> str:
     return self._ms_text_converter(self.start_time_ms)
