@@ -63,6 +63,6 @@ class FFprobeProcessor():
         return False, None, "Error Occured!\nCheck logs for details!"
       
       if result is None or "N/A" in result:
-        return False, None, f"Error Occured!\nVideo {vid_attr} not found!"
+        return False, None, f"Issue getting info from file headers."
 
       return True, result, None
