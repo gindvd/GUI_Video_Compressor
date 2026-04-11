@@ -6,7 +6,7 @@ from utils import create_logs
 class FFprobeProcessor():
   _CMD_ARGS: dict = {
     "duration" : {
-      "entry" : "stream=duration",
+      "entry" : "format=duration",
       "-of_arg" : "default=noprint_wrappers=1:nokey=1"
     },
     "resolution" : {
@@ -62,7 +62,7 @@ class FFprobeProcessor():
         create_logs(err)
         return False, None, "Error Occured!\nCheck logs for details!"
       
-      if result is None:
+      if result is None or "N/A" in result:
         return False, None, f"Error Occured!\nVideo {vid_attr} not found!"
 
       return True, result, None
