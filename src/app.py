@@ -62,6 +62,8 @@ class App(ctk.CTk):
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
 
+    self._set_icon()
+
     self._create_menubar()
     self._main_frame = ctk.CTkFrame(self)
     self._build_gui()  
@@ -77,6 +79,20 @@ class App(ctk.CTk):
         
         self.destroy()
         raise SystemExit(f"Missing dependency: {EXTERNAL_PROCS[idx]}")
+  
+  def _set_icon(self) -> None:
+    icon_path = get_icon()
+    
+    if icon_path is None:
+      CTkMessagebox(title="Missing icon",
+                    message="Icon missing from assets folder",
+                    icon="warning")
+      return
+    
+    else:
+      # using png since cross platform 
+      icon = tk.PhotoImage(file=icon_path)
+      self.iconphoto(True, icon)
 	
   def _create_menubar(self) -> None:
     menubar = CTkMenuBar(self)

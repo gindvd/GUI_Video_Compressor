@@ -70,3 +70,12 @@ def create_logs(err_msg: str) -> None:
 
   with open(log_file, 'w') as f:
     f.write(err_msg)
+
+def get_icon() -> PathLike | str | None:
+  icon_abspath = ROOT_DIR / Path("assets/icons/icon.png")
+
+  if not icon_abspath.is_file():
+    return None
+  
+  return icon_abspath
+  
