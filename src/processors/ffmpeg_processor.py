@@ -16,7 +16,8 @@ class FFmpegProcessor():
               file_format: str, 
               resolution: str, 
               codec: str, 
-              fps: str, 
+              fps: str,
+              preset: str | None,
               quality: int, 
               audio: bool,
               start_time: str ,
@@ -61,6 +62,9 @@ class FFmpegProcessor():
       case _:
         quality_args = ["-crf", str(crf)]
     
+    if codec == "libvpx-vp9":
+      quality_args.extend(["-b:v", "0"])
+    
     cmd = [self._ffmpeg] 
     
     if hwaccel_args is not None:
@@ -68,8 +72,12 @@ class FFmpegProcessor():
     
     cmd.extend(["-i", input_file,
                 "-c:v", codec, 
-                *scale_args, 
-                *quality_args, 
+                *scale_args])
+    
+    if preset is not None:
+      cmd.extend(["-preset", preset])
+                
+    cmd.extend([*quality_args, 
                 *aud_opts,
                 "-ss", start_time,
                 "-t", duration, 
@@ -82,14 +90,15 @@ class FFmpegProcessor():
     else:
       creation_flags["start_new_session"] = True
     
-    self._proc = subprocess.Popen(cmd,
+
+    try:
+      self._proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
                               stderr=subprocess.STDOUT,
                               shell=False,
                               text=True,
                               **creation_flags)
 
-    try:
       out, _ = self._proc.communicate()
       self._proc.wait()
     
@@ -117,7 +126,7 @@ class FFmpegProcessor():
         if os.path.exists(output_file):
                 os.remove(output_file)
         
-        create_logs(f"{' '.join(cmd)}\n\n" + out)
+        create_logs(f"{' '.join(str(c) for c in cmd)}\n\n" + out)
         return False, "Compression Failed\nCheck logs for details!"
 
       elif rc != 0 and self._terminated == True:
