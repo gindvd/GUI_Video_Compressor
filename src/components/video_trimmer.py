@@ -4,7 +4,6 @@ from CTkMessagebox import CTkMessagebox
 
 import vlc
 from os import PathLike
-from threading import Thread
 
 from utils import DEVICE_OS
 from CTkTrimSlider.ctk_trimslider import CTkTrimSlider
@@ -14,7 +13,13 @@ class VideoTrimmer(ctk.CTkFrame):
     super().__init__(master=master, corner_radius=0)
     self._vlc_cmd = vlc_cmd
     
-    self._duration: int  = 0
+    self._duration: int = 0
+    self._actual_duration: int = 0
+    self._media: vlc.Media | None = None
+    self._update_id: str | None = None
+    self._is_seeking: bool = False
+    self._seek_reset_id: str | None = None
+    self._is_muted: bool = False
     
     self._start_time: tk.Variable = tk.DoubleVar(self, value=0)
     self._end_time: tk.Variable = tk.DoubleVar(self, value=1)
@@ -25,12 +30,12 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._instance: vlc.Instance = self._platform_specific_inst()
     self._instance.log_unset()
-    self._media_player: vlc.MediaPlayer = self._instance.media_player_new()
+    self._vid_player = self._instance.media_player_new()
 
     self._vid_panel = ctk.CTkFrame(self, width=800, height=400, fg_color="black", corner_radius=0)
     self._vid_panel.pack(fill='both', expand=True, padx=5, pady=10)
 
-    self._control_panel  = ctk.CTkFrame(self, corner_radius=0)
+    self._control_panel = ctk.CTkFrame(self, corner_radius=0)
     self._control_panel.pack(fill='x', padx=5)
 
     self._create_control_panel()
@@ -71,65 +76,154 @@ class VideoTrimmer(ctk.CTkFrame):
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._control_panel, text="00:00:00.000")
     self._curtime_lbl.grid(row=0, column=2, padx=10, pady=5, sticky="nswe")
 
-  def _create_time_panel(self) -> None:
-    ctk.CTkLabel(self._time_panel, text="Video Duration:").grid(row=0, column=0, padx=10, pady=5)
+    self._volume_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
+                                                    width=60,
+                                                    height=30,
+                                                    text="Mute",
+                                                    state="disabled",
+                                                    command=self._toggle_mute)
 
-    self._dur_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
-    self._dur_lbl.grid(row=0, column=1, padx=10, pady=5)
+    self._volume_btn.grid(row=0, column=3, padx=10, pady=5, sticky="nswe")
+
+    self._vol_popup = ctk.CTkFrame(self, corner_radius=8)
+    self._vol_popup_visible: bool = False
+    self._vol_hide_id: str | None = None
+
+    self._volume_slider: ctk.CTkSlider = ctk.CTkSlider(self._vol_popup,
+                                                       height=120,
+                                                       width=24,
+                                                       from_=0,
+                                                       to=100,
+                                                       number_of_steps=100,
+                                                       orientation="vertical",
+                                                       command=self._set_volume)
+    self._volume_slider.set(100)
+    self._volume_slider.pack(padx=6, pady=8)
+
+    self._volume_btn.bind("<Enter>", self._show_vol_popup)
+    self._volume_btn.bind("<Leave>", self._schedule_hide_vol_popup)
+    self._vol_popup.bind("<Enter>", self._cancel_hide_vol_popup)
+    self._vol_popup.bind("<Leave>", self._schedule_hide_vol_popup)
+    self._volume_slider.bind("<Enter>", self._cancel_hide_vol_popup)
+    self._volume_slider.bind("<Leave>", self._schedule_hide_vol_popup)
+
+  def _create_time_panel(self) -> None:
+    ctk.CTkLabel(self._time_panel, text="New Duration:").grid(row=0, column=0, padx=10, pady=5)
+
+    self._current_duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
+    self._current_duration_lbl.grid(row=0, column=1, padx=10, pady=5)
+
+    ctk.CTkLabel(self._time_panel, text="Video Duration:").grid(row=0, column=20, padx=10, pady=5)
+
+    self._duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
+    self._duration_lbl.grid(row=0, column=3, padx=10, pady=5)
 
   def _play_pause(self) -> None:
-    playing = self._media_player.is_playing()
+    state = self._vid_player.get_state()
 
-    if not playing:
-      if self._current_time.get() >= self._end_time.get():
-        self._current_time.set(self._start_time.get())
+    if state == vlc.State.Ended:
+      self._restart_media(int(self._start_time.get()))
+      return
 
-      self._media_player.play()
-      self._play_pause_btn.configure(text='Pause')
-
-      Thread(target=self._update_progress, daemon=True).start()
-    
-    elif playing:
-      self._media_player.pause()
+    if self._vid_player.is_playing():
+      self._vid_player.pause()
       self._play_pause_btn.configure(text="Play")
-
-  def _update_progress(self) -> None:
-    while True:
-      state = self._media_player.get_state()
-
-      if state == vlc.State.Ended:
-        self._play_pause_btn.configure(text="Play")
-        break
-      
-      if state == vlc.State.Paused:
-        break
-
-      current_time = self._media_player.get_time()
-      self._current_time.set(current_time)
-      self._curtime_lbl.configure(text=self._ms_text_converter(current_time))
-
-      if self._current_time.get() >= self._end_time.get():
-        self._media_player.pause()
-        self._play_pause_btn.configure(text="Play")
-        break
-  
-  def _seek(self, value):
-    self._media_player.set_time(int(value))
-  
-  def _set_start_time(self, value):
-    self._current_time.set(value)
-    self._media_player.set_time(int(value))
-
-  def _set_end_time(self, value):
-    self._current_time.set(value)
-    self._media_player.set_time(int(value))
-    self._media_player.pause()
+    else:
+      current_ms = self._vid_player.get_time()
+      end_ms = int(self._end_time.get())
+      if current_ms >= end_ms:
+        start_ms = int(self._start_time.get())
+        self._vid_player.set_time(start_ms)
+        self._current_time.set(start_ms)
+        self._curtime_lbl.configure(text=self._ms_text_converter(start_ms))
+      self._vid_player.play()
+      self._play_pause_btn.configure(text='Pause')
 
   def _display_video(self) -> None:
     if DEVICE_OS == "Linux":
-      self._media_player.set_xwindow(self._vid_panel.winfo_id())
+      self._vid_player.set_xwindow(self._vid_panel.winfo_id())
     elif DEVICE_OS == "Windows":
-      self._media_player.set_hwnd(self._vid_panel.winfo_id())
+      self._vid_player.set_hwnd(self._vid_panel.winfo_id())
+
+  def _update_progress(self):
+    state = self._vid_player.get_state()
+
+    if state == vlc.State.Playing and not self._is_seeking:
+      current_time_ms = self._vid_player.get_time()
+      end_time_ms = int(self._end_time.get())
+
+      if current_time_ms >= end_time_ms:
+        self._vid_player.pause()
+        self._vid_player.set_time(end_time_ms)
+        self._play_pause_btn.configure(text="Play")
+        current_time_ms = end_time_ms
+
+      self._current_time.set(current_time_ms)
+      self._curtime_lbl.configure(text=self._ms_text_converter(current_time_ms))
+
+    elif state == vlc.State.Ended:
+      end_time_ms = int(self._end_time.get())
+      self._current_time.set(end_time_ms)
+      self._curtime_lbl.configure(text=self._ms_text_converter(end_time_ms))
+      self._play_pause_btn.configure(text="Play")
+
+    self._update_id = self.after(33, self._update_progress)
+  
+  def _seek(self, value):
+    self._is_seeking = True
+    target = int(value)
+
+    state = self._vid_player.get_state()
+    if state == vlc.State.Ended:
+      self._restart_media(target, paused=True)
+    else:
+      self._vid_player.set_time(target)
+
+    self._curtime_lbl.configure(text=self._ms_text_converter(target))
+    self._schedule_seek_reset()
+  
+  def _set_start_time(self, value):
+    self._is_seeking = True
+    target = int(value)
+    self._current_time.set(target)
+
+    state = self._vid_player.get_state()
+    if state == vlc.State.Ended:
+      self._restart_media(target, paused=True)
+    else:
+      self._vid_player.set_time(target)
+
+    self._curtime_lbl.configure(text=self._ms_text_converter(target))
+    self._schedule_seek_reset()
+
+    new_duration = int(self._end_time.get()) - target
+    self._current_duration_lbl.configure(text=self._ms_text_converter(new_duration))
+
+  def _set_end_time(self, value):
+    self._is_seeking = True
+    target = int(value)
+    self._current_time.set(target)
+
+    state = self._vid_player.get_state()
+    if state == vlc.State.Ended:
+      self._restart_media(target, paused=True)
+    else:
+      self._vid_player.set_time(target)
+    
+    self._curtime_lbl.configure(text=self._ms_text_converter(target))
+    self._schedule_seek_reset()
+
+    new_duration = target - int(self._start_time.get())
+    self._current_duration_lbl.configure(text=self._ms_text_converter(new_duration))
+  
+  def _schedule_seek_reset(self) -> None:
+    if self._seek_reset_id is not None:
+      self.after_cancel(self._seek_reset_id)
+    self._seek_reset_id = self.after(150, self._reset_seeking)
+
+  def _reset_seeking(self) -> None:
+    self._is_seeking = False
+    self._seek_reset_id = None
 
   def set_vid_values(self, duration: float) -> None:
     self._duration = int(duration * 1000)
@@ -139,20 +233,131 @@ class VideoTrimmer(ctk.CTkFrame):
     self._current_time.set(0)
     self._end_time.set(self._duration)
 
-    self._dur_lbl.configure(text=self._ms_text_converter(self._duration))
+    self._current_duration_lbl.configure(text=self._ms_text_converter(self._duration))
+    self._duration_lbl.configure(text=self._ms_text_converter(self._duration)) 
 
   def set_video(self, vid_file: PathLike | str) -> None:
+    if self._update_id is not None:
+      self.after_cancel(self._update_id)
+      self._update_id = None
+
+    self._vid_player.stop()
     self.update()
 
-    media = self._instance.media_new(vid_file)
-    self._media_player.set_media(media)
+    self._media = self._instance.media_new(vid_file)
+    self._vid_player.set_media(self._media)
 
     self._display_video()
 
     self._play_pause_btn.configure(state="normal")
+    self._volume_btn.configure(state="normal")
 
-    self._play_pause()
-    self.after(100, self._play_pause)
+    self._vid_player.play()
+    self._play_pause_btn.configure(text="Pause")
+    self.after(200, self._pause_initial_frame)
+
+    self._update_progress()
+
+  def _pause_initial_frame(self) -> None:
+    if self._vid_player.is_playing():
+      self._vid_player.pause()
+      self._vid_player.set_time(0)
+      self._play_pause_btn.configure(text="Play")
+      self._current_time.set(0)
+      self._curtime_lbl.configure(text="00:00:00.000")
+
+  def _restart_media(self, seek_ms: int, paused: bool = False) -> None:
+    self._vid_player.set_media(self._media)
+    self._display_video()
+    self._vid_player.play()
+    if paused:
+      self.after(100, lambda: self._seek_and_pause(seek_ms))
+    else:
+      self.after(100, lambda: self._vid_player.set_time(seek_ms))
+      self._play_pause_btn.configure(text='Pause')
+
+  def _seek_and_pause(self, seek_ms: int, retries: int = 10) -> None:
+    state = self._vid_player.get_state()
+    if state not in (vlc.State.Playing, vlc.State.Paused):
+      if retries > 0:
+        self.after(50, lambda: self._seek_and_pause(seek_ms, retries - 1))
+      return
+    self._vid_player.set_time(seek_ms)
+    self._vid_player.pause()
+    self._play_pause_btn.configure(text="Play")
+    self._current_time.set(seek_ms)
+    self._curtime_lbl.configure(text=self._ms_text_converter(seek_ms))
+
+  def _toggle_mute(self) -> None:
+    self._is_muted = not self._is_muted
+    self._vid_player.audio_set_mute(self._is_muted)
+
+  def _set_volume(self, value) -> None:
+    volume = int(value)
+    self._vid_player.audio_set_volume(volume)
+    if volume == 0 and not self._is_muted:
+      self._is_muted = True
+      self._vid_player.audio_set_mute(True)
+    elif volume > 0 and self._is_muted:
+      self._is_muted = False
+      self._vid_player.audio_set_mute(False)
+
+  def _show_vol_popup(self, event=None) -> None:
+    if self._vol_hide_id is not None:
+      self.after_cancel(self._vol_hide_id)
+      self._vol_hide_id = None
+
+    if self._vol_popup_visible:
+      return
+
+    self._volume_btn.update_idletasks()
+    btn_x = self._volume_btn.winfo_rootx() - self.winfo_rootx()
+    btn_y = self._volume_btn.winfo_rooty() - self.winfo_rooty()
+    btn_w = self._volume_btn.winfo_width()
+    popup_w = self._vol_popup.winfo_reqwidth()
+
+    x = btn_x + (btn_w - popup_w) // 2
+    y = btn_y - self._vol_popup.winfo_reqheight() - 4
+
+    self._vol_popup.place(x=x, y=y)
+    self._vol_popup.lift()
+    self._vol_popup_visible = True
+
+  def _schedule_hide_vol_popup(self, event=None) -> None:
+    if self._vol_hide_id is not None:
+      self.after_cancel(self._vol_hide_id)
+    self._vol_hide_id = self.after(300, self._hide_vol_popup)
+
+  def _cancel_hide_vol_popup(self, event=None) -> None:
+    if self._vol_hide_id is not None:
+      self.after_cancel(self._vol_hide_id)
+      self._vol_hide_id = None
+
+  def _hide_vol_popup(self) -> None:
+    self._vol_popup.place_forget()
+    self._vol_popup_visible = False
+    self._vol_hide_id = None
+
+  def release(self) -> None:
+    if self._update_id is not None:
+      self.after_cancel(self._update_id)
+      self._update_id = None
+
+    if self._seek_reset_id is not None:
+      self.after_cancel(self._seek_reset_id)
+      self._seek_reset_id = None
+
+    self._vid_player.stop()
+    self._vid_player.release()
+    self._instance.release()
+
+  @property
+  def start_time_ms(self) -> int:
+    return int(self._start_time.get())
+
+  @property
+  def duration_ms(self) -> int:
+    return int(self._end_time.get()) - int(self._start_time.get())
   
   def get_start_time(self) -> str:
     return self._ms_text_converter(self.start_time_ms)
