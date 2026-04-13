@@ -90,6 +90,8 @@ class FFmpegProcessor():
     else:
       creation_flags["start_new_session"] = True
     
+    cmd_str = ' '.join(str(c) for c in cmd)
+    print(cmd_str)
 
     try:
       self._proc = subprocess.Popen(cmd,
