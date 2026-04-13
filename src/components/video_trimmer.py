@@ -14,7 +14,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._vlc_cmd = vlc_cmd
     
     self._duration: int = 0
-    self._actual_duration: int = 0
+
     self._media: vlc.Media | None = None
     self._update_id: str | None = None
     self._is_seeking: bool = False
