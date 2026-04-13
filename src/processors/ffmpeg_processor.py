@@ -70,7 +70,9 @@ class FFmpegProcessor():
     if hwaccel_args is not None:
       cmd.extend(hwaccel_args)
     
-    cmd.extend(["-i", input_file,
+    cmd.extend(["-ss", start_time,
+                "-t", duration, 
+                "-i", input_file,
                 "-c:v", codec, 
                 *scale_args])
     
@@ -79,8 +81,6 @@ class FFmpegProcessor():
                 
     cmd.extend([*quality_args, 
                 *aud_opts,
-                "-ss", start_time,
-                "-t", duration, 
                 output_file])
 
     creation_flags = {}
@@ -89,9 +89,6 @@ class FFmpegProcessor():
       creation_flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     else:
       creation_flags["start_new_session"] = True
-    
-    cmd_str = ' '.join(str(c) for c in cmd)
-    print(cmd_str)
 
     try:
       self._proc = subprocess.Popen(cmd,
