@@ -33,15 +33,15 @@ class VideoTrimmer(ctk.CTkFrame):
     self._vid_player = self._instance.media_player_new()
 
     self._vid_panel = ctk.CTkFrame(self, width=800, height=400, fg_color="black", corner_radius=0)
-    self._vid_panel.pack(fill='both', expand=True, padx=5, pady=10)
+    self._vid_panel.pack(fill='both', expand=True)
 
     self._control_panel = ctk.CTkFrame(self, corner_radius=0)
-    self._control_panel.pack(fill='x', padx=5)
+    self._control_panel.pack(fill='both', expand=True)
 
     self._create_control_panel()
 
     self._time_panel = ctk.CTkFrame(self, corner_radius=0)
-    self._time_panel.pack(fill='x', padx=5, pady=(0,5))
+    self._time_panel.pack(fill='both', expand=True)
 
     self._create_time_panel()
 
@@ -53,13 +53,13 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _create_control_panel(self) -> None:
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
-                                                        width=60,
+                                                        width=61,
                                                         height=30,
                                                         text="Play",
                                                         state="disabled",
                                                         command=self._play_pause)
 
-    self._play_pause_btn.grid(row=0, column=0, padx=10, pady=5, sticky="nswe")
+    self._play_pause_btn.grid(row=0, column=0, padx=10, pady=10, sticky="nswe")
 
     self._trim_slider = CTkTrimSlider(self._control_panel, 
                                       width=600, 
@@ -71,10 +71,10 @@ class VideoTrimmer(ctk.CTkFrame):
                                       end_variable=self._end_time,
                                       center_variable=self._current_time)
 
-    self._trim_slider.grid(row=0, column=1, padx=10, pady=5, sticky="nswe")
+    self._trim_slider.grid(row=0, column=1, padx=10, pady=10, sticky="nswe")
 
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._control_panel, text="00:00:00.000")
-    self._curtime_lbl.grid(row=0, column=2, padx=10, pady=5, sticky="nswe")
+    self._curtime_lbl.grid(row=0, column=2, padx=10, pady=10, sticky="nswe")
 
     self._volume_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                     width=60,
@@ -83,7 +83,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                                     state="disabled",
                                                     command=self._toggle_mute)
 
-    self._volume_btn.grid(row=0, column=3, padx=10, pady=5, sticky="nswe")
+    self._volume_btn.grid(row=0, column=3, padx=10, pady=10, sticky="nswe")
 
     self._vol_popup = ctk.CTkFrame(self, corner_radius=8)
     self._vol_popup_visible: bool = False
@@ -95,6 +95,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                                        from_=0,
                                                        to=100,
                                                        number_of_steps=100,
+                                                       state="disabled",
                                                        orientation="vertical",
                                                        command=self._set_volume)
     self._volume_slider.set(100)
@@ -251,6 +252,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._play_pause_btn.configure(state="normal")
     self._volume_btn.configure(state="normal")
+    self._volume_slider.configure(state="normal")
 
     self._vid_player.play()
     self._play_pause_btn.configure(text="Pause")
@@ -297,16 +299,20 @@ class VideoTrimmer(ctk.CTkFrame):
       self._volume_slider.set(0)
     else:
       self._volume_btn.configure(text="Mute")
+      self._volume_slider.set(10)
+      self._set_volume(10)
 
-  def _set_volume(self, value) -> None:
+  def _set_volume(self, value: int) -> None:
     volume = int(value)
     self._vid_player.audio_set_volume(volume)
     if volume == 0 and not self._is_muted:
       self._is_muted = True
       self._vid_player.audio_set_mute(True)
+      self._volume_btn.configure(text="Unmute")
     elif volume > 0 and self._is_muted:
       self._is_muted = False
       self._vid_player.audio_set_mute(False)
+      self._volume_btn.configure(text="Mute")
 
   def _show_vol_popup(self, event=None) -> None:
     if self._vol_hide_id is not None:
