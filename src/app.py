@@ -219,13 +219,15 @@ class App(ctk.CTk):
     self._options_frame.grid(row=0, column=1, rowspan=2, padx=10, pady=10, sticky="nsew")
 
     # compresion button
-    self._compress_btn = ctk.CTkButton(self._main_frame, 
+    self._compress_btn = ctk.CTkButton(self._main_frame,
+                                       width = 150,
+                                       height=40,
                                        text="Compress",
                                        font=(ctk.CTkFont(size=20)),
                                        state="disabled",
                                        command=self._compress_video)
     
-    self._compress_btn.grid(row=2, column=1, padx=10, pady=10, sticky="nswe")
+    self._compress_btn.grid(row=2, column=1, padx=10, pady=10, )
 
   def _show_about(self) -> None:
     about_file = ROOT_DIR / Path("assets/about.txt")
