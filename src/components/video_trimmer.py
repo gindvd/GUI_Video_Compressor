@@ -113,7 +113,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._current_duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._current_duration_lbl.grid(row=0, column=1, padx=10, pady=5)
 
-    ctk.CTkLabel(self._time_panel, text="Video Duration:").grid(row=0, column=20, padx=10, pady=5)
+    ctk.CTkLabel(self._time_panel, text="Video Duration:").grid(row=0, column=2, padx=10, pady=5)
 
     self._duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._duration_lbl.grid(row=0, column=3, padx=10, pady=5)
