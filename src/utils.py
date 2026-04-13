@@ -22,14 +22,29 @@ def get_win_procs() -> list:
   proc_paths: list = []
 
   for proc in EXTERNAL_PROCS:
-    try:
-      abs_path = ROOT_DIR / Path(f"lib/win32/f{proc}.exe")
-
-    except FileNotFoundError:
-      proc_paths.append(None)
-
+    if proc == "vlc":
+      abs_path = ROOT_DIR / Path(f"lib/win32/plugins")
+      try:
+        if not abs_path.is_dir():
+          raise FileNotFoundError
+      
+      except FileNotFoundError:
+        proc_paths.append(None)
+      
+      else:
+        proc_paths.append(abs_path)
     else:
-      proc_paths.append(abs_path)
+      abs_path = ROOT_DIR / Path(f"lib/win32/{proc}.exe")
+    
+      try:
+        if not abs_path.is_file():
+          raise FileNotFoundError
+      
+      except FileNotFoundError:
+        proc_paths.append(None)
+
+      else:
+        proc_paths.append(abs_path)
   
   return proc_paths
 
@@ -47,7 +62,7 @@ def get_linux_procs() -> list:
 
 def create_logs(err_msg: str) -> None:
   now = datetime.now()
-  basename = Path(str(now) + ".log")
+  basename = Path(now.strftime("%Y-%m-%d_%H-%M-%S") + ".log")
 
   log_directory = ROOT_DIR / Path('logs')
   log_directory.mkdir(exist_ok=True)
