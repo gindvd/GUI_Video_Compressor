@@ -1,6 +1,5 @@
 import os
 import subprocess
-import re
 
 from utils import create_logs
 from utils import DEVICE_OS
