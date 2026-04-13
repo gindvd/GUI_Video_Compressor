@@ -292,6 +292,12 @@ class VideoTrimmer(ctk.CTkFrame):
     self._is_muted = not self._is_muted
     self._vid_player.audio_set_mute(self._is_muted)
 
+    if self._is_muted:
+      self._volume_btn.configure(text="Unmute")
+      self._volume_slider.set(0)
+    else:
+      self._volume_btn.configure(text="Mute")
+
   def _set_volume(self, value) -> None:
     volume = int(value)
     self._vid_player.audio_set_volume(volume)
