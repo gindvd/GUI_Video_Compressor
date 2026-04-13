@@ -216,7 +216,8 @@ class App(ctk.CTk):
     with open(about_file, "r") as f:
       about_msg = f.read()
 
-    CTkMessagebox(title="About", 
+    CTkMessagebox(title="About",
+                  width=500,
                   message=about_msg, 
                   icon="info")
   
