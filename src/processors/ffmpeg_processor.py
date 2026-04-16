@@ -82,12 +82,16 @@ class FFmpegProcessor():
                 *aud_opts,
                 output_file])
 
-    creation_flags = {}
-
+    flags = {}
+    
+    # flags to hide console window
     if DEVICE_OS == "Windows":
-      creation_flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+      flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+      si = subprocess.STARTUPINFO()
+      si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      flags["startupinfo"] = si
     else:
-      creation_flags["start_new_session"] = True
+      flags["start_new_session"] = True
 
     try:
       self._proc = subprocess.Popen(cmd,
@@ -95,7 +99,7 @@ class FFmpegProcessor():
                               stderr=subprocess.STDOUT,
                               shell=False,
                               text=True,
-                              **creation_flags)
+                              **flags)
 
       out, _ = self._proc.communicate()
       self._proc.wait()
