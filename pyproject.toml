@@ -13,13 +13,14 @@ authors = [
 requires-python = ">=3.11"
 
 dependencies = [
-  "CTkMenuBar==0.9",
-  "CTkMessagebox==2.7",
-  "customtkinter==5.2.2",
-  "darkdetect==0.8.0",
-  "packaging==26.0",
-  "pillow==12.1.1",
-  "python-vlc==3.0.21203"
+  "CTkMenuBar>=0.9",
+  "CTkMessagebox>=2.7",
+  "CTkTrimSlider>=1.0.2",
+  "customtkinter>=5.2.2",
+  "darkdetect>=0.8.0",
+  "packaging>=26.0",
+  "pillow>=12.1.1",
+  "python-vlc>=3.0.21203"
 ]
 
 [project.optional-dependencies]
