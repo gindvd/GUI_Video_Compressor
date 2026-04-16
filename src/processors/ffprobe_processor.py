@@ -1,7 +1,7 @@
 import subprocess
 from os import PathLike
 
-from utils import create_logs
+from utils import create_logs, DEVICE_OS
 
 class FFprobeProcessor():
   _CMD_ARGS: dict = {
@@ -38,11 +38,22 @@ class FFprobeProcessor():
            of_arg,
            filepath]
 
+    startupinfo = None
+    creation_flags = 0
+
+    # flags to hide console window
+    if DEVICE_OS == 'Windows':
+      startupinfo = subprocess.STARTUPINFO()
+      startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      creation_flags = subprocess.CREATE_NO_WINDOW
+
     proc = subprocess.Popen(cmd, 
                             stdout=subprocess.PIPE, 
                             stderr=subprocess.PIPE, 
                             shell=False, 
-                            text=True)
+                            text=True,
+                            startupinfo=startupinfo,
+                            creationflags=creation_flags)
     
     try: 
       result, err = proc.communicate()
@@ -63,6 +74,6 @@ class FFprobeProcessor():
         return False, None, "Error Occured!\nCheck logs for details!"
       
       if result is None or "N/A" in result:
-        return False, None, f"Issue getting info from file headers."
+        return False, None, "Issue getting info from file headers."
 
       return True, result.strip(), None
