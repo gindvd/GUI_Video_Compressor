@@ -1,3 +1,10 @@
+"""
+Lionbridge Media Tool
+Custom, hand-coded GUI tool for editing, compressing, and converting media files.
+Author: David Gingerich
+Version: 1.2
+"""
+
 import tkinter as tk
 import customtkinter  as ctk
 
@@ -56,7 +63,7 @@ class App(ctk.CTk):
     self._quality: int = 90
     self._audio: bool = True
 
-    self.title("Video Compression Tool")
+    self.title("Lionbridge Media Tool")
     self.resizable(False, False)
     
     ctk.set_appearance_mode("System")  
@@ -65,14 +72,15 @@ class App(ctk.CTk):
     self._set_icon()
 
     self._create_menubar()
-    self._main_frame = ctk.CTkFrame(self)
+    self._main_frame = ctk.CTkFrame(self, corner_radius=0)
     self._build_gui()  
-    self._main_frame.pack(fill='both')
+    self._main_frame.pack( padx=5, pady=5, fill='both')
 
   def _check_procs_exist(self) -> None:
     for idx, proc in enumerate(self._external_procs):
       if proc is None:
-        CTkMessagebox(title="Missing Dependency", 
+        CTkMessagebox(master=self,
+                      title="Missing Dependency", 
                       message=f"Missing External Processor:\n {EXTERNAL_PROCS[idx]}!", 
                       icon="cancel",
                       option_1="Ok")
@@ -82,14 +90,17 @@ class App(ctk.CTk):
   
   def _set_icon(self) -> None:
     icon_path = get_icon()
+    ico_path = get_ico()
     
-    if icon_path is None:
-      CTkMessagebox(title="Missing icon",
+    if icon_path is None or ico_path is None:
+      CTkMessagebox(master=self,
+                    title="Missing icon",
                     message="Icon missing from assets folder",
                     icon="warning")
       return
     
     else:
+      self.iconbitmap(ico_path)
       # using png since cross platform 
       icon = tk.PhotoImage(file=icon_path)
       self.iconphoto(True, icon)
@@ -110,36 +121,36 @@ class App(ctk.CTk):
 
   def _build_gui(self) -> None: 
     # file frame
-    self._file_frame = ctk.CTkFrame(self._main_frame)
+    self._file_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
     
     self._browse_btn = ctk.CTkButton(self._file_frame, 
                                      text="Browse",
                                      command=self._browse_files)
     
-    self._browse_btn.grid(row=0, column=0, padx=5, pady=5)
+    self._browse_btn.grid(row=0, column=0, padx=10, pady=5)
 
-    self._file_entry = ctk.CTkEntry(self._file_frame, width=700, height=35)
+    self._file_entry = ctk.CTkEntry(self._file_frame, width=600, height=30)
     self._file_entry.bind("<Return>", self._file_entered)
     self._file_entry.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
 
-    self._file_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+    self._file_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
  
     # media frame
-    self._media_frame = ctk.CTkFrame(self._main_frame)
+    self._media_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
     
     self._vid_trimmer: VideoTrimmer = VideoTrimmer(self._media_frame, self._external_procs[2])
     self._vid_trimmer.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-    self._media_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+    self._media_frame.grid(row=1, column=0, sticky="nsew")
 
     # quality frame
-    self._quality_frame = ctk.CTkFrame(self._main_frame)
+    self._quality_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
 
-    ctk.CTkLabel(self._quality_frame, text="Video Quality:").grid(row=0, column=0, padx=5, pady=5, sticky="sw")
+    ctk.CTkLabel(self._quality_frame, text="Video Quality:").grid(row=0, column=0, padx=(20, 10), pady=5, sticky="sw")
 
     self._quality_slider = ctk.CTkSlider(self._quality_frame, 
-                                         width=700, 
-                                         height=25,
+                                         width=500, 
+                                         height=10,
                                          from_=0, 
                                          to=100,
                                          number_of_steps=100, 
@@ -151,12 +162,12 @@ class App(ctk.CTk):
     self._quality_perc_lbl = ctk.CTkLabel(self._quality_frame, text=f"{int(self._quality_slider.get())}%")
     self._quality_perc_lbl.grid(row=0, column=2, padx=5, pady=5, sticky="w")
 
-    self._quality_frame.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+    self._quality_frame.grid(row=2, column=0, sticky="nsew")
 
     # options frame
-    self._options_frame = ctk.CTkFrame(self._main_frame)
+    self._options_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
   
-    ctk.CTkLabel(self._options_frame, text="Codec:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._options_frame, text="Codec:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
     self._codec_drpdwn = ctk.CTkComboBox(self._options_frame, 
                                          values=self._codec_values(),
@@ -164,9 +175,9 @@ class App(ctk.CTk):
                                          command=self._codec_choice)
 
     self._codec_drpdwn.set("libx264")
-    self._codec_drpdwn.grid(row=0, column=1, padx=5, pady=5)
+    self._codec_drpdwn.grid(row=0, column=1, padx=10, pady=10)
 
-    ctk.CTkLabel(self._options_frame, text="Resolution:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._options_frame, text="Resolution:").grid(row=1, column=0, padx=10, pady=10, sticky="w")
 
     self._target_res_drpdwn = ctk.CTkComboBox(self._options_frame, 
                                               values=["3840x2160", "2560x1440", "1920x1080", 
@@ -175,9 +186,9 @@ class App(ctk.CTk):
                                               command=self._res_choice)
 
     self._target_res_drpdwn.set("1920x1080")
-    self._target_res_drpdwn.grid(row=1, column=1, padx=5, pady=5)
+    self._target_res_drpdwn.grid(row=1, column=1, padx=10, pady=10)
     
-    ctk.CTkLabel(self._options_frame, text="Video Format:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._options_frame, text="Video Format:").grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
     self._target_ext_drpdwn = ctk.CTkComboBox(self._options_frame, 
                                               values=["mp4", "mkv", "mov"],
@@ -187,7 +198,7 @@ class App(ctk.CTk):
     self._target_ext_drpdwn.grid(row=2, column=1, padx=5, pady=5)
     self._target_ext_drpdwn.set("mp4")
 
-    ctk.CTkLabel(self._options_frame, text="FPS:").grid(row=3, column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._options_frame, text="FPS:").grid(row=3, column=0, padx=10, pady=10, sticky="w")
 
     self._target_fps_drpdwn = ctk.CTkComboBox(self._options_frame, 
                                               values=["60", "30", "24", "15"],
@@ -195,9 +206,9 @@ class App(ctk.CTk):
                                               command=self._fps_choice)
 
     self._target_fps_drpdwn.set("60")
-    self._target_fps_drpdwn.grid(row=3, column=1, padx=5, pady=5)
+    self._target_fps_drpdwn.grid(row=3, column=1, padx=10, pady=10)
 
-    ctk.CTkLabel(self._options_frame, text="Speed:").grid(row=4,column=0, padx=5, pady=5, sticky="w")
+    ctk.CTkLabel(self._options_frame, text="Speed:").grid(row=4,column=0, padx=10, pady=10, sticky="w")
 
     self._preset_speed_drpdwn = ctk.CTkComboBox(self._options_frame, 
                                               values=["Veryfast", "Faster", "Fast", 
@@ -206,7 +217,7 @@ class App(ctk.CTk):
                                               command=self._preset_choice)
 
     self._preset_speed_drpdwn.set("Medium")
-    self._preset_speed_drpdwn.grid(row=4, column=1, padx=5, pady=5)
+    self._preset_speed_drpdwn.grid(row=4, column=1, padx=10, pady=10)
 
     self._aud_on_off: tk.IntVar = ctk.IntVar()
     self._rm_aud_chkbox = ctk.CTkCheckBox(self._options_frame, 
@@ -214,27 +225,32 @@ class App(ctk.CTk):
                                           variable=self._aud_on_off,
                                           command=self._remove_audio)
 
-    self._rm_aud_chkbox.grid(row=5, column=0, columnspan=2, padx=5, pady=15, sticky="sw")
+    self._rm_aud_chkbox.grid(row=5, column=0, columnspan=2, padx=10, pady=10, sticky="sw",)
 
-    self._options_frame.grid(row=0, column=1, rowspan=2, padx=10, pady=10, sticky="nsew")
+    self._options_frame.grid(row=1, column=1, sticky="nsew")
+    
+    # compress button frame
+    self._compress_btn_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
 
     # compresion button
-    self._compress_btn = ctk.CTkButton(self._main_frame,
-                                       width = 150,
-                                       height=40,
+    self._compress_btn = ctk.CTkButton(self._compress_btn_frame,
+                                       width =150,
+                                       height=35,
                                        text="Compress",
-                                       font=(ctk.CTkFont(size=20)),
                                        state="disabled",
                                        command=self._compress_video)
     
-    self._compress_btn.grid(row=2, column=1, padx=10, pady=10, )
+    self._compress_btn.pack(padx=10,pady=10)
+
+    self._compress_btn_frame.grid(row=2, column=1, sticky="nsew")
 
   def _show_about(self) -> None:
-    about_file = ROOT_DIR / Path("assets/about.txt")
+    about_file = resource_path(os.path.join("assets", "about.txt"))
     with open(about_file, "r") as f:
       about_msg = f.read()
 
-    CTkMessagebox(title="About",
+    CTkMessagebox(master=self,
+                  title="About",
                   width=500,
                   message=about_msg, 
                   icon="info")
@@ -268,7 +284,8 @@ class App(ctk.CTk):
       return False
 
     if not os.path.isfile(item):
-      CTkMessagebox(title="File Warning", 
+      CTkMessagebox(master=self,
+                    title="File Warning", 
                     message="Warning!\nFile does not exist!", 
                     icon='warning')
      
@@ -277,7 +294,8 @@ class App(ctk.CTk):
     _, ext = os.path.splitext(item)   
 
     if ext not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
-      CTkMessagebox(title="Video File Warning", 
+      CTkMessagebox(master=self,
+                    title="Video File Warning", 
                     message="Warning!\nFile is not supported video file!", 
                     icon='warning')
       
@@ -292,7 +310,8 @@ class App(ctk.CTk):
       completed, val, err_msg = self._ffprobe.get_video_attr_value(attr, self._input_file)
     
       if not completed:
-        CTkMessagebox(title="FFprobe Error", 
+        CTkMessagebox(master=self,
+                      title="FFprobe Error", 
                       message=f"Error getting video file's {attr}!\n{err_msg}", 
                       icon='cancel')
       
@@ -315,7 +334,8 @@ class App(ctk.CTk):
     
     numer, denom = vid_fps.split("/")
     if int(denom) == 0:
-      CTkMessagebox(title="FFprobe Error",
+      CTkMessagebox(master=self,
+                    title="FFprobe Error",
                     message="Error getting video file's fps!\nInvalid frame rate data.",
                     icon='cancel')
       return
@@ -359,7 +379,7 @@ class App(ctk.CTk):
       self._target_ext_drpdwn.set("mp4")
       self._target_format = "mp4"
 
-    if choice in ["h264_amf", "hevc_amf", "h264_vaapi", "hevc_vaapi", "libvpx-vp9"]:
+    if choice in ["h264_amf", "hevc_amf", "h264_vaapi", "hevc_vaapi", "libsvtav1"]:
       self._preset_speed_drpdwn.configure(state="disabled")
       self._preset = None
     
@@ -392,7 +412,8 @@ class App(ctk.CTk):
     connected_gpus = gpu.manufacturer()
 
     if connected_gpus is None:
-      CTkMessagebox(title="System GPU Command Error",
+      CTkMessagebox(master=self,
+                    title="System GPU Command Error",
                     message="Error getting connected GPU info!\nCheck logs for details!",
                     icon="warning")
 
@@ -441,12 +462,14 @@ class App(ctk.CTk):
     self._compress_btn.configure(state="normal")
 
     if completed:
-      CTkMessagebox(title="Video Compression Completed", 
-                    message="Success!\nVideo has been successfully compressed!", 
+      CTkMessagebox(master=self,
+                    title="Video Compression Completed", 
+                    message="Success!\nVideo compressed!", 
                     icon='info')
 
     if not completed and err_msg is not None:
-      CTkMessagebox(title="Video Compression Error", 
+      CTkMessagebox(master=self,
+                    title="Video Compression Error", 
                     message=f"ERROR\n{err_msg}", 
                     icon='cancel')
   
@@ -457,7 +480,8 @@ class App(ctk.CTk):
       return
       
     elif killed:
-      close = CTkMessagebox(title="Video Compression Terminated", 
+      close = CTkMessagebox(master=self,
+                            title="Video Compression Terminated", 
                             message=f"{msg}!", 
                             icon="info",
                             option_1="Ok")
@@ -472,7 +496,8 @@ class App(ctk.CTk):
     self._vid_trimmer.release()
     self.quit()
 
+
 if __name__ == "__main__":
-  vid_compress_app = App()
-  vid_compress_app.protocol("WM_DELETE_WINDOW", vid_compress_app.on_quit)
-  vid_compress_app.mainloop()
+  app = App()
+  app.protocol("WM_DELETE_WINDOW", app.on_quit)
+  app.mainloop()
