@@ -1,5 +1,5 @@
 """
-Lionbridge Media Tool
+Media Tool
 Custom, hand-coded GUI tool for editing, compressing, and converting media files.
 Author: David Gingerich
 Version: 1.2
@@ -63,7 +63,7 @@ class App(ctk.CTk):
     self._quality: int = 90
     self._audio: bool = True
 
-    self.title("Lionbridge Media Tool")
+    self.title("Media Tool")
     self.resizable(False, False)
     
     ctk.set_appearance_mode("System")  
