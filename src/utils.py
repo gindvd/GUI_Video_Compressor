@@ -1,14 +1,47 @@
 from pathlib import Path
 from datetime import datetime
-from os import PathLike
 
+import sys
+import os
 import shutil
 import platform
 
-ROOT_DIR: PathLike = Path(__file__).parents[1]
 DEVICE_OS: str = platform.system()
 
 EXTERNAL_PROCS: tuple = ("ffmpeg", "ffprobe", "vlc")
+
+def resource_path(relative_path: str = "") -> Path:
+  if getattr(sys, 'frozen', False):
+    base_path = Path(sys._MEIPASS)
+  else:
+    base_path = Path(__file__).parents[1]
+  return base_path / relative_path
+
+def get_app_dir() -> Path:
+  if getattr(sys, 'frozen', False):
+    return Path(sys.executable).parent
+  return Path(__file__).parents[1]
+
+def setup_vlc_environment() -> None:
+  if DEVICE_OS != "Windows":
+    return
+
+  vlc_dir = resource_path(os.path.join("lib", "vlc"))
+
+  if not vlc_dir.is_dir():
+    return
+
+  os.environ['PYTHON_VLC_MODULE_PATH'] = str(vlc_dir)
+  os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / "libvlc.dll")
+
+  # add dlls explicitly
+  if hasattr(os, 'add_dll_directory'):
+    os.add_dll_directory(str(vlc_dir))
+
+  os.environ['PATH'] = str(vlc_dir) + os.pathsep + os.environ.get('PATH', '')
+
+# Set up VLC environment at import time so it runs before any module imports vlc
+setup_vlc_environment()
 
 def get_external_procs() -> list:
   if DEVICE_OS == "Windows":
@@ -23,7 +56,7 @@ def get_win_procs() -> list:
 
   for proc in EXTERNAL_PROCS:
     if proc == "vlc":
-      abs_path = ROOT_DIR / Path(f"lib/win32/plugins")
+      abs_path = resource_path(os.path.join("lib", "vlc", "plugins"))
       try:
         if not abs_path.is_dir():
           raise FileNotFoundError
@@ -34,7 +67,7 @@ def get_win_procs() -> list:
       else:
         proc_paths.append(abs_path)
     else:
-      abs_path = ROOT_DIR / Path(f"lib/win32/{proc}.exe")
+      abs_path = resource_path(os.path.join("lib", f"{proc}.exe"))
     
       try:
         if not abs_path.is_file():
@@ -64,15 +97,23 @@ def create_logs(err_msg: str) -> None:
   now = datetime.now()
   basename = Path(now.strftime("%Y-%m-%d_%H-%M-%S") + ".log")
 
-  log_directory = ROOT_DIR / Path('logs')
+  log_directory = get_app_dir() / 'logs'
   log_directory.mkdir(exist_ok=True)
   log_file = log_directory / basename
 
   with open(log_file, 'w') as f:
     f.write(err_msg)
 
-def get_icon() -> PathLike | str | None:
-  icon_abspath = ROOT_DIR / Path("assets/icons/icon.png")
+def get_icon() -> os.PathLike | str | None:
+  icon_abspath = resource_path(os.path.join("assets", "icons", "icon.png"))
+
+  if not icon_abspath.is_file():
+    return None
+  
+  return icon_abspath
+
+def get_ico() -> os.PathLike | str | None:
+  icon_abspath = resource_path(os.path.join("assets", "icons", "icon.ico"))
 
   if not icon_abspath.is_file():
     return None
