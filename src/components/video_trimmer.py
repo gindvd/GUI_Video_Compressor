@@ -1,12 +1,11 @@
 import tkinter as tk
 import customtkinter as ctk
-from CTkMessagebox import CTkMessagebox
 
 import vlc
 from os import PathLike
 
 from utils import DEVICE_OS
-from CTkTrimSlider.ctk_trimslider import CTkTrimSlider
+from CTkTrimSlider import CTkTrimSlider
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, master, vlc_cmd: PathLike | str) -> None:
@@ -32,15 +31,15 @@ class VideoTrimmer(ctk.CTkFrame):
     self._instance.log_unset()
     self._vid_player = self._instance.media_player_new()
 
-    self._vid_panel = ctk.CTkFrame(self, width=800, height=400, fg_color="black", corner_radius=0)
+    self._vid_panel = ctk.CTkFrame(self, width=750, height=400, fg_color="black", corner_radius=0)
     self._vid_panel.pack(fill='both', expand=True)
 
-    self._control_panel = ctk.CTkFrame(self, corner_radius=0)
+    self._control_panel = ctk.CTkFrame(self, width=750, corner_radius=0)
     self._control_panel.pack(fill='both', expand=True)
 
     self._create_control_panel()
 
-    self._time_panel = ctk.CTkFrame(self, corner_radius=0)
+    self._time_panel = ctk.CTkFrame(self, width=750, corner_radius=0)
     self._time_panel.pack(fill='both', expand=True)
 
     self._create_time_panel()
@@ -53,7 +52,7 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _create_control_panel(self) -> None:
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
-                                                        width=61,
+                                                        width=65,
                                                         height=30,
                                                         text="Play",
                                                         state="disabled",
@@ -62,14 +61,14 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause_btn.grid(row=0, column=0, padx=10, pady=10, sticky="nswe")
 
     self._trim_slider = CTkTrimSlider(self._control_panel, 
-                                      width=600, 
+                                      width=500, 
                                       state="disabled",
-                                      lbutton_command=self._set_start_time,
-                                      rbutton_command=self._set_end_time,
-                                      cbutton_command=self._seek,
-                                      start_variable=self._start_time, 
-                                      end_variable=self._end_time,
-                                      center_variable=self._current_time)
+                                      left_button_command=self._set_start_time,
+                                      right_button_command=self._set_end_time,
+                                      center_button_command=self._seek,
+                                      left_button_var=self._start_time, 
+                                      right_button_var=self._end_time,
+                                      center_button_var=self._current_time)
 
     self._trim_slider.grid(row=0, column=1, padx=10, pady=10, sticky="nswe")
 
@@ -77,7 +76,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._curtime_lbl.grid(row=0, column=2, padx=10, pady=10, sticky="nswe")
 
     self._volume_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
-                                                    width=60,
+                                                    width=50,
                                                     height=30,
                                                     text="Mute",
                                                     state="disabled",
@@ -91,7 +90,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._volume_slider: ctk.CTkSlider = ctk.CTkSlider(self._vol_popup,
                                                        height=120,
-                                                       width=24,
+                                                       width=20,
                                                        from_=0,
                                                        to=100,
                                                        number_of_steps=100,
@@ -244,8 +243,15 @@ class VideoTrimmer(ctk.CTkFrame):
       self._update_id = None
 
     self._vid_player.stop()
-    self.update()
-
+    
+    # unloads old media files before loading new media
+    if self._media is not None:
+      self._media.release()
+      self._media = None
+    
+    self._vid_player.release()
+    
+    self._vid_player = self._instance.media_player_new()
     self._media = self._instance.media_new(vid_file)
     self._vid_player.set_media(self._media)
 
