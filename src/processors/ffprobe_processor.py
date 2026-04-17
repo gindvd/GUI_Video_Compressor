@@ -1,41 +1,25 @@
-import subprocess
+import json
 from os import PathLike
-
 from utils import create_logs, DEVICE_OS
 
 class FFprobeProcessor():
-  _CMD_ARGS: dict = {
-    "duration" : {
-      "entry" : "format=duration",
-      "-of_arg" : "default=noprint_wrappers=1:nokey=1"
-    },
-    "resolution" : {
-      "entry" : "stream=width,height",
-      "-of_arg" : "csv=s=x:p=0"
-    },
-    "fps" : {
-      "entry" : "stream=avg_frame_rate",
-      "-of_arg" : "default=noprint_wrappers=1:nokey=1"
-    },
-  }
 
   def __init__(self, ffprobe: PathLike | str) -> None:
     self._ffprobe: PathLike | str = ffprobe
     
-  def get_video_attr_value(self, vid_attr: str, filepath: PathLike | str) -> tuple[bool, str | None, str | None]:
-
-    entries_arg = self._CMD_ARGS.get(vid_attr, {}).get("entry")
-    of_arg = self._CMD_ARGS.get(vid_attr, {}).get("-of_arg")
-    
-    cmd = [self._ffprobe, 
-           "-v", 
+  def get_video_attributions(self, filepath: PathLike | str) -> tuple[bool, list[str] | None, str | None]:
+    import subprocess
+    cmd = [self._ffprobe,
+           "-v",
            "error",
            "-select_streams",
            "v:0",
            "-show_entries",
-           entries_arg,
-           "-of", 
-           of_arg,
+           "stream=width,height,avg_frame_rate",
+           "-show_entries",
+           "format=duration",
+           "-of",
+           "json",
            filepath]
 
     startupinfo = None
@@ -75,5 +59,35 @@ class FFprobeProcessor():
       
       if result is None or "N/A" in result:
         return False, None, "Issue getting info from file headers."
+      
+      return self._parse_attributes(result)
+      
+  @staticmethod
+  def _parse_attributes(result: json) -> tuple[bool, set[str] | None, str | None]:
+    try:
+      data = json.loads(result)
+    except json.JSONDecodeError as e:
+      create_logs(str(e))
+      return False, None, "Issue getting info from file headers."
 
-      return True, result.strip(), None
+    streams = data.get("streams", [])
+    fmt = data.get("format", {})
+
+    if not streams:
+      return False, None, "No video stream found."
+
+    s = streams[0]
+    width = s.get("width")
+    height = s.get("height")
+    avg_frame_rate = s.get("avg_frame_rate")
+    duration = fmt.get("duration")
+
+    if None in (width, height, avg_frame_rate, duration):
+      return False, None, "Issue getting info from file headers."
+
+    if "N/A" in str(avg_frame_rate) or "N/A" in str(duration):
+      return False, None, "Issue getting info from file headers."
+
+    attrs = [f"{width}x{height}", avg_frame_rate, duration]
+
+    return True, attrs, None

@@ -1,8 +1,8 @@
 """
-Media Tool
-Custom, hand-coded GUI tool for editing, compressing, and converting media files.
+Media Conversion Tool
+GUI tool for editing, compressing, and converting media files.
 Author: David Gingerich
-Version: 1.2
+Version: 1.3.0
 """
 
 import tkinter as tk
@@ -63,7 +63,7 @@ class App(ctk.CTk):
     self._quality: int = 90
     self._audio: bool = True
 
-    self.title("Media Tool")
+    self.title("Media Conversion Tool")
     self.resizable(False, False)
     
     ctk.set_appearance_mode("System")  
@@ -304,22 +304,29 @@ class App(ctk.CTk):
     return True
   
   def _update_gui(self) -> None:
-    attr_vals = []
+    self._browse_btn.configure(state="disabled")
+    self._compress_btn.configure(state="disabled")
+
+    # threading to keep ffprobe call from blocking UI updates
+    threading.Thread(target=self._run_ffprobe, daemon=True).start()
+
+  def _run_ffprobe(self) -> None:
+    completed, attributions, err_msg = self._ffprobe.get_video_attributions(self._input_file)
+
+    if not completed:
+      self.after(0, self._display_ffprobe_error, err_msg)
+      return
+
+   
+    self.after(0, self._set_attr_values, attributions)
     
-    for attr in self.VIDEO_ATTR:
-      completed, val, err_msg = self._ffprobe.get_video_attr_value(attr, self._input_file)
-    
-      if not completed:
-        CTkMessagebox(master=self,
+  def _display_ffprobe_error(self, err_msg: str) -> None:
+    CTkMessagebox(master=self,
                       title="FFprobe Error", 
-                      message=f"Error getting video file's {attr}!\n{err_msg}", 
+                      message=f"Error getting video file info!\n{err_msg}", 
                       icon='cancel')
-      
-        return
-      
-      assert val is not None, "Video attribute value can't be None" 
-      attr_vals.append(val)
-    
+
+  def _set_attr_values(self, attr_vals: list[str]) -> None:
     # Update combo box with list of resolution options lower than video's current resolution
     vid_res = attr_vals[0]
     
@@ -363,6 +370,7 @@ class App(ctk.CTk):
     self._vid_trimmer.set_vid_values(vid_dur)
 
     # Enable compression button and display the video file
+    self._browse_btn.configure(state="normal")
     self._compress_btn.configure(state="normal")
     self._vid_trimmer.set_video(self._input_file)
 
@@ -431,6 +439,7 @@ class App(ctk.CTk):
 
   def _compress_video(self) -> None:
     self._compress_btn.configure(state="disabled")
+    self._browse_btn.configure(state="disabled")
     
     self._progressbar_popup: ProgressbarPopup = ProgressbarPopup(self)
     self._progressbar_popup.run_progressbar()
@@ -460,6 +469,7 @@ class App(ctk.CTk):
   def _compression_finished(self, completed: bool, err_msg: str) -> None:
     self._progressbar_popup.destroy_window()
     self._compress_btn.configure(state="normal")
+    self._browse_btn.configure(state="normal")
 
     if completed:
       CTkMessagebox(master=self,
@@ -475,11 +485,16 @@ class App(ctk.CTk):
   
   def cancel_compression(self) -> None:
     killed, msg = self._ffmpeg.terminate_compression()
+    self._compress_btn.configure(state="normal")
+    self._browse_btn.configure(state="normal")
 
     if not killed:
       return
       
     elif killed:
+      self._compress_btn.configure(state="normal")
+      self._browse_btn.configure(state="normal")
+
       close = CTkMessagebox(master=self,
                             title="Video Compression Terminated", 
                             message=f"{msg}!", 
@@ -497,7 +512,8 @@ class App(ctk.CTk):
     self.quit()
 
 
+
 if __name__ == "__main__":
-  app = App()
+  app = App()  
   app.protocol("WM_DELETE_WINDOW", app.on_quit)
   app.mainloop()
