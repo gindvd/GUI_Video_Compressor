@@ -100,7 +100,9 @@ class App(ctk.CTk):
       return
     
     else:
-      self.iconbitmap(ico_path)
+
+      if DEVICE_OS == "Windows":
+        self.iconbitmap(ico_path)
       # using png since cross platform 
       icon = tk.PhotoImage(file=icon_path)
       self.iconphoto(True, icon)
