@@ -1,3 +1,4 @@
+import platform
 import subprocess
 import re
 
@@ -38,9 +39,7 @@ def get_card_info() -> list[str] | None:
     return None
 
   if DEVICE_OS == "Windows":
-    from platform import release
-    
-    win_ver = release()
+    win_ver = platform.release()
     if win_ver != "11":
       win_ver = "legacy"
     
@@ -60,17 +59,28 @@ def get_card_info() -> list[str] | None:
     return None
 
   if child_cmd is None:
-    return run_cmd(parent_cmd)
+    return run_parent(parent_cmd)
 
-  return run_piped_cmd(parent_cmd, child_cmd)
+  return run_parent_and_child(parent_cmd, child_cmd)
 
-def run_cmd(cmd: list[str]) -> list[str] | None:
+def _get_subprocess_flags() -> dict:
+  # flags to hide console window
+  flags = {}
+  if DEVICE_OS == 'Windows':
+    flags['creationflags'] = subprocess.CREATE_NO_WINDOW
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    flags['startupinfo'] = si
+  return flags
+
+def run_parent(cmd: list[str]) -> list[str] | None:
   try:
     proc = subprocess.Popen(cmd, 
                             stdout=subprocess.PIPE, 
                             stderr=subprocess.PIPE, 
                             shell=False, 
-                            text=True)
+                            text=True,
+                            **_get_subprocess_flags())
 
     out, err = proc.communicate()
     proc.wait()
@@ -93,20 +103,23 @@ def run_cmd(cmd: list[str]) -> list[str] | None:
     return out.split()
 
 
-def run_piped_cmd(cmd1: list[str], cmd2: list[str]) -> list[str] | None:
+def run_parent_and_child(cmd1: list[str], cmd2: list[str]) -> list[str] | None:
   try:
+    flags = _get_subprocess_flags()
     proc1 = subprocess.Popen(cmd1,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              shell=False,
-                             text=True)
+                             text=True,
+                             **flags)
 
     proc2 = subprocess.Popen(cmd2,
                              stdin=proc1.stdout,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              shell=False,
-                             text=True) 
+                             text=True,
+                             **flags) 
 
     if proc1.stdout is not None:
       proc1.stdout.close()
