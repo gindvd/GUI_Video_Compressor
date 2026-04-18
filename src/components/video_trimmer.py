@@ -1,4 +1,4 @@
-import tkinter as tk
+from tkinter import Variable, DoubleVar
 import customtkinter as ctk
 
 import vlc
@@ -20,9 +20,9 @@ class VideoTrimmer(ctk.CTkFrame):
     self._seek_reset_id: str | None = None
     self._is_muted: bool = False
     
-    self._start_time: tk.Variable = tk.DoubleVar(self, value=0)
-    self._end_time: tk.Variable = tk.DoubleVar(self, value=1)
-    self._current_time: tk.Variable = tk.DoubleVar(self, value=0.5)
+    self._start_time: Variable = DoubleVar(self, value=0)
+    self._end_time: Variable = DoubleVar(self, value=1)
+    self._current_time: Variable = DoubleVar(self, value=0.5)
 
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")

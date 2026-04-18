@@ -1,4 +1,3 @@
-import platform
 import subprocess
 import re
 
@@ -39,7 +38,9 @@ def get_card_info() -> list[str] | None:
     return None
 
   if DEVICE_OS == "Windows":
-    win_ver = platform.release()
+    from platform import release
+    
+    win_ver = release()
     if win_ver != "11":
       win_ver = "legacy"
     

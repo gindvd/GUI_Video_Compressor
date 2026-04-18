@@ -1,12 +1,11 @@
 from pathlib import Path
-from datetime import datetime
+from platform import system
 
 import sys
 import os
-import shutil
-import platform
 
-DEVICE_OS: str = platform.system()
+
+DEVICE_OS: str = system()
 
 EXTERNAL_PROCS: tuple = ("ffmpeg", "ffprobe", "vlc")
 
@@ -82,10 +81,12 @@ def get_win_procs() -> list:
   return proc_paths
 
 def get_linux_procs() -> list:
+  from shutil import which
+
   proc_paths: list = []
 
   for proc in EXTERNAL_PROCS:
-    if shutil.which(proc):
+    if which(proc):
       proc_paths.append(proc)
     
     else:
@@ -94,6 +95,8 @@ def get_linux_procs() -> list:
   return proc_paths
 
 def create_logs(err_msg: str) -> None:
+  from datetime import datetime
+  
   now = datetime.now()
   basename = Path(now.strftime("%Y-%m-%d_%H-%M-%S") + ".log")
 

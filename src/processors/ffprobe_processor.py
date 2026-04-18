@@ -1,4 +1,5 @@
-import json
+import subprocess
+
 from os import PathLike
 from utils import create_logs, DEVICE_OS
 
@@ -8,7 +9,7 @@ class FFprobeProcessor():
     self._ffprobe: PathLike | str = ffprobe
     
   def get_video_attributions(self, filepath: PathLike | str) -> tuple[bool, list[str] | None, str | None]:
-    import subprocess
+
     cmd = [self._ffprobe,
            "-v",
            "error",
@@ -63,7 +64,9 @@ class FFprobeProcessor():
       return self._parse_attributes(result)
       
   @staticmethod
-  def _parse_attributes(result: json) -> tuple[bool, set[str] | None, str | None]:
+  def _parse_attributes(result) -> tuple[bool, set[str] | None, str | None]:
+    import json
+
     try:
       data = json.loads(result)
     except json.JSONDecodeError as e:

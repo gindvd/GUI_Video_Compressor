@@ -5,15 +5,15 @@ Author: David Gingerich
 Version: 1.3.0
 """
 
-import tkinter as tk
 import customtkinter  as ctk
 
 from CTkMenuBar import CTkMenuBar, CustomDropdownMenu
 from CTkMessagebox import CTkMessagebox
 from customtkinter import filedialog
+from tkinter import PhotoImage
 
 import os
-import threading
+from threading import Thread
 
 from utils import *
 
@@ -104,7 +104,7 @@ class App(ctk.CTk):
       if DEVICE_OS == "Windows":
         self.iconbitmap(ico_path)
       # using png since cross platform 
-      icon = tk.PhotoImage(file=icon_path)
+      icon = PhotoImage(file=icon_path)
       self.iconphoto(True, icon)
 	
   def _create_menubar(self) -> None:
@@ -310,7 +310,7 @@ class App(ctk.CTk):
     self._compress_btn.configure(state="disabled")
 
     # threading to keep ffprobe call from blocking UI updates
-    threading.Thread(target=self._run_ffprobe, daemon=True).start()
+    Thread(target=self._run_ffprobe, daemon=True).start()
 
   def _run_ffprobe(self) -> None:
     completed, attributions, err_msg = self._ffprobe.get_video_attributions(self._input_file)
@@ -449,7 +449,7 @@ class App(ctk.CTk):
     # Run FFmpeg executable/binary in separate thread 
     # Keeps the process from blocking progress bar animation from rendering
  
-    threading.Thread(target=self._run_compression_cmd, daemon=True).start()
+    Thread(target=self._run_compression_cmd, daemon=True).start()
 
   def _run_compression_cmd(self) -> None:
     start_time: str = self._vid_trimmer.get_start_time()
