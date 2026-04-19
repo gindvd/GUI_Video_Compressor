@@ -10,7 +10,7 @@ import customtkinter  as ctk
 from CTkMenuBar import CTkMenuBar, CustomDropdownMenu
 from CTkMessagebox import CTkMessagebox
 from customtkinter import filedialog
-from tkinter import PhotoImage
+from tkinter import PhotoImage, Variable, IntVar
 
 import os
 from threading import Thread
@@ -221,7 +221,7 @@ class App(ctk.CTk):
     self._preset_speed_drpdwn.set("Medium")
     self._preset_speed_drpdwn.grid(row=4, column=1, padx=10, pady=10)
 
-    self._aud_on_off: tk.IntVar = ctk.IntVar()
+    self._aud_on_off: IntVar = ctk.IntVar()
     self._rm_aud_chkbox = ctk.CTkCheckBox(self._options_frame, 
                                           text="Remove Audio",
                                           variable=self._aud_on_off,

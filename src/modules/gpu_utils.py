@@ -38,12 +38,12 @@ def get_card_info() -> list[str] | None:
     create_logs(str(OSCompatibiltyError("Current OS is not compatible with this module.", DEVICE_OS)))
     return None
 
-  if DEVICE_OS == "Windows":
+  if DEVICE_OS.startswith("win32"):
     win_ver = platform.release()
     if win_ver != "11":
       win_ver = "legacy"
     
-    cmd_entry = CMD_DICT.get(DEVICE_OS, {}).get(win_ver)
+    cmd_entry = CMD_DICT.get("Windows", {}).get(win_ver)
   else:
     cmd_entry = CMD_DICT.get(DEVICE_OS)
 

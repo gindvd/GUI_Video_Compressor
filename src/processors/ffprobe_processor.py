@@ -64,7 +64,7 @@ class FFprobeProcessor():
       return self._parse_attributes(result)
       
   @staticmethod
-  def _parse_attributes(result) -> tuple[bool, set[str] | None, str | None]:
+  def _parse_attributes(result) -> tuple[bool, list[str] | None, str | None]:
     import json
 
     try:
@@ -80,10 +80,10 @@ class FFprobeProcessor():
       return False, None, "No video stream found."
 
     s = streams[0]
-    width = s.get("width")
-    height = s.get("height")
-    avg_frame_rate = s.get("avg_frame_rate")
-    duration = fmt.get("duration")
+    width: str = s.get("width")
+    height: str = s.get("height")
+    avg_frame_rate: str = s.get("avg_frame_rate")
+    duration: str = fmt.get("duration")
 
     if None in (width, height, avg_frame_rate, duration):
       return False, None, "Issue getting info from file headers."
