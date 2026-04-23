@@ -85,7 +85,7 @@ class FFmpegProcessor():
     flags = {}
     
     # flags to hide console window
-    if DEVICE_OS.startswith("win32"):
+    if DEVICE_OS == "Windows":
       flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
       si = subprocess.STARTUPINFO()
       si.dwFlags |= subprocess.STARTF_USESHOWWINDOW

@@ -15,7 +15,7 @@ requires-python = ">=3.11"
 dependencies = [
   "CTkMenuBar>=0.9",
   "CTkMessagebox>=2.7",
-  "CTkTrimSlider>=1.0.2",
+  "CTkTrimSlider>=1.2.0",
   "customtkinter>=5.2.2",
   "darkdetect>=0.8.0",
   "packaging>=26.0",
