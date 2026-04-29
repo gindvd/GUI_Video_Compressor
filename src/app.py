@@ -2,15 +2,15 @@
 Media Conversion Tool
 GUI tool for editing, compressing, and converting media files.
 Author: David Gingerich
-Version: 1.3.0
+Version: 1.6.0
 """
 
 import customtkinter  as ctk
 
-from CTkMenuBar import CTkMenuBar, CustomDropdownMenu
+from CTkMenuBar    import CTkMenuBar, CustomDropdownMenu
 from CTkMessagebox import CTkMessagebox
 from customtkinter import filedialog
-from tkinter import PhotoImage, Variable, IntVar
+from tkinter       import PhotoImage, Variable, IntVar
 
 import os
 from threading import Thread
@@ -20,23 +20,26 @@ from utils import *
 import modules.gpu_utils as gpu
 from modules.resolution_utils import get_list_of_smaller_res
 
-from processors.ffmpeg_processor import FFmpegProcessor
+from processors.ffmpeg_processor  import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
-
 from components.progressbar_popup import ProgressbarPopup
-from components.video_trimmer import VideoTrimmer
+from components.video_trimmer     import VideoTrimmer
 
 class App(ctk.CTk):
-  HW_CODEC_OPTS: dict = {
-    "NVIDIA" :  {
+  HW_CODEC_OPTS: dict = \
+  {
+    "NVIDIA" :  \
+    {
       "Windows" : ["h264_nvenc", "hevc_nvenc"],
       "Linux" : ["h264_nvenc", "hevc_nvenc"],
     },
-    "AMD" : {
+    "AMD" : \
+    {
       "Windows" : ["h264_amf", "hevc_amf"],
       "Linux" : ["h264_amf", "hevc_amf"],
     },
-    "Intel" : {
+    "Intel" : \
+    {
       "Windows" : ["h264_qsv", "hevc_qsv"],
       "Linux" : ["h264_vaapi", "hevc_vaapi"],
     },
@@ -47,21 +50,20 @@ class App(ctk.CTk):
   def __init__(self) -> None:
     super().__init__()
     self._external_procs: list = get_external_procs()
-    assert len(self._external_procs) == 3, "Not enough external processors for app to function"
 
     self._check_procs_exist()
     
-    self._ffmpeg: FFmpegProcessor = FFmpegProcessor(self._external_procs[0])
+    self._ffmpeg: FFmpegProcessor   = FFmpegProcessor(self._external_procs[0])
     self._ffprobe: FFprobeProcessor = FFprobeProcessor(self._external_procs[1])
 
-    self._input_file: os.PathLike | str = ""
-    self._target_format: str = "mp4"
-    self._target_res: str = "1920x1080"
-    self._codec: str = "libx264"
-    self._target_fps: str = "30"
-    self._preset: str | None = "medium"
-    self._quality: int = 90
-    self._audio: bool = True
+    self._input_file:    os.PathLike | str = ""
+    self._target_format: str               = "mp4"
+    self._target_res:    str               = "1920x1080"
+    self._codec:         str               = "libx264"
+    self._target_fps:    str               = "30"
+    self._preset:        str | None        = "medium"
+    self._quality:       int               = 90
+    self._audio:         bool              = True
 
     self.title("Media Conversion Tool")
     self.resizable(False, False)
@@ -213,10 +215,10 @@ class App(ctk.CTk):
     ctk.CTkLabel(self._options_frame, text="Speed:").grid(row=4,column=0, padx=10, pady=10, sticky="w")
 
     self._preset_speed_drpdwn = ctk.CTkComboBox(self._options_frame, 
-                                              values=["Veryfast", "Faster", "Fast", 
-                                                      "Medium", "Slow", "Slower", "Veryslow"],
-                                              state='readonly',
-                                              command=self._preset_choice)
+                                                values=["Veryfast", "Faster", "Fast", 
+                                                        "Medium", "Slow", "Slower", "Veryslow"],
+                                                state='readonly',
+                                                command=self._preset_choice)
 
     self._preset_speed_drpdwn.set("Medium")
     self._preset_speed_drpdwn.grid(row=4, column=1, padx=10, pady=10)
@@ -324,9 +326,9 @@ class App(ctk.CTk):
     
   def _display_ffprobe_error(self, err_msg: str) -> None:
     CTkMessagebox(master=self,
-                      title="FFprobe Error", 
-                      message=f"Error getting video file info!\n{err_msg}", 
-                      icon='cancel')
+                  title="FFprobe Error", 
+                  message=f"Error getting video file info!\n{err_msg}", 
+                  icon='cancel')
 
   def _set_attr_values(self, attr_vals: list[str]) -> None:
     # Update combo box with list of resolution options lower than video's current resolution
@@ -512,8 +514,6 @@ class App(ctk.CTk):
     self.cancel_compression()
     self._vid_trimmer.release()
     self.quit()
-
-
 
 if __name__ == "__main__":
   app = App()  
