@@ -18,7 +18,7 @@ from platform  import system
 
 import utils.gpu_utils as gpu
 
-from utils.log_util         import logger
+from utils.log_utils        import logger
 from utils.resolution_utils import get_list_of_smaller_res
 from utils.path_utils       import *
 
@@ -26,7 +26,7 @@ from processors.ffmpeg_processor  import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
 
 from components.progressbar_popup import ProgressbarPopup
-from components.video_player      import VideoPlayer
+from components.video_player      import VideoTrimmer
 
 class App(ctk.CTk):
   HW_CODEC_OPTS: dict = \
