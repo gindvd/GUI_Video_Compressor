@@ -140,9 +140,9 @@ class VideoTrimmer(ctk.CTkFrame):
       self._play_pause_btn.configure(text='Pause')
 
   def _display_video(self) -> None:
-    if DEVICE_OS == "Linux":
+    if self._device_os == "Linux":
       self._vid_player.set_xwindow(self._vid_panel.winfo_id())
-    elif DEVICE_OS == "Windows":
+    elif self._device_os == "Windows":
       self._vid_player.set_hwnd(self._vid_panel.winfo_id())
 
   def _update_progress(self):
