@@ -57,15 +57,15 @@ class FFprobeProcessor():
 
     except PermissionError as e:
       logger.exception(str(e))
-      return False, "Permission Error Occured!\nCheck logs for details!"
+      return False, None, "Permission Error Occured!\nCheck logs for details!"
 
     except subprocess.SubprocessError as e:
       logger.exception(str(e))
-      return False, "Subprocess Error Occured!\nCheck logs for details!"
+      return False, None, "Subprocess Error Occured!\nCheck logs for details!"
 
     except OSError as e:
       logger.exception(str(e))
-      return False, "OS Error Occured!\nCheck logs for details!"
+      return False, None, "OS Error Occured!\nCheck logs for details!"
     
     else:
       if rc != 0:
