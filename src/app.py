@@ -10,20 +10,23 @@ import customtkinter  as ctk
 from CTkMenuBar    import CTkMenuBar, CustomDropdownMenu
 from CTkMessagebox import CTkMessagebox
 from customtkinter import filedialog
-from tkinter       import PhotoImage, Variable, IntVar
+from tkinter       import PhotoImage, IntVar
 
 import os
 from threading import Thread
+from platform  import system
 
-from utils import *
+import utils.gpu_utils as gpu
 
-import modules.gpu_utils as gpu
-from modules.resolution_utils import get_list_of_smaller_res
+from utils.log_util         import logger
+from utils.resolution_utils import get_list_of_smaller_res
+from utils.path_utils       import *
 
 from processors.ffmpeg_processor  import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
+
 from components.progressbar_popup import ProgressbarPopup
-from components.video_trimmer     import VideoTrimmer
+from components.video_player      import VideoPlayer
 
 class App(ctk.CTk):
   HW_CODEC_OPTS: dict = \
@@ -49,12 +52,13 @@ class App(ctk.CTk):
 
   def __init__(self) -> None:
     super().__init__()
+    self._device_os: str = system()
     self._external_procs: list = get_external_procs()
 
     self._check_procs_exist()
     
-    self._ffmpeg: FFmpegProcessor   = FFmpegProcessor(self._external_procs[0])
-    self._ffprobe: FFprobeProcessor = FFprobeProcessor(self._external_procs[1])
+    self._ffmpeg: FFmpegProcessor   = FFmpegProcessor(self._external_procs[0], self._device_os)
+    self._ffprobe: FFprobeProcessor = FFprobeProcessor(self._external_procs[1], self._device_os)
 
     self._input_file:    os.PathLike | str = ""
     self._target_format: str               = "mp4"
@@ -103,7 +107,7 @@ class App(ctk.CTk):
     
     else:
 
-      if DEVICE_OS == "Windows":
+      if self._device_os == "Windows":
         self.iconbitmap(ico_path)
       # using png since cross platform 
       icon = PhotoImage(file=icon_path)
@@ -142,7 +146,7 @@ class App(ctk.CTk):
     # media frame
     self._media_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
     
-    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self._media_frame, self._external_procs[2])
+    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self._media_frame, self._external_procs[2], self._device_os)
     self._vid_trimmer.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
     self._media_frame.grid(row=1, column=0, sticky="nsew")
@@ -320,7 +324,6 @@ class App(ctk.CTk):
     if not completed:
       self.after(0, self._display_ffprobe_error, err_msg)
       return
-
    
     self.after(0, self._set_attr_values, attributions)
     
@@ -435,7 +438,7 @@ class App(ctk.CTk):
       if name is None:
         continue
 
-      hw_codecs = self.HW_CODEC_OPTS.get(name, {}).get(DEVICE_OS)
+      hw_codecs = self.HW_CODEC_OPTS.get(name, {}).get(self._device_os)
       if hw_codecs is not None:
         codecs.extend(hw_codecs)
   
@@ -497,17 +500,11 @@ class App(ctk.CTk):
       self._compress_btn.configure(state="normal")
       self._browse_btn.configure(state="normal")
 
-      close = CTkMessagebox(master=self,
-                            title="Video Compression Terminated", 
-                            message=f"{msg}!", 
-                            icon="info",
-                            option_1="Ok")
-        
-      if close.get() == "Ok":
-        return
-      
-      return
-  
+      CTkMessagebox(master=self,
+                    title="Video Compression Terminated", 
+                    message=f"{msg}!", 
+                    icon="info")
+
   def on_quit(self) -> None:
     self.cancel_compression()
     self._vid_trimmer.release()
