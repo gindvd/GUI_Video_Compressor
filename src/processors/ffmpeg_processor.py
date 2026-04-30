@@ -101,7 +101,7 @@ class FFmpegProcessor():
                               text=True,
                               **flags)
 
-      out, _ = self._proc.communicate()
+      out, err = self._proc.communicate()
       self._proc.wait()
     
       rc = self._proc.returncode
