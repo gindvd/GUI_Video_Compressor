@@ -509,8 +509,3 @@ class App(ctk.CTk):
     self.cancel_compression()
     self._vid_trimmer.release()
     self.quit()
-
-if __name__ == "__main__":
-  app = App()  
-  app.protocol("WM_DELETE_WINDOW", app.on_quit)
-  app.mainloop()
