@@ -451,7 +451,7 @@ class App(ctk.CTk):
     self._compress_btn.configure(state="disabled")
     self._browse_btn.configure(state="disabled")
     
-    self._progressbar_popup: ProgressbarPopup = ProgressbarPopup(self)
+    self._progressbar_popup: ProgressbarPopup = ProgressbarPopup(self, cmd=self.cancel_compression)
     self._progressbar_popup.run_progressbar()
 
     # Run FFmpeg executable/binary in separate thread 

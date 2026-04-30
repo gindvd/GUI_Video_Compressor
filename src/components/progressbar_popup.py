@@ -1,7 +1,8 @@
 import customtkinter as ctk
+from collections.abc import Callable
 
 class ProgressbarPopup(ctk.CTkToplevel):
-  def __init__(self, master) -> None:
+  def __init__(self, master, cmd: Callable) -> None:
     super().__init__(master)
     self._master = master
 
@@ -26,7 +27,7 @@ class ProgressbarPopup(ctk.CTkToplevel):
     
     self._cancel_compression_btn = ctk.CTkButton(self, 
                                                  text="Cancel", 
-                                                 command=self._master.cancel_compression)  
+                                                 command=cmd)  
 
     self._cancel_compression_btn.pack(side="right", padx=10, pady=10)
 
