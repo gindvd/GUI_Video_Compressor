@@ -90,7 +90,7 @@ class FFprobeProcessor():
     try:
       data = json.loads(result)
     except json.JSONDecodeError as e:
-      create_logs(str(e))
+      logger(str(e))
       return False, None, "Issue getting info from file headers."
 
     streams = data.get("streams", [])
