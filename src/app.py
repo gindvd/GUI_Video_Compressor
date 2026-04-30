@@ -48,8 +48,6 @@ class App(ctk.CTk):
     },
   }
 
-  VIDEO_ATTR: tuple = ("resolution", "fps", "duration")
-
   def __init__(self) -> None:
     super().__init__()
     self._device_os: str = system()
@@ -83,16 +81,16 @@ class App(ctk.CTk):
     self._main_frame.pack( padx=5, pady=5, fill='both')
 
   def _check_procs_exist(self) -> None:
-    for idx, proc in enumerate(self._external_procs):
+    for proc in ("ffmpeg", "ffprobe", "vlc"):
       if proc is None:
         CTkMessagebox(master=self,
                       title="Missing Dependency", 
-                      message=f"Missing External Processor:\n {EXTERNAL_PROCS[idx]}!", 
+                      message=f"Missing External Processor:\n {proc}!", 
                       icon="cancel",
                       option_1="Ok")
         
         self.destroy()
-        raise SystemExit(f"Missing dependency: {EXTERNAL_PROCS[idx]}")
+        raise SystemExit(f"Missing dependency: {proc}")
   
   def _set_icon(self) -> None:
     icon_path = get_icon()
@@ -158,8 +156,10 @@ class App(ctk.CTk):
 
     self._quality_slider = ctk.CTkSlider(self._quality_frame, 
                                          width=500, 
-                                         height=10,
-                                         from_=0, 
+                                         height=8,
+                                         border_width=9,
+                                         button_corner_radius=7,
+                                         from_=0,
                                          to=100,
                                          number_of_steps=100, 
                                          command=self._quality_choice)
@@ -353,6 +353,7 @@ class App(ctk.CTk):
                     message="Error getting video file's fps!\nInvalid frame rate data.",
                     icon='cancel')
       return
+    
     fps = round(int(numer) / int(denom))
     
     fps_list = [120, 60, 30, 24, 15]
@@ -424,9 +425,11 @@ class App(ctk.CTk):
   def _codec_values(self) -> list[str]:
     codecs = ["libx264", "libx265", "libsvtav1", "libvpx-vp9"]
 
-    connected_gpus = gpu.manufacturer()
+    try:
+      connected_gpus = gpu.manufacturers()
+    except Exception as e:
+      logger.exception(str(e))
 
-    if connected_gpus is None:
       CTkMessagebox(master=self,
                     title="System GPU Command Error",
                     message="Error getting connected GPU info!\nCheck logs for details!",
