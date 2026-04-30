@@ -1,7 +1,7 @@
-import subprocess
-
+import json
 from os import PathLike
-from utils import create_logs, DEVICE_OS
+
+from utils.log_util import logger
 
 class FFprobeProcessor():
 
@@ -9,7 +9,8 @@ class FFprobeProcessor():
     self._ffprobe: PathLike | str = ffprobe
     
   def get_video_attributions(self, filepath: PathLike | str) -> tuple[bool, list[str] | None, str | None]:
-
+    import subprocess
+    
     cmd = [self._ffprobe,
            "-v",
            "error",

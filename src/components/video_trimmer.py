@@ -4,13 +4,13 @@ import customtkinter as ctk
 import vlc
 from os import PathLike
 
-from utils import DEVICE_OS
 from CTkTrimSlider import CTkTrimSlider
 
 class VideoTrimmer(ctk.CTkFrame):
-  def __init__(self, master, vlc_cmd: PathLike | str) -> None:
+  def __init__(self, master, vlc_cmd: PathLike | str, device_os: str) -> None:
     super().__init__(master=master, corner_radius=0)
     self._vlc_cmd = vlc_cmd
+    self._device_os: str = device_os
     
     self._duration: int = 0
 
@@ -45,7 +45,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._create_time_panel()
 
   def _platform_specific_inst(self):
-    if DEVICE_OS == "Windows":
+    if self._device_os == "Windows":
         return vlc.Instance(["--quiet","--verbose=0", "--aout=directsound", f"--plugin-path={self._vlc_cmd}"])
 
     return vlc.Instance(["--quiet","--verbose=0", "--aout=pulse", "--no-xlib"])
