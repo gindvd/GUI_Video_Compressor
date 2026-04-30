@@ -2,85 +2,57 @@ import platform
 import subprocess
 import re
 
-from utils import create_logs
-from utils import DEVICE_OS
-
-class OSCompatibiltyError(Exception):
-  def __init__(self, message: str, os: str) -> None:
+class CompatibiltyError(Exception):
+  def __init__(self, message: str, oper_system: str) -> None:
     super().__init__()
-    self._os = os
+    self._oper_system = oper_system
     self._message = message
   
   def __str__(self) -> str:
-    return f"{self._message} (Non-Compatible OS: {self._os})\nCompatible OS: Windows , Linux"
+    return f"{self._message}\n(Incompatible Operating System: {self._oper_system})\n\nCompatible Operating Stsyems: Windows, Linux, MacOS"
 
-CMD_DICT: dict = {
-  "Linux" : {
-    "parent" : ["lspci"],
-    "child" : ["grep", "-iE", "VGA|3D|video"],
-  },
-  "Darwin" : {
-    "parent" : ["system_profiler", "SPDisplaysDataType"],
-  },
-  "Windows" : {
-    "11" : {
-      "parent" : ["powershell", "-Command",
-                   "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"],
-    },
-    "legacy" : {
-      "parent" : ["wmic", "path", "Win32_VideoController", "get", "name"],
-    },
-  },
+system_commands: dict = {
+    "Linux" : (("lspci"), ("grep", "-iE", "VGA|3D|video"), ("awk", "-F", ": ", "{print $2}"), ("sed", "s/ (rev .*)$//")),
+    "Darwin" : (("system_profiler", "SPDisplaysDataType"),  ("grep", "Chipset Model"), ("awk", "-F", ": ", "{print $2}")),
+    # empty list is temp solution to keep parent command from being set to 'powershell' / "wmic" and not the full list
+    "win11" : (("powershell", "-Command", "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"), () ),
+    "win-legacy" : (("wmic", "path", "Win32_VideoController", "get", "name"), ())
 }
 
-def get_card_info() -> list[str] | None:
-  if DEVICE_OS not in ["Windows", "Linux", "Darwin"]:
-    create_logs(str(OSCompatibiltyError("Current OS is not compatible with this module.", DEVICE_OS)))
-    return None
+def get_gpu_names() -> str:
+  oper_system: str = platform.system()
 
-  if DEVICE_OS.startswith("win32"):
-    win_ver = platform.release()
-    if win_ver != "11":
-      win_ver = "legacy"
+  if oper_system not in ["Linux", "Darwin", "Windows"]:
+    raise CompatibiltyError("The GPU info cannot be obtained on this device", oper_system)
+
+  # use powershell on Windows 11, bash on older Windows versions
+  if oper_system == "Windows":
+    version = platform.release()
+    if version != "11":
+      oper_system = "win-legacy"
     
-    cmd_entry = CMD_DICT.get("Windows", {}).get(win_ver)
-  else:
-    cmd_entry = CMD_DICT.get(DEVICE_OS)
+    else:
+      oper_system = "win11"
 
-  if cmd_entry is None:
-    create_logs(f"No command configuration found for OS: {DEVICE_OS}")
-    return None
+  parent_cmd = system_commands[oper_system][0]
+  child_cmds = system_commands[oper_system][1:]
 
-  parent_cmd: list[str] = cmd_entry.get("parent")
-  child_cmd: list[str] | None = cmd_entry.get("child")
+  output: bytes = run_parent(parent_cmd)
 
-  if parent_cmd is None:
-    create_logs("Parent command set to None")
-    return None
+  if child_cmds[0] == ():
+    return output.decode()
 
-  if child_cmd is None:
-    return run_parent(parent_cmd)
+  for child_cmd in child_cmds:
+    output = run_child(child_cmd, output)
 
-  return run_parent_and_child(parent_cmd, child_cmd)
-
-def _get_subprocess_flags() -> dict:
-  # flags to hide console window
-  flags = {}
-  if DEVICE_OS == 'Windows':
-    flags['creationflags'] = subprocess.CREATE_NO_WINDOW
-    si = subprocess.STARTUPINFO()
-    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    flags['startupinfo'] = si
-  return flags
-
-def run_parent(cmd: list[str]) -> list[str] | None:
+  return output.decode()
+  
+def run_parent(cmd: list[str]) -> bytes:
   try:
     proc = subprocess.Popen(cmd, 
                             stdout=subprocess.PIPE, 
                             stderr=subprocess.PIPE, 
-                            shell=False, 
-                            text=True,
-                            **_get_subprocess_flags())
+                            shell=False)
 
     out, err = proc.communicate()
     proc.wait()
@@ -88,82 +60,106 @@ def run_parent(cmd: list[str]) -> list[str] | None:
     rc = proc.returncode
 
   except FileNotFoundError as e:
-    create_logs(str(e))
-    return None
-  
-  except Exception as e:
-    create_logs(str(e))
-    return None
+    raise FileNotFoundError("Command not found in PATH") from e
 
+  except PermissionError as e:
+    raise PermissionError("Permission denied when running system command") from e
+
+  except subprocess.SubprocessError as e:
+    raise RuntimeError("Subprocess failed") from e
+
+  except OSError as e:
+    raise OSError("OS error while running subprocess") from e
+    
   else:
     if rc != 0:
-      create_logs(err)
-      return None
+      raise subprocess.CalledProcessError(rc, cmd, output=out, stderr=err)
 
-    return out.split()
-
-
-def run_parent_and_child(cmd1: list[str], cmd2: list[str]) -> list[str] | None:
+    return out
+  
+def run_child(child_cmd: list[str], parent_output: bytes) -> bytes:
   try:
-    flags = _get_subprocess_flags()
-    proc1 = subprocess.Popen(cmd1,
+    proc = subprocess.Popen(child_cmd,
+                             stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
-                             shell=False,
-                             text=True,
-                             **flags)
-
-    proc2 = subprocess.Popen(cmd2,
-                             stdin=proc1.stdout,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             shell=False,
-                             text=True,
-                             **flags) 
-
-    if proc1.stdout is not None:
-      proc1.stdout.close()
+                             shell=False) 
     
-    out, err = proc2.communicate()
-    proc2.wait()
-    rc = proc2.returncode
+    out, err = proc.communicate(input=parent_output)
+    proc.wait()
+    rc = proc.returncode
 
   except FileNotFoundError as e:
-    create_logs(str(e))
-    return None
+    raise FileNotFoundError("Command not found in PATH") from e
+
+  except PermissionError as e:
+    raise PermissionError("Permission denied when running system command") from e
   
-  except Exception as e:
-    create_logs(str(e))
-    return None
+  except TypeError as e:
+    raise TypeError("STDIN PIPE given incorrect type") from e 
+
+  except subprocess.SubprocessError as e:
+    raise RuntimeError("Subprocess failed") from e
+
+  except OSError as e:
+    raise OSError("OS error while running subprocess") from e
     
   else:
     if rc != 0:
-      create_logs(err)
-      return None
+      raise subprocess.CalledProcessError(rc, child_cmd, output=out, stderr=err)
 
-    return out.split()
-
-def clean_data(gpu_list: list[str]) -> list[str]:
-  clean_list = []
+    return out
   
-  for string in gpu_list:
-    stripped = re.sub(r"[\(\[$@*&?-].*[\)\]$@*&?-]", "", string)
+def remove_symbols(input: str) -> str:
+  clean_list = []
+  if input == "Name":
+    return ""
+  
+  split_input = input.split()
+  
+  for string in split_input:
+    stripped = re.sub(r"[\($@*&?-].*[\)$@*&?-]", "", string)
     clean_list.append(stripped)
 
-  return clean_list
+  return " ".join(clean_list)
   
-def manufacturer() -> list[str] | None:
-  gpus = get_card_info()
+def manufacturers() -> list[str]:
+  """
+  Possible returns options:
+  NVIDIA - for NVIDIA GPUS
+  AMD - for AMD for dedicated and integrated GPUs
+  Intel - for Intel for dedicated and integrated GPUs
+  Apple - for Macbook M5 GPUs
+  Adapter - possible returns on Virtual Machines and Container hosted OS
+  """
 
-  if gpus is None:
-    return None
+  string_of_connected_gpus: str = get_gpu_names()
+  
+  list_of_connected_gpus: list[str] = string_of_connected_gpus.splitlines()
 
-  gpus = clean_data(gpus)
-  
-  manufacturers = []
-  
-  for string in gpus:
-    if string in ["NVIDIA", "AMD", "Intel"]:
-      manufacturers.append(string)
-      
-  return manufacturers
+  device_manufacturers = []
+  for connected_gpu in list_of_connected_gpus:
+    temp = []
+    connected_gpu = remove_symbols(connected_gpu)
+    temp = connected_gpu.split()
+
+    if temp == []:
+      continue
+    
+    name = temp[0]
+
+    # Windows command batch will return name 
+    if name in ("", "Name", "name"):
+      continue
+
+    # Linux devices may use Advanced Micro Devices, Inc instead on AMD
+    elif name == "Advanced":
+      name = "AMD"
+
+    # possible options for OS run on virtual machines, and containers
+    elif name in ["Microsoft", "VMware", "VirtualBox"]:
+      name = "Adapter"
+
+    device_manufacturers.append(name)
+
+  return device_manufacturers
