@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from utils.log_util import logger
+from utils.log_utils import logger
 
 class FFmpegProcessor():
   def __init__(self, ffmpeg: os.PathLike | str, device_os: str) -> None:

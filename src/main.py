@@ -1,5 +1,5 @@
 from app import App
-from utils.log_util import logger
+from utils.log_utils import logger
 from utils.path_utils import setup_vlc_environment
 
 def main():

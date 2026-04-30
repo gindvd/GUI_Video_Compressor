@@ -1,7 +1,7 @@
 import json
 from os import PathLike
 
-from utils.log_util import logger
+from utils.log_utils import logger
 
 class FFprobeProcessor():
 

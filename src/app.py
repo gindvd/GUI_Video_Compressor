@@ -51,7 +51,7 @@ class App(ctk.CTk):
   def __init__(self) -> None:
     super().__init__()
     self._device_os: str = system()
-    self._external_procs: list = get_external_procs()
+    self._external_procs: list = get_external_procs(self._device_os)
 
     self._check_procs_exist()
     
