@@ -5,12 +5,13 @@ from utils.log_util import logger
 
 class FFprobeProcessor():
 
-  def __init__(self, ffprobe: PathLike | str) -> None:
+  def __init__(self, ffprobe: PathLike | str, device_os: str) -> None:
     self._ffprobe: PathLike | str = ffprobe
+    self._device_os: str = device_os
     
   def get_video_attributions(self, filepath: PathLike | str) -> tuple[bool, list[str] | None, str | None]:
     import subprocess
-    
+
     cmd = [self._ffprobe,
            "-v",
            "error",
@@ -28,7 +29,7 @@ class FFprobeProcessor():
     creation_flags = 0
 
     # flags to hide console window
-    if DEVICE_OS == 'Windows':
+    if self._device_os == 'Windows':
       startupinfo = subprocess.STARTUPINFO()
       startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
       creation_flags = subprocess.CREATE_NO_WINDOW
@@ -44,20 +45,38 @@ class FFprobeProcessor():
     try: 
       result, err = proc.communicate()
 
-      proc.wait()
+      proc.wait(timeout=30)
       rc = proc.returncode
+
+    except TimeoutError as e:
+      logger.exception(str(e))
+      return False, None, "Timeout Error Occurred!\nCheck logs for details!"
     
     except FileNotFoundError:
       return False, None, "FFprobe not found!"
 
-    except Exception as e:
-      create_logs(str(e))
-      return False, None, "Error Occured!\nCheck logs for details!"
+    except PermissionError as e:
+      logger.exception(str(e))
+      return False, "Permission Error Occured!\nCheck logs for details!"
+
+    except subprocess.SubprocessError as e:
+      logger.exception(str(e))
+      return False, "Subprocess Error Occured!\nCheck logs for details!"
+
+    except OSError as e:
+      logger.exception(str(e))
+      return False, "OS Error Occured!\nCheck logs for details!"
     
     else:
       if rc != 0:
-        create_logs(err)
-        return False, None, "Error Occured!\nCheck logs for details!"
+        # Raise error if return code is 0 to log info
+        try:
+          raise subprocess.CalledProcessError(rc, cmd, output=result, stderr=err)
+          
+        except subprocess.CalledProcessError as e:
+          logger.exception(str(e))
+      
+        return False, None, "Called Process Error Occured!\nCheck logs for details!"
       
       if result is None or "N/A" in result:
         return False, None, "Issue getting info from file headers."
