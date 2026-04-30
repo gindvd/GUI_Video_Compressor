@@ -1,14 +1,14 @@
 import os
 import subprocess
 
-from utils import create_logs
-from utils import DEVICE_OS
+from utils.log_util import logger
 
 class FFmpegProcessor():
-  def __init__(self, ffmpeg: os.PathLike | str) -> None:
+  def __init__(self, ffmpeg: os.PathLike | str, device_os: str) -> None:
     self._ffmpeg: os.PathLike | str = ffmpeg
     self._proc: subprocess.Popen[str] | None = None
     self._terminated: bool = False
+    self._device_os: str = device_os
 
   def compress(self, 
               input_file: os.PathLike | str, 
@@ -85,7 +85,7 @@ class FFmpegProcessor():
     flags = {}
     
     # flags to hide console window
-    if DEVICE_OS == "Windows":
+    if self._device_os == "Windows":
       flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
       si = subprocess.STARTUPINFO()
       si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -116,24 +116,36 @@ class FFmpegProcessor():
       return False,  None
     
     except FileNotFoundError:
-      return False, "FFmpeg could not be found!"        
-    
-    except Exception as e: 
-      create_logs(str(e))
+      return False, "FFmpeg could not be found!"
 
-      return False, "Error Occured!\nCheck logs for details!"
+    except PermissionError as e:
+      logger.exception(str(e))
+      return False, "Permission Error Occured!\nCheck logs for details!"
+
+    except subprocess.SubprocessError as e:
+      logger.exception(str(e))
+      return False, "Subprocess Error Occured!\nCheck logs for details!"
+
+    except OSError as e:
+      logger.exception(str(e))
+      return False, "OS Error Occured!\nCheck logs for details!"
     
     else:
       if rc != 0 and self._terminated == False:
         if os.path.exists(output_file):
-                os.remove(output_file)
+          os.remove(output_file)
         
-        create_logs(f"{' '.join(str(c) for c in cmd)}\n\n" + out)
+        # Log exception if return code is 0
+        try:
+          raise subprocess.CalledProcessError(rc, cmd, output=out, stderr=err)
+        except subprocess.CalledProcessError as e:
+          logger.exception(str(e))
+        
         return False, "Compression Failed\nCheck logs for details!"
 
       elif rc != 0 and self._terminated == True:
         if os.path.exists(output_file):
-                os.remove(output_file)
+          os.remove(output_file)
         
         return False,  None
 
