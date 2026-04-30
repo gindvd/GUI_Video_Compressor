@@ -26,7 +26,7 @@ from processors.ffmpeg_processor  import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
 
 from components.progressbar_popup import ProgressbarPopup
-from components.video_player      import VideoTrimmer
+from components.video_trimmer      import VideoTrimmer
 
 class App(ctk.CTk):
   HW_CODEC_OPTS: dict = \
