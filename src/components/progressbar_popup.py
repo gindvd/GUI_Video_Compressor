@@ -8,9 +8,6 @@ class ProgressbarPopup(ctk.CTkToplevel):
 
     self.title("Compression in Progress")
     self.resizable(False, False)
-    
-    ctk.set_appearance_mode("System")  
-    ctk.set_default_color_theme("blue")
 
     self._btm_frame = ctk.CTkFrame(self, corner_radius=0)
 
