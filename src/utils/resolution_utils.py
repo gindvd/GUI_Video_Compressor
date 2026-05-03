@@ -11,12 +11,12 @@ def get_list_of_smaller_res(vid_res: str) -> list[str]:
   # resolutions for compressing too
    
   if width >= height:
-    std_width = [5120, 3840, 2560, 1920, 1600, 1280, 854, 640]
-    std_height = [2880, 2160, 1440, 1080, 900, 720, 480, 360]
+    std_width = [5120, 3840, 2560, 1920, 1280, 854, 640]
+    std_height = [2880, 2160, 1440, 1080, 720, 480, 360]
 
   elif width < height:
-    std_width = [2880, 2160, 1440, 1080, 900, 720, 480, 360]
-    std_height = [5120, 3840, 2560, 1920, 1600, 1280, 854, 640]
+    std_width = [2880, 2160, 1440, 1080, 720, 480, 360]
+    std_height = [5120, 3840, 2560, 1920, 1280, 854, 640]
 
   temp_res = []
 
