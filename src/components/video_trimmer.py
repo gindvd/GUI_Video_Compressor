@@ -229,6 +229,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     new_duration = int(self._end_time.get()) - target
     self._current_duration_lbl.configure(text=self._ms_text_converter(new_duration))
+    self._start_time_lbl.configure(text=self._ms_text_converter(target))
 
   def _set_end_time(self, value):
     self._is_seeking = True
@@ -246,6 +247,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     new_duration = target - int(self._start_time.get())
     self._current_duration_lbl.configure(text=self._ms_text_converter(new_duration))
+    self._end_time_lbl.configure(text=self._ms_text_converter(target))
   
   def _schedule_seek_reset(self) -> None:
     if self._seek_reset_id is not None:
