@@ -31,18 +31,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._instance.log_unset()
     self._vid_player = self._instance.media_player_new()
 
-    self._vid_panel = ctk.CTkFrame(self, width=750, height=400, fg_color="black", corner_radius=0)
-    self._vid_panel.pack(fill='both', expand=True)
-
-    self._control_panel = ctk.CTkFrame(self, width=750, corner_radius=0)
-    self._control_panel.pack(fill='both', expand=True)
-
-    self._create_control_panel()
-
-    self._time_panel = ctk.CTkFrame(self, width=750, corner_radius=0)
-    self._time_panel.pack(fill='both', expand=True)
-
-    self._create_time_panel()
+    self._create_ui()
 
   def _platform_specific_inst(self):
     if self._device_os == "Windows":
@@ -56,7 +45,19 @@ class VideoTrimmer(ctk.CTkFrame):
                         "--aout=pulse", 
                         "--no-xlib"])
   
-  def _create_control_panel(self) -> None:
+  def _create_ui(self) -> None:
+    self._vid_panel = ctk.CTkFrame(self, width=750, height=400, fg_color="black", corner_radius=0)
+    self._vid_panel.pack(fill='both', expand=True)
+
+    self._control_panel = ctk.CTkFrame(self, width=750, corner_radius=0)
+    self._control_panel.pack(fill='both', expand=True)
+    self._create_controls()
+
+    self._time_panel = ctk.CTkFrame(self, width=750, corner_radius=0)
+    self._time_panel.pack(fill='both', expand=True)
+    self._create_time_labels()
+  
+  def _create_controls(self) -> None:
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                         width=65,
                                                         height=30,
@@ -113,7 +114,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._volume_slider.bind("<Enter>", self._cancel_hide_vol_popup)
     self._volume_slider.bind("<Leave>", self._schedule_hide_vol_popup)
 
-  def _create_time_panel(self) -> None:
+  def _create_time_labls(self) -> None:
     ctk.CTkLabel(self._time_panel, text="New Duration:").grid(row=0, column=0, padx=10, pady=5, sticky="nswe")
 
     self._current_duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
