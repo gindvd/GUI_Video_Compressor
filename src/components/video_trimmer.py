@@ -24,6 +24,9 @@ class VideoTrimmer(ctk.CTkFrame):
     self._end_time: Variable = DoubleVar(self, value=1)
     self._current_time: Variable = DoubleVar(self, value=0.5)
 
+    self._vol_hide_id: str | None = None
+    self._vol_popup_visible: bool = False
+
     self._instance: vlc.Instance = self._platform_specific_inst()
     self._instance.log_unset()
     self._vid_player = self._instance.media_player_new()
