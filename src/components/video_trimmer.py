@@ -46,9 +46,15 @@ class VideoTrimmer(ctk.CTkFrame):
 
   def _platform_specific_inst(self):
     if self._device_os == "Windows":
-        return vlc.Instance(["--quiet","--verbose=0", "--aout=directsound", f"--plugin-path={self._vlc_cmd}"])
+        return vlc.Instance(["--quiet",
+                             "--verbose=0", 
+                             "--aout=directsound", 
+                             f"--plugin-path={self._vlc_cmd}"])
 
-    return vlc.Instance(["--quiet","--verbose=0", "--aout=pulse", "--no-xlib"])
+    return vlc.Instance(["--quiet",
+                        "--verbose=0", 
+                        "--aout=pulse", 
+                        "--no-xlib"])
   
   def _create_control_panel(self) -> None:
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
