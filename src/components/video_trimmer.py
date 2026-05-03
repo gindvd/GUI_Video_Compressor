@@ -260,15 +260,20 @@ class VideoTrimmer(ctk.CTkFrame):
 
   def set_vid_values(self, duration: float) -> None:
     self._duration = int(duration * 1000)
-    self._trim_slider.configure(require_redraw=True, to=self._duration, number_of_steps=self._duration, state="normal")
+    self._trim_slider.configure(require_redraw=True, 
+                                to=self._duration, 
+                                number_of_steps=self._duration, 
+                                state="normal")
 
     self._start_time.set(0)
     self._current_time.set(0)
     self._end_time.set(self._duration)
-    
 
     self._current_duration_lbl.configure(text=self._ms_text_converter(self._duration))
-    self._duration_lbl.configure(text=self._ms_text_converter(self._duration)) 
+    self._duration_lbl.configure(text=self._ms_text_converter(self._duration))
+
+    self._start_time_lbl.configure(text=self._ms_text_converter(0))
+    self._end_time_lbl.configure(text=self._ms_text_converter(self._duration))
 
   def set_video(self, vid_file: PathLike | str) -> None:
     if self._update_id is not None:
