@@ -5,6 +5,7 @@ import vlc
 from os import PathLike
 
 from CTkTrimSlider import CTkTrimSlider
+from utils.log_utils import logger
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, master, vlc_cmd: PathLike | str, device_os: str, **kwargs) -> None:
@@ -166,26 +167,36 @@ class VideoTrimmer(ctk.CTkFrame):
       self._vid_player.set_hwnd(self._vid_panel.winfo_id())
 
   def _update_progress(self):
-    state = self._vid_player.get_state()
+    try:
+      state = self._vid_player.get_state()
+      
+      # Break out of update progress loop if VLC enters an Error state
+      if state == vlc.State.Error:
+        logger.Exception("VLC Error")
+        return
 
-    if state == vlc.State.Playing and not self._is_seeking:
-      current_time_ms = self._vid_player.get_time()
-      end_time_ms = int(self._end_time.get())
+      if state == vlc.State.Playing and not self._is_seeking:
+        current_time_ms = self._vid_player.get_time()
+        end_time_ms = int(self._end_time.get())
 
-      if current_time_ms >= end_time_ms:
-        self._vid_player.pause()
-        self._vid_player.set_time(end_time_ms)
-        self._play_pause_btn.configure(text="Play")
-        current_time_ms = end_time_ms
+        if current_time_ms >= end_time_ms:
+          self._vid_player.pause()
+          self._vid_player.set_time(end_time_ms)
+          self._play_pause_btn.configure(text="Play \U000025B6")
+          current_time_ms = end_time_ms
 
-      self._current_time.set(current_time_ms)
-      self._curtime_lbl.configure(text=self._ms_text_converter(current_time_ms))
+        self._current_time.set(current_time_ms)
+        self._curtime_lbl.configure(text=self._ms_text_converter(current_time_ms))
 
-    elif state == vlc.State.Ended:
-      end_time_ms = int(self._end_time.get())
-      self._current_time.set(end_time_ms)
-      self._curtime_lbl.configure(text=self._ms_text_converter(end_time_ms))
-      self._play_pause_btn.configure(text="Play")
+      elif state == vlc.State.Ended:
+        end_time_ms = int(self._end_time.get())
+        self._current_time.set(end_time_ms)
+        self._curtime_lbl.configure(text=self._ms_text_converter(end_time_ms))
+        self._play_pause_btn.configure(text="Play \U000025B6")
+    
+    except Exception:
+      logger.Exception("VLC Error")
+      return
 
     self._update_id = self.after(33, self._update_progress)
   
