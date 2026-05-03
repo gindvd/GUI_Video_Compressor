@@ -138,7 +138,7 @@ class App(ctk.CTk):
     self._file_entry.bind("<Return>", self._file_entered)
     self._file_entry.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
 
-    self._file_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+    self._file_frame.grid(row=0, column=0, columnspan=2, padx=1, pady=1, sticky="nsew")
  
     # video trimmer
     self._vid_trimmer: VideoTrimmer = VideoTrimmer(self._main_frame, 
@@ -168,7 +168,7 @@ class App(ctk.CTk):
     self._quality_perc_lbl = ctk.CTkLabel(self._quality_frame, text=f"{int(self._quality_slider.get())}%")
     self._quality_perc_lbl.grid(row=0, column=2, padx=5, pady=5, sticky="w")
 
-    self._quality_frame.grid(row=2, column=0, sticky="nsew")
+    self._quality_frame.grid(row=2, column=0, padx=1, pady=1, sticky="nsew")
 
     # options frame
     self._options_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
@@ -233,7 +233,7 @@ class App(ctk.CTk):
 
     self._rm_aud_chkbox.grid(row=5, column=0, columnspan=2, padx=10, pady=10, sticky="sw",)
 
-    self._options_frame.grid(row=1, column=1, sticky="nsew")
+    self._options_frame.grid(row=1, column=1, padx=1, pady=1, sticky="nsew")
     
     # compress button frame
     self._compress_btn_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
@@ -248,7 +248,7 @@ class App(ctk.CTk):
     
     self._compress_btn.pack(padx=10,pady=10)
 
-    self._compress_btn_frame.grid(row=2, column=1, sticky="nsew")
+    self._compress_btn_frame.grid(row=2, column=1, padx=1, pady=1, sticky="nsew")
 
     self._main_frame.pack(fill='both', expand=True)
 
