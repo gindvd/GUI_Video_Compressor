@@ -140,13 +140,12 @@ class App(ctk.CTk):
 
     self._file_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
  
-    # media frame
-    self._media_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
+    # video trimmer
+    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self._main_frame, 
+                                                   self._external_procs[2], 
+                                                   self._device_os)
     
-    self._vid_trimmer: VideoTrimmer = VideoTrimmer(self._media_frame, self._external_procs[2], self._device_os)
-    self._vid_trimmer.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-
-    self._media_frame.grid(row=1, column=0, sticky="nsew")
+    self._vid_trimmer.grid(row=1, column=0, padx=1, pady=1, sticky="nsew")
 
     # quality frame
     self._quality_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
@@ -250,7 +249,7 @@ class App(ctk.CTk):
     self._compress_btn.pack(padx=10,pady=10)
 
     self._compress_btn_frame.grid(row=2, column=1, sticky="nsew")
-    
+
     self._main_frame.pack(fill='both', expand=True)
 
   def _show_about(self) -> None:
