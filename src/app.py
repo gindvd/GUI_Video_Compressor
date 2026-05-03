@@ -143,7 +143,9 @@ class App(ctk.CTk):
     # video trimmer
     self._vid_trimmer: VideoTrimmer = VideoTrimmer(self._main_frame, 
                                                    self._external_procs[2], 
-                                                   self._device_os)
+                                                   self._device_os,
+                                                   corner_radius=0,
+                                                   fg_color="transparent")
     
     self._vid_trimmer.grid(row=1, column=0, padx=1, pady=1, sticky="nsew")
 
