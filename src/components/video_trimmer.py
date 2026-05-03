@@ -134,17 +134,20 @@ class VideoTrimmer(ctk.CTkFrame):
 
     if self._vid_player.is_playing():
       self._vid_player.pause()
-      self._play_pause_btn.configure(text="Play")
+      self._play_pause_btn.configure(text="Play \U000025B6")
+
     else:
       current_ms = self._vid_player.get_time()
       end_ms = int(self._end_time.get())
+
       if current_ms >= end_ms:
         start_ms = int(self._start_time.get())
         self._vid_player.set_time(start_ms)
         self._current_time.set(start_ms)
         self._curtime_lbl.configure(text=self._ms_text_converter(start_ms))
+
       self._vid_player.play()
-      self._play_pause_btn.configure(text='Pause')
+      self._play_pause_btn.configure(text='Pause \U000023F8')
 
   def _display_video(self) -> None:
     if self._device_os == "Linux":
