@@ -7,8 +7,8 @@ from os import PathLike
 from CTkTrimSlider import CTkTrimSlider
 
 class VideoTrimmer(ctk.CTkFrame):
-  def __init__(self, master, vlc_cmd: PathLike | str, device_os: str) -> None:
-    super().__init__(master=master, corner_radius=0)
+  def __init__(self, master, vlc_cmd: PathLike | str, device_os: str, **kwargs) -> None:
+    super().__init__(master=master, **kwargs)
     self._vlc_cmd = vlc_cmd
     self._device_os: str = device_os
     
@@ -23,9 +23,6 @@ class VideoTrimmer(ctk.CTkFrame):
     self._start_time: Variable = DoubleVar(self, value=0)
     self._end_time: Variable = DoubleVar(self, value=1)
     self._current_time: Variable = DoubleVar(self, value=0.5)
-
-    ctk.set_appearance_mode("System")  
-    ctk.set_default_color_theme("blue")
 
     self._instance: vlc.Instance = self._platform_specific_inst()
     self._instance.log_unset()
