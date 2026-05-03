@@ -76,9 +76,7 @@ class App(ctk.CTk):
     self._set_icon()
 
     self._create_menubar()
-    self._main_frame = ctk.CTkFrame(self, corner_radius=0)
-    self._build_gui()  
-    self._main_frame.pack( padx=5, pady=5, fill='both')
+    self._build_ui()
 
   def _check_procs_exist(self) -> None:
     for proc in ("ffmpeg", "ffprobe", "vlc"):
@@ -125,7 +123,8 @@ class App(ctk.CTk):
     help_drop = CustomDropdownMenu(widget=help_btn)
     help_drop.add_option(option="About", command=self._show_about)
 
-  def _build_gui(self) -> None: 
+  def _build_ui(self) -> None: 
+    self._main_frame = ctk.CTkFrame(self, corner_radius=0)
     # file frame
     self._file_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
     
@@ -251,6 +250,8 @@ class App(ctk.CTk):
     self._compress_btn.pack(padx=10,pady=10)
 
     self._compress_btn_frame.grid(row=2, column=1, sticky="nsew")
+    
+    self._main_frame.pack(fill='both', expand=True)
 
   def _show_about(self) -> None:
     about_file = resource_path(os.path.join("assets", "about.txt"))
