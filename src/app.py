@@ -378,11 +378,11 @@ class App(ctk.CTk):
     vid_dur = float(attr_vals[2])
     
     self._vid_trimmer.set_vid_values(vid_dur)
+    self._vid_trimmer.load_media(self._input_file)
 
     # Enable compression button and display the video file
     self._browse_btn.configure(state="normal")
     self._compress_btn.configure(state="normal")
-    self._vid_trimmer.set_video(self._input_file)
 
   def _codec_choice(self, choice) -> None:
     self._codec = choice

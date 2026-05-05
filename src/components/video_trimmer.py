@@ -3,6 +3,7 @@ import customtkinter as ctk
 
 import vlc
 from os import PathLike
+from threading import Thread, Event
 
 from CTkTrimSlider import CTkTrimSlider
 from utils.log_utils import logger
@@ -16,10 +17,11 @@ class VideoTrimmer(ctk.CTkFrame):
     self._duration: int = 0
 
     self._media: vlc.Media | None = None
+    self._is_loading: bool = False
+
     self._update_id: str | None = None
     self._is_seeking: bool = False
     self._seek_reset_id: str | None = None
-    self._is_muted: bool = False
     
     self._start_time: Variable = DoubleVar(self, value=0)
     self._end_time: Variable = DoubleVar(self, value=1)
@@ -27,6 +29,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._vol_hide_id: str | None = None
     self._vol_popup_visible: bool = False
+    self._is_muted: bool = False
 
     self._instance: vlc.Instance = self._platform_specific_inst()
     self._instance.log_unset()
@@ -275,24 +278,49 @@ class VideoTrimmer(ctk.CTkFrame):
     self._start_time_lbl.configure(text=self._ms_text_converter(0))
     self._end_time_lbl.configure(text=self._ms_text_converter(self._duration))
 
-  def set_video(self, vid_file: PathLike | str) -> None:
+  # VLC enters error state sometimes on loading new media
+  # Need to unload previous videos, and load new videos on separate threads
+  # Need to check for error states and destroy VLC instances and load new instances 
+  def load_media(self, vid_file: PathLike | str) -> None:
     if self._update_id is not None:
       self.after_cancel(self._update_id)
       self._update_id = None
 
-    self._vid_player.stop()
-    
-    # unloads old media files before loading new media
-    if self._media is not None:
-      self._media.release()
-      self._media = None
-    
-    self._vid_player.release()
-    
-    self._vid_player = self._instance.media_player_new()
-    self._media = self._instance.media_new(vid_file)
-    self._vid_player.set_media(self._media)
+    self._is_loading = True
+    Thread(target=self._stop_and_load_media, args=(vid_file), daemon=True).start()
+  
+  def _stop_and_load_media(self, vid_file: Pathlike | str) -> None:
+    try:
+      self._vid_player.stop()
 
+      # VLC state doesn't immediately update so need to wait and check if it stops
+      # If no media is loaded, state should be NothingSpecial
+      for _ in range(50):
+        state = self.self._vid_player.get_state()
+        if state in (vlc.State.Stopped, vlc.State.Ended, vlc.State.NothingSpecial):
+          break
+
+        Event.wait(0.05)
+      
+      else:
+        self.after(0, self._reset_vlc, vid_file)
+        return
+      
+      # Need to check if there is already media loaded
+      current_media = self._media
+      self._media = self._instance.media_new(vid_file)
+      self._vid_player.set_media(self._media)
+
+      if current_media is not None:
+        release()
+      
+      self.after(0, self._finish_loading)
+    
+    except Exception:
+      self.after(0, self._reset_vlc, vid_file)
+
+  def _finish_loading(self) -> None:
+    self._is_loading = False
     self._display_video()
 
     self._set_volume(100)
@@ -304,10 +332,47 @@ class VideoTrimmer(ctk.CTkFrame):
     self._volume_slider.configure(state="normal")
 
     self._vid_player.play()
-    self._play_pause_btn.configure(text="Pause")
+    self._play_pause_btn.configure(text="Pause  \U000023F8")
     self.after(200, self._pause_initial_frame)
 
     self._update_progress()
+  
+  def _reset_vlc(self, reload_file: PathLike | str | None = None) -> None:
+    if self._update_id is not None:
+      self.after_cancel(self._update_id)
+      seld._update_id = None
+    
+    self._is_loading = True
+
+    def _teardown_vlc():
+      try:
+        self._vid_player.stop()
+        self._vid_player.release()
+      except Exception:
+        pass
+      
+      try:
+        self._instance.release()
+      except Exception:
+        pass
+
+      self.after(0, self._rebuild_instance(reload_file))
+    
+    # Putting on separate thread to keep VLC from blocking main thread if error occurs
+    Thread(target=_teardown_vlc, daemon=True).start()
+  
+  def _rebuild_instance(self, reload_file: PathLike | str | None = None) -> None:
+    self._media = None
+    self._instance = self._platform_specific_inst()
+    self._vid_player = self._instance.media_player_new()
+    self._is_loading = False
+
+    self._play_pause_btn.configure(text="Play \U000025B6", state="disabled")
+    self._volume_btn.configure(state="disabled")
+    self._volume_slider.configure(state="disabled")
+
+    if reload_file is not None:
+      self.set_video(reload_file)
 
   def _pause_initial_frame(self) -> None:
     if self._vid_player.is_playing():
