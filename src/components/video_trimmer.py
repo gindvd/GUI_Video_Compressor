@@ -118,7 +118,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._volume_slider.bind("<Enter>", self._cancel_hide_vol_popup)
     self._volume_slider.bind("<Leave>", self._schedule_hide_vol_popup)
 
-  def _create_time_labls(self) -> None:
+  def _create_time_labels(self) -> None:
     ctk.CTkLabel(self._time_panel, text="New Duration:").grid(row=0, column=0, padx=10, pady=5, sticky="w")
 
     self._current_duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
