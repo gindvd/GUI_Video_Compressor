@@ -152,7 +152,7 @@ class App(ctk.CTk):
     # quality frame
     self._quality_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color="transparent")
 
-    ctk.CTkLabel(self._quality_frame, text="Video Quality:").grid(row=0, column=0, padx=(20, 10), pady=5, sticky="sw")
+    ctk.CTkLabel(self._quality_frame, text="Video Quality:").grid(row=0, column=0, padx=10, pady=5, sticky="w")
 
     self._quality_slider = ctk.CTkSlider(self._quality_frame, 
                                          width=500, 

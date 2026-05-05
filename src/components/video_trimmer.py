@@ -51,7 +51,7 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _create_ui(self) -> None:
     self._vid_panel = ctk.CTkFrame(self, width=750, height=400, fg_color="black", corner_radius=0)
-    self._vid_panel.pack(fill='both', expand=True)
+    self._vid_panel.pack(padx=10, pady=10, fill='both', expand=True)
 
     self._control_panel = ctk.CTkFrame(self, width=750, corner_radius=0)
     self._control_panel.pack(fill='both', expand=True)
