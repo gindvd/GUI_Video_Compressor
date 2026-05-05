@@ -300,7 +300,7 @@ class VideoTrimmer(ctk.CTkFrame):
       # VLC state doesn't immediately update so need to wait and check if it stops
       # If no media is loaded, state should be NothingSpecial
       for _ in range(50):
-        state = self.self._vid_player.get_state()
+        state = self._vid_player.get_state()
         if state in (vlc.State.Stopped, vlc.State.Ended, vlc.State.NothingSpecial):
           break
 
