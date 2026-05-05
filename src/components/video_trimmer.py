@@ -137,7 +137,7 @@ class VideoTrimmer(ctk.CTkFrame):
     ctk.CTkLabel(self._time_panel, text="End Time:").grid(row=1, column=2, padx=10, pady=5, sticky="w")
 
     self._end_time_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
-    self._en_time_lbl.grid(row=1, column=3, padx=10, pady=5, sticky="nswe")
+    self._end_time_lbl.grid(row=1, column=3, padx=10, pady=5, sticky="nswe")
 
   def _play_pause(self) -> None:
     state = self._vid_player.get_state()
