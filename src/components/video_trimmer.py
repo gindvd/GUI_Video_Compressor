@@ -287,7 +287,7 @@ class VideoTrimmer(ctk.CTkFrame):
       self._update_id = None
 
     self._is_loading = True
-    Thread(target=self._stop_and_load_media, args=(vid_file), daemon=True).start()
+    Thread(target=self._stop_and_load_media, args=(vid_file, ), daemon=True).start()
   
   def _stop_and_load_media(self, vid_file: PathLike | str) -> None:
     try:
