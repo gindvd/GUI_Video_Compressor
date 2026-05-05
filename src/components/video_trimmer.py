@@ -372,7 +372,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._volume_slider.configure(state="disabled")
 
     if reload_file is not None:
-      self.set_video(reload_file)
+      self.load_media(reload_file)
 
   def _pause_initial_frame(self) -> None:
     if self._vid_player.is_playing():
