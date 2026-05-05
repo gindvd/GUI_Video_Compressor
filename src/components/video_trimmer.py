@@ -66,7 +66,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                         width=65,
                                                         height=30,
-                                                        text="Play",
+                                                        text="Play \U000025B6",
                                                         state="disabled",
                                                         command=self._play_pause)
 
@@ -90,15 +90,14 @@ class VideoTrimmer(ctk.CTkFrame):
     self._volume_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                     width=50,
                                                     height=30,
-                                                    text="Mute",
+                                                    text="\U0001F50A",
+                                                    font=("Arial", 24),
                                                     state="disabled",
                                                     command=self._toggle_mute)
 
     self._volume_btn.grid(row=0, column=3, padx=10, pady=10, sticky="nswe")
 
     self._vol_popup = ctk.CTkFrame(self, corner_radius=8)
-    self._vol_popup_visible = False
-    self._vol_hide_id = None
 
     self._volume_slider: ctk.CTkSlider = ctk.CTkSlider(self._vol_popup,
                                                        height=120,
@@ -422,10 +421,10 @@ class VideoTrimmer(ctk.CTkFrame):
     self._vid_player.audio_set_mute(self._is_muted)
 
     if self._is_muted:
-      self._volume_btn.configure(text="Unmute")
+      self._volume_btn.configure(text="\U0001F507")
       self._volume_slider.set(0)
     else:
-      self._volume_btn.configure(text="Mute")
+      self._volume_btn.configure(text="\U0001F50A")
       self._volume_slider.set(10)
       self._set_volume(10)
 
@@ -435,11 +434,11 @@ class VideoTrimmer(ctk.CTkFrame):
     if volume == 0 and not self._is_muted:
       self._is_muted = True
       self._vid_player.audio_set_mute(True)
-      self._volume_btn.configure(text="Unmute")
+      self._volume_btn.configure(text="\U0001F507")
     elif volume > 0 and self._is_muted:
       self._is_muted = False
       self._vid_player.audio_set_mute(False)
-      self._volume_btn.configure(text="Mute")
+      self._volume_btn.configure(text="\U0001F50A")
 
   def _show_vol_popup(self, event=None) -> None:
     if self._vol_hide_id is not None:
