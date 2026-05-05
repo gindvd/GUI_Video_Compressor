@@ -126,7 +126,7 @@ class App(ctk.CTk):
   def _build_ui(self) -> None: 
     self._main_frame = ctk.CTkFrame(self, corner_radius=0)
     # file frame
-    self._file_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
+    self._file_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color="transparent")
     
     self._browse_btn = ctk.CTkButton(self._file_frame, 
                                      text="Browse",
@@ -150,7 +150,7 @@ class App(ctk.CTk):
     self._vid_trimmer.grid(row=1, column=0, padx=1, pady=1, sticky="nsew")
 
     # quality frame
-    self._quality_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
+    self._quality_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color="transparent")
 
     ctk.CTkLabel(self._quality_frame, text="Video Quality:").grid(row=0, column=0, padx=(20, 10), pady=5, sticky="sw")
 
@@ -173,7 +173,7 @@ class App(ctk.CTk):
     self._quality_frame.grid(row=2, column=0, padx=1, pady=1, sticky="nsew")
 
     # options frame
-    self._options_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
+    self._options_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color="transparent")
   
     ctk.CTkLabel(self._options_frame, text="Codec:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
@@ -238,7 +238,7 @@ class App(ctk.CTk):
     self._options_frame.grid(row=1, column=1, padx=1, pady=1, sticky="nsew")
     
     # compress button frame
-    self._compress_btn_frame = ctk.CTkFrame(self._main_frame, corner_radius=0)
+    self._compress_btn_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color="transparent")
 
     # compresion button
     self._compress_btn = ctk.CTkButton(self._compress_btn_frame,
