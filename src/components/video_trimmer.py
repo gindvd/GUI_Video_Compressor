@@ -96,8 +96,8 @@ class VideoTrimmer(ctk.CTkFrame):
     self._volume_btn.grid(row=0, column=3, padx=10, pady=10, sticky="nswe")
 
     self._vol_popup = ctk.CTkFrame(self, corner_radius=8)
-    self._vol_popup_visible: bool = False
-    self._vol_hide_id: str | None = None
+    self._vol_popup_visible = False
+    self._vol_hide_id = None
 
     self._volume_slider: ctk.CTkSlider = ctk.CTkSlider(self._vol_popup,
                                                        height=120,
@@ -289,7 +289,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._is_loading = True
     Thread(target=self._stop_and_load_media, args=(vid_file), daemon=True).start()
   
-  def _stop_and_load_media(self, vid_file: Pathlike | str) -> None:
+  def _stop_and_load_media(self, vid_file: PathLike | str) -> None:
     try:
       self._vid_player.stop()
 
@@ -300,7 +300,7 @@ class VideoTrimmer(ctk.CTkFrame):
         if state in (vlc.State.Stopped, vlc.State.Ended, vlc.State.NothingSpecial):
           break
 
-        Event.wait(0.05)
+        Event().wait(timeout=0.05)
       
       else:
         self.after(0, self._reset_vlc, vid_file)
@@ -312,7 +312,7 @@ class VideoTrimmer(ctk.CTkFrame):
       self._vid_player.set_media(self._media)
 
       if current_media is not None:
-        release()
+        current_media.release()
       
       self.after(0, self._finish_loading)
     
@@ -340,7 +340,7 @@ class VideoTrimmer(ctk.CTkFrame):
   def _reset_vlc(self, reload_file: PathLike | str | None = None) -> None:
     if self._update_id is not None:
       self.after_cancel(self._update_id)
-      seld._update_id = None
+      self._update_id = None
     
     self._is_loading = True
 
