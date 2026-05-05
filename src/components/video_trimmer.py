@@ -164,12 +164,6 @@ class VideoTrimmer(ctk.CTkFrame):
       self._vid_player.play()
       self._play_pause_btn.configure(text='Pause \U000023F8')
 
-  def _display_video(self) -> None:
-    if self._device_os == "Linux":
-      self._vid_player.set_xwindow(self._vid_panel.winfo_id())
-    elif self._device_os == "Windows":
-      self._vid_player.set_hwnd(self._vid_panel.winfo_id())
-
   def _update_progress(self):
     try:
       state = self._vid_player.get_state()
@@ -267,7 +261,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._trim_slider.configure(require_redraw=True, 
                                 to=self._duration, 
                                 number_of_steps=self._duration, 
-                                state="normal")
+                                state="disabled")
 
     self._start_time.set(0)
     self._current_time.set(0)
@@ -320,9 +314,9 @@ class VideoTrimmer(ctk.CTkFrame):
       self._vid_player.set_media(self._media)
 
       if current_media is not None:
-        current_media.release()
+        current_media.release
       
-      self.after(0, self._finish_loading, vid_file)
+      self.after(0, self._finish_loading, request)
     
     except Exception as e:
       raise vlc.VLCException("Error occuring") from e
@@ -342,12 +336,19 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause_btn.configure(state="normal")
     self._volume_btn.configure(state="normal")
     self._volume_slider.configure(state="normal")
+    self._trim_slider.configure(state="normal")
 
     self._vid_player.play()
     self._play_pause_btn.configure(text="Pause  \U000023F8")
     self.after(200, self._pause_initial_frame)
 
     self._update_progress()
+
+  def _display_video(self) -> None:
+    if self._device_os == "Linux":
+      self._vid_player.set_xwindow(self._vid_panel.winfo_id())
+    elif self._device_os == "Windows":
+      self._vid_player.set_hwnd(self._vid_panel.winfo_id())
   
   def _reset_vlc(self, reload_file: PathLike | str | None = None) -> None:
     if self._update_id is not None:
