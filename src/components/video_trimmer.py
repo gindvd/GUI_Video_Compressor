@@ -18,6 +18,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._media: vlc.Media | None = None
     self._is_loading: bool = False
+    self._load_request: int = 0
 
     self._update_id: str | None = None
     self._is_seeking: bool = False
@@ -287,9 +288,12 @@ class VideoTrimmer(ctk.CTkFrame):
       self._update_id = None
 
     self._is_loading = True
-    Thread(target=self._stop_and_load_media, args=(vid_file, ), daemon=True).start()
+    self._load_request +=1
+    request = self._load_request
+
+    Thread(target=self._stop_and_load_media, args=(vid_file, request,), daemon=True).start()
   
-  def _stop_and_load_media(self, vid_file: PathLike | str) -> None:
+  def _stop_and_load_media(self, vid_file: PathLike | str, request: int) -> None:
     try:
       self._vid_player.stop()
 
@@ -306,6 +310,10 @@ class VideoTrimmer(ctk.CTkFrame):
         self.after(0, self._reset_vlc, vid_file)
         return
       
+      # Don't load media if another request to load media occurs while waiting for video to load
+      if request != self._load_request:
+        return
+      
       # Need to check if there is already media loaded
       current_media = self._media
       self._media = self._instance.media_new(vid_file)
@@ -314,12 +322,16 @@ class VideoTrimmer(ctk.CTkFrame):
       if current_media is not None:
         current_media.release()
       
-      self.after(0, self._finish_loading)
+      self.after(0, self._finish_loading, vid_file)
     
-    except Exception:
-      self.after(0, self._reset_vlc, vid_file)
+    except Exception as e:
+      raise vlc.VLCException("Error occuring") from e
 
-  def _finish_loading(self) -> None:
+
+  def _finish_loading(self, request: int) -> None:
+    if request != self._load_request:
+      return
+
     self._is_loading = False
     self._display_video()
 
