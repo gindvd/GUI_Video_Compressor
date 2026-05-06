@@ -1,4 +1,4 @@
-from tkinter import Variable, DoubleVar
+from tkinter import IntVar, DoubleVar
 import customtkinter as ctk
 
 import vlc
@@ -11,7 +11,7 @@ from utils.log_utils import logger
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, master, vlc_cmd: PathLike | str, device_os: str, **kwargs) -> None:
     super().__init__(master=master, **kwargs)
-    self._vlc_cmd = vlc_cmd
+    self._vlc_cmd: PathLike | str = vlc_cmd
     self._device_os: str = device_os
     
     self._duration: int = 0
@@ -73,7 +73,9 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause_btn.grid(row=0, column=0, padx=10, pady=10, sticky="nswe")
 
     self._trim_slider = CTkTrimSlider(self._control_panel, 
-                                      width=500, 
+                                      width=500,
+                                      border_width=8,
+                                      outer_button_corner_radius=5,
                                       state="disabled",
                                       left_button_command=self._set_start_time,
                                       right_button_command=self._set_end_time,
@@ -99,15 +101,17 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._vol_popup = ctk.CTkFrame(self, corner_radius=8)
 
-    self._volume_slider: ctk.CTkSlider = ctk.CTkSlider(self._vol_popup,
-                                                       height=120,
-                                                       width=20,
-                                                       from_=0,
-                                                       to=100,
-                                                       number_of_steps=100,
-                                                       state="disabled",
-                                                       orientation="vertical",
-                                                       command=self._set_volume)
+    self._volume_slider = ctk.CTkSlider(self._vol_popup, 
+                                        height=120, 
+                                        width=20,
+                                        button_corner_radius=4,
+                                        from_=0, 
+                                        to=100, 
+                                        number_of_steps=100,
+                                        state="disabled", 
+                                        orientation="vertical",
+                                        command=self._set_volume)
+
     self._volume_slider.set(100)
     self._volume_slider.pack(padx=6, pady=8)
 
