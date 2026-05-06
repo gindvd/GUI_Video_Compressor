@@ -13,8 +13,6 @@ class VideoTrimmer(ctk.CTkFrame):
     super().__init__(master=master, **kwargs)
     self._vlc_cmd: PathLike | str = vlc_cmd
     self._device_os: str = device_os
-    
-    self._duration: int = 0
 
     self._media: vlc.Media | None = None
     self._is_loading: bool = False
@@ -260,21 +258,21 @@ class VideoTrimmer(ctk.CTkFrame):
     self._seek_reset_id = None
 
   def set_vid_values(self, duration: float) -> None:
-    self._duration = int(duration * 1000)
+    original_duration = int(duration * 1000)
     self._trim_slider.configure(require_redraw=True, 
-                                to=self._duration, 
-                                number_of_steps=self._duration, 
+                                to=original_duration, 
+                                number_of_steps=original_duration, 
                                 state="disabled")
 
     self._start_time.set(0)
     self._current_time.set(0)
-    self._end_time.set(self._duration)
+    self._end_time.set(original_duration)
 
-    self._current_duration_lbl.configure(text=self._ms_text_converter(self._duration))
-    self._duration_lbl.configure(text=self._ms_text_converter(self._duration))
+    self._current_duration_lbl.configure(text=self._ms_text_converter(original_duration))
+    self._duration_lbl.configure(text=self._ms_text_converter(original_duration))
 
     self._start_time_lbl.configure(text=self._ms_text_converter(0))
-    self._end_time_lbl.configure(text=self._ms_text_converter(self._duration))
+    self._end_time_lbl.configure(text=self._ms_text_converter(original_duration))
 
   # VLC enters error state sometimes on loading new media
   # Need to unload previous videos, and load new videos on separate threads
