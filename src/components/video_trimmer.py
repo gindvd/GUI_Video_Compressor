@@ -32,7 +32,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._instance: vlc.Instance = self._platform_specific_inst()
     self._instance.log_unset()
-    self._vid_player = self._instance.media_player_new()
+    self._media_player = self._instance.media_player_new()
 
     self._create_ui()
 
@@ -49,8 +49,8 @@ class VideoTrimmer(ctk.CTkFrame):
                         "--no-xlib"])
   
   def _create_ui(self) -> None:
-    self._vid_panel = ctk.CTkFrame(self, width=750, height=400, fg_color="black", corner_radius=0)
-    self._vid_panel.pack(padx=10, pady=10, fill='both', expand=True)
+    self._media_viewer = ctk.CTkFrame(self, width=750, height=400, fg_color="black", corner_radius=0)
+    self._media_viewer.pack(padx=10, pady=10, fill='both', expand=True)
 
     self._control_panel = ctk.CTkFrame(self, width=750, corner_radius=0)
     self._control_panel.pack(fill='both', expand=True)
@@ -142,32 +142,32 @@ class VideoTrimmer(ctk.CTkFrame):
     self._end_time_lbl.grid(row=1, column=3, padx=10, pady=5, sticky="nswe")
 
   def _play_pause(self) -> None:
-    state = self._vid_player.get_state()
+    state = self._media_player.get_state()
 
     if state == vlc.State.Ended:
       self._restart_media(int(self._start_time.get()))
       return
 
-    if self._vid_player.is_playing():
-      self._vid_player.pause()
+    if self._media_player.is_playing():
+      self._media_player.pause()
       self._play_pause_btn.configure(text="Play \U000025B6")
 
     else:
-      current_ms = self._vid_player.get_time()
+      current_ms = self._media_player.get_time()
       end_ms = int(self._end_time.get())
 
       if current_ms >= end_ms:
         start_ms = int(self._start_time.get())
-        self._vid_player.set_time(start_ms)
+        self._media_player.set_time(start_ms)
         self._current_time.set(start_ms)
         self._curtime_lbl.configure(text=self._ms_text_converter(start_ms))
 
-      self._vid_player.play()
+      self._media_player.play()
       self._play_pause_btn.configure(text='Pause \U000023F8')
 
   def _update_progress(self):
     try:
-      state = self._vid_player.get_state()
+      state = self._media_player.get_state()
       
       # Break out of update progress loop if VLC enters an Error state
       if state == vlc.State.Error:
@@ -175,12 +175,12 @@ class VideoTrimmer(ctk.CTkFrame):
         return
 
       if state == vlc.State.Playing and not self._is_seeking:
-        current_time_ms = self._vid_player.get_time()
+        current_time_ms = self._media_player.get_time()
         end_time_ms = int(self._end_time.get())
 
         if current_time_ms >= end_time_ms:
-          self._vid_player.pause()
-          self._vid_player.set_time(end_time_ms)
+          self._media_player.pause()
+          self._media_player.set_time(end_time_ms)
           self._play_pause_btn.configure(text="Play \U000025B6")
           current_time_ms = end_time_ms
 
@@ -203,11 +203,11 @@ class VideoTrimmer(ctk.CTkFrame):
     self._is_seeking = True
     target = int(value)
 
-    state = self._vid_player.get_state()
+    state = self._media_player.get_state()
     if state == vlc.State.Ended:
       self._restart_media(target, paused=True)
     else:
-      self._vid_player.set_time(target)
+      self._media_player.set_time(target)
 
     self._curtime_lbl.configure(text=self._ms_text_converter(target))
     self._schedule_seek_reset()
@@ -217,11 +217,11 @@ class VideoTrimmer(ctk.CTkFrame):
     target = int(value)
     self._current_time.set(target)
 
-    state = self._vid_player.get_state()
+    state = self._media_player.get_state()
     if state == vlc.State.Ended:
       self._restart_media(target, paused=True)
     else:
-      self._vid_player.set_time(target)
+      self._media_player.set_time(target)
 
     self._curtime_lbl.configure(text=self._ms_text_converter(target))
     self._schedule_seek_reset()
@@ -235,11 +235,11 @@ class VideoTrimmer(ctk.CTkFrame):
     target = int(value)
     self._current_time.set(target)
 
-    state = self._vid_player.get_state()
+    state = self._media_player.get_state()
     if state == vlc.State.Ended:
       self._restart_media(target, paused=True)
     else:
-      self._vid_player.set_time(target)
+      self._media_player.set_time(target)
     
     self._curtime_lbl.configure(text=self._ms_text_converter(target))
     self._schedule_seek_reset()
@@ -290,12 +290,12 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _stop_and_load_media(self, vid_file: PathLike | str, request: int) -> None:
     try:
-      self._vid_player.stop()
+      self._media_player.stop()
 
       # VLC state doesn't immediately update so need to wait and check if it stops
       # If no media is loaded, state should be NothingSpecial
       for _ in range(50):
-        state = self._vid_player.get_state()
+        state = self._media_player.get_state()
         if state in (vlc.State.Stopped, vlc.State.Ended, vlc.State.NothingSpecial):
           break
 
@@ -312,7 +312,7 @@ class VideoTrimmer(ctk.CTkFrame):
       # Need to check if there is already media loaded
       current_media = self._media
       self._media = self._instance.media_new(vid_file)
-      self._vid_player.set_media(self._media)
+      self._media_player.set_media(self._media)
 
       if current_media is not None:
         current_media.release
@@ -332,14 +332,14 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._set_volume(100)
     self._is_muted = False
-    self._vid_player.audio_set_mute(self._is_muted)
+    self._media_player.audio_set_mute(self._is_muted)
 
     self._play_pause_btn.configure(state="normal")
     self._volume_btn.configure(state="normal")
     self._volume_slider.configure(state="normal")
     self._trim_slider.configure(state="normal")
 
-    self._vid_player.play()
+    self._media_player.play()
     self._play_pause_btn.configure(text="Pause  \U000023F8")
     self.after(200, self._pause_initial_frame)
 
@@ -347,9 +347,9 @@ class VideoTrimmer(ctk.CTkFrame):
 
   def _display_video(self) -> None:
     if self._device_os == "Linux":
-      self._vid_player.set_xwindow(self._vid_panel.winfo_id())
+      self._media_player.set_xwindow(self._media_viewer.winfo_id())
     elif self._device_os == "Windows":
-      self._vid_player.set_hwnd(self._vid_panel.winfo_id())
+      self._media_player.set_hwnd(self._media_viewer.winfo_id())
   
   def _reset_vlc(self, reload_file: PathLike | str | None = None) -> None:
     if self._update_id is not None:
@@ -360,8 +360,8 @@ class VideoTrimmer(ctk.CTkFrame):
 
     def _teardown_vlc():
       try:
-        self._vid_player.stop()
-        self._vid_player.release()
+        self._media_player.stop()
+        self._media_player.release()
       except Exception:
         pass
       
@@ -378,7 +378,7 @@ class VideoTrimmer(ctk.CTkFrame):
   def _rebuild_instance(self, reload_file: PathLike | str | None = None) -> None:
     self._media = None
     self._instance = self._platform_specific_inst()
-    self._vid_player = self._instance.media_player_new()
+    self._media_player = self._instance.media_player_new()
     self._is_loading = False
 
     self._play_pause_btn.configure(text="Play \U000025B6", state="disabled")
@@ -389,38 +389,38 @@ class VideoTrimmer(ctk.CTkFrame):
       self.load_media(reload_file)
 
   def _pause_initial_frame(self) -> None:
-    if self._vid_player.is_playing():
-      self._vid_player.pause()
-      self._vid_player.set_time(0)
+    if self._media_player.is_playing():
+      self._media_player.pause()
+      self._media_player.set_time(0)
       self._play_pause_btn.configure(text="Play")
       self._current_time.set(0)
       self._curtime_lbl.configure(text="00:00:00.000")
 
   def _restart_media(self, seek_ms: int, paused: bool = False) -> None:
-    self._vid_player.set_media(self._media)
+    self._media_player.set_media(self._media)
     self._display_video()
-    self._vid_player.play()
+    self._media_player.play()
     if paused:
       self.after(100, lambda: self._seek_and_pause(seek_ms))
     else:
-      self.after(100, lambda: self._vid_player.set_time(seek_ms))
+      self.after(100, lambda: self._media_player.set_time(seek_ms))
       self._play_pause_btn.configure(text='Pause')
 
   def _seek_and_pause(self, seek_ms: int, retries: int = 10) -> None:
-    state = self._vid_player.get_state()
+    state = self._media_player.get_state()
     if state not in (vlc.State.Playing, vlc.State.Paused):
       if retries > 0:
         self.after(50, lambda: self._seek_and_pause(seek_ms, retries - 1))
       return
-    self._vid_player.set_time(seek_ms)
-    self._vid_player.pause()
+    self._media_player.set_time(seek_ms)
+    self._media_player.pause()
     self._play_pause_btn.configure(text="Play")
     self._current_time.set(seek_ms)
     self._curtime_lbl.configure(text=self._ms_text_converter(seek_ms))
 
   def _toggle_mute(self) -> None:
     self._is_muted = not self._is_muted
-    self._vid_player.audio_set_mute(self._is_muted)
+    self._media_player.audio_set_mute(self._is_muted)
 
     if self._is_muted:
       self._volume_btn.configure(text="\U0001F507")
@@ -432,14 +432,14 @@ class VideoTrimmer(ctk.CTkFrame):
 
   def _set_volume(self, value: int) -> None:
     volume = int(value)
-    self._vid_player.audio_set_volume(volume)
+    self._media_player.audio_set_volume(volume)
     if volume == 0 and not self._is_muted:
       self._is_muted = True
-      self._vid_player.audio_set_mute(True)
+      self._media_player.audio_set_mute(True)
       self._volume_btn.configure(text="\U0001F507")
     elif volume > 0 and self._is_muted:
       self._is_muted = False
-      self._vid_player.audio_set_mute(False)
+      self._media_player.audio_set_mute(False)
       self._volume_btn.configure(text="\U0001F50A")
 
   def _show_vol_popup(self, event=None) -> None:
@@ -487,8 +487,8 @@ class VideoTrimmer(ctk.CTkFrame):
       self.after_cancel(self._seek_reset_id)
       self._seek_reset_id = None
 
-    self._vid_player.stop()
-    self._vid_player.release()
+    self._media_player.stop()
+    self._media_player.release()
     self._instance.release()
 
   @property
