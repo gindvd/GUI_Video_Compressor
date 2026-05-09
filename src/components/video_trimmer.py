@@ -72,8 +72,6 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._trim_slider = CTkTrimSlider(self._control_panel, 
                                       width=500,
-                                      border_width=8,
-                                      outer_button_corner_radius=5,
                                       state="disabled",
                                       left_button_command=self._set_start_time,
                                       right_button_command=self._set_end_time,
@@ -82,7 +80,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                       right_button_var=self._end_time,
                                       center_button_var=self._current_time)
 
-    self._trim_slider.grid(row=0, column=1, padx=10, pady=10, sticky="nswe")
+    self._trim_slider.grid(row=0, column=1, padx=10, pady=10, sticky="we")
 
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._control_panel, text="00:00:00.000")
     self._curtime_lbl.grid(row=0, column=2, padx=10, pady=10, sticky="nswe")

@@ -1,9 +1,19 @@
+from platform import system
+
+try:
+  from ctypes import windll
+except:
+  pass
+
 from app import App
-from utils.log_utils import logger
+
 from utils.path_utils import setup_vlc_environment
 
 def main():
   setup_vlc_environment()
+
+  if system() == "Windows":
+    windll.shcore.SetProcessDpiAwareness(2)
 
   app = App()
   app.protocol("WM_DELETE_WINDOW", app.on_quit)

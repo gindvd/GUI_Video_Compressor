@@ -156,16 +156,13 @@ class App(ctk.CTk):
 
     self._quality_slider = ctk.CTkSlider(self._quality_frame, 
                                          width=500, 
-                                         height=8,
-                                         border_width=9,
-                                         button_corner_radius=7,
                                          from_=0,
                                          to=100,
                                          number_of_steps=100, 
                                          command=self._quality_choice)
 
     self._quality_slider.set(90)
-    self._quality_slider.grid(row=0, column=1,  padx=5, pady=5, sticky="nsew")
+    self._quality_slider.grid(row=0, column=1,  padx=5, pady=5, sticky="ew")
 
     self._quality_perc_lbl = ctk.CTkLabel(self._quality_frame, text=f"{int(self._quality_slider.get())}%")
     self._quality_perc_lbl.grid(row=0, column=2, padx=5, pady=5, sticky="w")
