@@ -79,7 +79,7 @@ class App(ctk.CTk):
     self._build_ui()
 
   def _check_procs_exist(self) -> None:
-    for proc in ("ffmpeg", "ffprobe", "vlc"):
+    for proc in self._external_procs:
       if proc is None:
         CTkMessagebox(master=self,
                       title="Missing Dependency", 
