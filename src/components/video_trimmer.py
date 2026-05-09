@@ -29,6 +29,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._vol_hide_id: str | None = None
     self._vol_popup_visible: bool = False
     self._is_muted: bool = False
+    self._volume: int = 100
 
     self._instance: vlc.Instance = self._platform_specific_inst()
     self._instance.log_unset()
@@ -423,19 +424,28 @@ class VideoTrimmer(ctk.CTkFrame):
     if self._is_muted:
       self._volume_btn.configure(text="\U0001F507")
       self._volume_slider.set(0)
+
     else:
       self._volume_btn.configure(text="\U0001F50A")
-      self._volume_slider.set(10)
-      self._set_volume(10)
+
+      if self._volume != 0:
+        self._volume_slider.set(self._volume)
+        self._set_volume(self._volume)
+
+      else:
+        self._volume_slider.set(10)
+        self._set_volume(10)
 
   def _set_volume(self, value: int) -> None:
-    volume = int(value)
-    self._media_player.audio_set_volume(volume)
-    if volume == 0 and not self._is_muted:
+    self._volume = int(value)
+    self._media_player.audio_set_volume(self._volume)
+
+    if self._volume == 0 and not self._is_muted:
       self._is_muted = True
       self._media_player.audio_set_mute(True)
       self._volume_btn.configure(text="\U0001F507")
-    elif volume > 0 and self._is_muted:
+      
+    elif self._volume > 0 and self._is_muted:
       self._is_muted = False
       self._media_player.audio_set_mute(False)
       self._volume_btn.configure(text="\U0001F50A")
