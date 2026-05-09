@@ -19,6 +19,8 @@ class FFmpegProcessor():
               preset: str | None,
               quality: int, 
               audio: bool,
+              audio_codec: str,
+              audio_bitrate: str,
               start_time: str ,
               duration: str) -> tuple[bool, str | None]:
 
@@ -35,7 +37,7 @@ class FFmpegProcessor():
     if not audio:
       aud_opts = ["-an"]
     elif audio:
-      aud_opts = ["-c:a", self._audio_codec(codec), "-b:a", "128k"]
+      aud_opts = ["-c:a", audio_codec, "-b:a", audio_bitrate]
 
     hwaccel_args = None
     scale_args = ["-vf", f"scale={width}:{height},fps={fps}"]
@@ -192,10 +194,3 @@ class FFmpegProcessor():
         counter += 1
 
     return path
-  
-  @staticmethod
-  def _audio_codec(codec: str) -> str:
-    if codec in ["libvpx-vp9", "libsvtav1"]:
-      return "libopus"
-    
-    return "aac"

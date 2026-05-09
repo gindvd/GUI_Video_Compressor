@@ -44,14 +44,8 @@ class FFprobeProcessor():
     
     try: 
       result, err = proc.communicate()
-
-      proc.wait(timeout=30)
       rc = proc.returncode
 
-    except TimeoutError as e:
-      logger.exception(str(e))
-      return False, None, "Timeout Error Occurred!\nCheck logs for details!"
-    
     except FileNotFoundError:
       return False, None, "FFprobe not found!"
 
