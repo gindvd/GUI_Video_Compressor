@@ -212,7 +212,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._duration_lbl.grid(row=0, column=7, padx=(5, 10), pady=5, sticky="nswe")
 
-  def _play_pause(self) -> None:
+  def _play_pause(self, event=None) -> None:
     state = self._media_player.get_state()
 
     if state == vlc.State.Ended:
@@ -332,7 +332,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._is_seeking = False
     self._seek_reset_id = None
   
-  def _reverse_10_seconds(self) -> None:
+  def _reverse_10_seconds(self, event=None) -> None:
     current_time = self._media_player.get_time()
 
     target = current_time - 10000
@@ -342,7 +342,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._trim_slider.set("center_value", target)
     self._seek(target)
   
-  def _forward_10_seconds(self) -> None:
+  def _forward_10_seconds(self, event=None) -> None:
     current_time = self._media_player.get_time()
 
     target = current_time + 10000
@@ -584,7 +584,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._vol_popup_visible = False
     self._vol_hide_id = None
   
-  def _take_screenshot(self) -> None:
+  def _take_screenshot(self, event=None) -> None:
     state = self._media_player.get_state()
     if state not in [vlc.State.Paused, vlc.State.Ended]:
       return

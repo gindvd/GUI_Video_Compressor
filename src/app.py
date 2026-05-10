@@ -80,6 +80,8 @@ class App(ctk.CTk):
     self._create_menubar()
     self._build_ui()
 
+    self._bind_keys()
+
   def _check_procs_exist(self) -> None:
     for proc in self._external_procs:
       if proc is None:
@@ -117,12 +119,12 @@ class App(ctk.CTk):
     help_btn = menubar.add_cascade("Help")
     
     file_drop = CustomDropdownMenu(widget=file_btn)
-    file_drop.add_option(option="Open", command=self._browse_files)
+    file_drop.add_option(option="Open    Ctrl+O", command=self._browse_files)
     file_drop.add_separator()
-    file_drop.add_option(option="Exit", command=self.on_quit)
+    file_drop.add_option(option="Exit    Ctrl+Q", command=self.on_quit)
     
     help_drop = CustomDropdownMenu(widget=help_btn)
-    help_drop.add_option(option="About", command=self._show_about)
+    help_drop.add_option(option="About    Ctrl+A", command=self._show_about)
 
   def _build_ui(self) -> None: 
     self._main_frame = ctk.CTkFrame(self, corner_radius=0)
@@ -585,3 +587,12 @@ class App(ctk.CTk):
     self.cancel_compression()
     self._video_trimmer.release()
     self.quit()
+  
+  def _bind_keys(self) -> None:
+    self.bind("<Control-o>", self._browse_files)
+    self.bind("<Control-q>", self.on_quit)
+    self.bind("<Control-a>", self._show_about)
+    self.bind("<space>", self._video_trimmer._play_pause)
+    self.bind("k", self._video_trimmer._play_pause)
+    self.bind("j", self._video_trimmer._reverse_10_seconds)
+    self.bind("l", self._video_trimmer._forward_10_seconds)
