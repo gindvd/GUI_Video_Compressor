@@ -2,11 +2,11 @@ import customtkinter as ctk
 from tkinter import DoubleVar
 from CTkMessagebox import CTkMessagebox
 from CTkTrimSlider import CTkTrimSlider
+from customtkinter import filedialog
 
 import vlc
 import os
 from threading import Thread, Event
-from datetime import datetime
 from PIL import Image
 
 from utils.log_utils import logger
@@ -85,6 +85,8 @@ class VideoTrimmer(ctk.CTkFrame):
   def _create_ui(self) -> None:
     self._media_viewer = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
     self._media_viewer.pack(padx=10, pady=(10, 5), fill='both', expand=True)
+
+    self._media_viewer.bind("Button-1", command=self._play_pause)
 
     self._control_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=6)
     self._control_panel.pack(padx=10, pady=0, fill='x')
@@ -589,15 +591,25 @@ class VideoTrimmer(ctk.CTkFrame):
     if state not in [vlc.State.Paused, vlc.State.Ended]:
       return
     
-    screenshot_folder = os.path.join(os.path.expanduser("~"), "Pictures")
-    os.makedirs(screenshot_folder, exist_ok=True)
-
-    now = datetime.now()
-    strnow = now.strftime("%m-%d-%Y_%H-%M-%S")
-
-    screenshot_path = os.path.join(screenshot_folder, f"screenshot_{strnow}.png")
+    file  = filedialog.asksaveasfilename(title="Save As",
+                                        initialdir=os.path.expanduser("~"),
+                                        initialfile="screenshot",
+                                        filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg")],
+                                        confirmoverwrite=True)
     
-    x =  self._media_player.video_take_snapshot(0, screenshot_path, 0, 0)
+    if file == "":
+      return
+    
+    _, ext = os.path.splitext(file)
+
+    if ext not in (".png", ".jpg", ".jpeg"):
+      CTkMessagebox(master=self,
+                    title="Incompatible file type",
+                    message=f"Screenshot cannot be saved as {ext}!",
+                    icon="cancel")
+      return
+    
+    x =  self._media_player.video_take_snapshot(0, file, 0, 0)
     if x != 0:
       CTkMessagebox(master=self,
                     title="Screenshot Error",
@@ -606,7 +618,7 @@ class VideoTrimmer(ctk.CTkFrame):
     else:
       CTkMessagebox(master=self,
                     title="Screenshot Successful",
-                    message=f"Screenshot taken!\n{screenshot_path}",
+                    message=f"Screenshot taken!\n{file}",
                     icon="info")
 
   def release(self) -> None:
