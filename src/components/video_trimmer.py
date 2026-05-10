@@ -339,6 +339,7 @@ class VideoTrimmer(ctk.CTkFrame):
     if target < self._start_time.get():
       target = self._start_time.get()
     
+    self._trim_slider.set("center_value", target)
     self._seek(target)
   
   def _forward_10_seconds(self) -> None:
@@ -348,6 +349,7 @@ class VideoTrimmer(ctk.CTkFrame):
     if target > self._end_time.get():
       target = self._end_time.get()
     
+    self._trim_slider.set("center_value", target)
     self._seek(target)
 
   def set_vid_values(self, duration: float) -> None:
