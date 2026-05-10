@@ -86,8 +86,7 @@ class App(ctk.CTk):
         CTkMessagebox(master=self,
                       title="Missing Dependency", 
                       message=f"Missing External Processor:\n {proc}!", 
-                      icon="cancel",
-                      option_1="Ok")
+                      icon="cancel")
         
         self.destroy()
         raise SystemExit(f"Missing dependency: {proc}")
@@ -132,7 +131,7 @@ class App(ctk.CTk):
     self._main_frame.rowconfigure(1, weight=1)
 
     # File Selection Bar
-    self._file_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color=("gray95", "gray20"))
+    self._file_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color=("gray78", "gray22"))
     self._file_frame.grid(row=0, column=0,padx=0, pady=(0, 10), sticky="ew")
     self._file_frame.columnconfigure(0, weight=1)
 
@@ -166,7 +165,7 @@ class App(ctk.CTk):
     self._build_settings_panel()
 
     # Bottom: Compress Button
-    self._compress_btn_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color=("gray95", "gray20"))
+    self._compress_btn_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color=("gray78", "gray22"))
     self._compress_btn_frame.grid(row=2, column=0,padx=0, pady=(10, 0), sticky="ew")
 
     self._compress_btn = ctk.CTkButton(self._compress_btn_frame,

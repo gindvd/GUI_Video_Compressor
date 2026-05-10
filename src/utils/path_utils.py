@@ -35,9 +35,6 @@ def setup_vlc_environment() -> None:
 
   os.environ['PATH'] = str(vlc_dir) + os.pathsep + os.environ.get('PATH', '')
 
-# Set up VLC environment at import time so it runs before any module imports vlc
-setup_vlc_environment()
-
 def get_external_procs(device_os) -> list:
   if device_os == "Windows":
     return get_win_procs() 
@@ -103,3 +100,11 @@ def get_ico() -> os.PathLike | str | None:
     return None
   
   return icon_abspath
+
+def get_button_image_path(file_name: str) -> os.PathLike | str:
+  image_path = resource_path(os.path.join("assets", "images", "video_control_icons", file_name))
+
+  if not image_path.is_file():
+    raise SystemExit(f"Missing image file: {file_name}")
+
+  return image_path

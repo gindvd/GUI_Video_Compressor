@@ -1,14 +1,16 @@
+import customtkinter as ctk
 from tkinter import DoubleVar
 from CTkMessagebox import CTkMessagebox
-import customtkinter as ctk
+from CTkTrimSlider import CTkTrimSlider
 
 import vlc
 import os
 from threading import Thread, Event
 from datetime import datetime
+from PIL import Image
 
-from CTkTrimSlider import CTkTrimSlider
 from utils.log_utils import logger
+from utils.path_utils import get_button_image_path
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, master, vlc_cmd: os.PathLike | str, device_os: str, **kwargs) -> None:
@@ -36,6 +38,28 @@ class VideoTrimmer(ctk.CTkFrame):
     self._instance: vlc.Instance | None = None
     self._media_player: vlc.MediaPlayer | None = None
 
+    self._play_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("play_button.png")),
+                                                  dark_image=Image.open(get_button_image_path("play_button.png")),
+                                                  size=(18,18))
+    self._pause_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("pause_button.png")),
+                                                   dark_image=Image.open(get_button_image_path("pause_button.png")),
+                                                   size=(18,18))
+    self._reverse_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("reverse.png")),
+                                                     dark_image=Image.open(get_button_image_path("reverse.png")),
+                                                     size=(18,18))
+    self._forward_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("forward.png")),
+                                                     dark_image=Image.open(get_button_image_path("forward.png")),
+                                                     size=(18,18))
+    self._mute_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("muted_volume.png")),
+                                                  dark_image=Image.open(get_button_image_path("muted_volume.png")),
+                                                  size=(18,18))
+    self._unmute_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("unmuted_volume.png")),
+                                                    dark_image=Image.open(get_button_image_path("unmuted_volume.png")),
+                                                    size=(18,18))
+    self._camera_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("camera.png")),
+                                                    dark_image=Image.open(get_button_image_path("camera.png")),
+                                                    size=(24,24))
+
     self._create_ui()
 
   def _ensure_vlc_initialized(self) -> None:
@@ -62,49 +86,49 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_viewer = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
     self._media_viewer.pack(padx=10, pady=(10, 5), fill='both', expand=True)
 
-    self._control_panel = ctk.CTkFrame(self, width=750, fg_color=("gray78", "gray22"), corner_radius=6)
+    self._control_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=6)
     self._control_panel.pack(padx=10, pady=0, fill='x')
     self._create_controls()
 
-    self._time_panel = ctk.CTkFrame(self, width=750, fg_color=("gray78", "gray22"), corner_radius=6)
+    self._time_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=6)
     self._time_panel.pack(padx=10, pady=5, fill='x')
     self._create_time_labels()
   
   def _create_controls(self) -> None:
-    self._control_panel.columnconfigure(1, weight=1)
+    self._control_panel.columnconfigure(3, weight=3)
 
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                         width=30,
                                                         height=30,
                                                         fg_color="transparent",
-                                                        text="\U000025B6",
-                                                        font=ctk.CTkFont(size=20),
+                                                        image=self._play_photo,
+                                                        text="",
                                                         state="disabled",
                                                         command=self._play_pause)
 
-    self._play_pause_btn.grid(row=0, column=0, padx=(10, 5), pady=5,)
+    self._play_pause_btn.grid(row=0, column=0, padx=(10, 5), pady=5)
 
     self._reverse_10s_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                         width=30,
                                                         height=30,
                                                         fg_color="transparent",
-                                                        text="\U000023EA",
-                                                        font=ctk.CTkFont(size=24),
+                                                        image=self._reverse_photo,
+                                                        text="",
                                                         state="disabled",
                                                         command=self._reverse_10_seconds)
 
-    self._reverse_10s_btn.grid(row=0, column=1, padx=5, pady=5,)
+    self._reverse_10s_btn.grid(row=0, column=1, padx=5, pady=5)
 
     self._forward_10s_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                         width=30,
                                                         height=30,
                                                         fg_color="transparent",
-                                                        text="\U000023E9",
-                                                        font=ctk.CTkFont(size=24),
+                                                        image=self._forward_photo,
+                                                        text="",
                                                         state="disabled",
                                                         command=self._forward_10_seconds)
 
-    self._forward_10s_btn.grid(row=0, column=2, padx=5, pady=5,)
+    self._forward_10s_btn.grid(row=0, column=2, padx=5, pady=5)
 
     self._trim_slider = CTkTrimSlider(self._control_panel, 
                                       state="disabled",
@@ -114,7 +138,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                       left_button_var=self._start_time, 
                                       right_button_var=self._end_time,
                                       center_button_var=self._current_time)
-    self._trim_slider.grid(row=0, column=3, padx=5, pady=5, sticky="we")
+    self._trim_slider.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._control_panel, text="00:00:00.000")
     self._curtime_lbl.grid(row=0, column=4, padx=5, pady=5,)
@@ -123,12 +147,12 @@ class VideoTrimmer(ctk.CTkFrame):
                                                     width=30,
                                                     height=30,
                                                     fg_color="transparent",
-                                                    text="\U0001F50A",
-                                                    font=ctk.CTkFont(size=24),
+                                                    image=self._unmute_photo,
+                                                    text="",
                                                     state="disabled",
                                                     command=self._toggle_mute)
 
-    self._volume_btn.grid(row=0, column=5, padx=5, pady=5,)
+    self._volume_btn.grid(row=0, column=5, padx=5, pady=5)
 
     self._vol_popup = ctk.CTkFrame(self, corner_radius=0)
 
@@ -156,8 +180,8 @@ class VideoTrimmer(ctk.CTkFrame):
                                          width=30,
                                          height=30,
                                          fg_color="transparent",
-                                         text="\U0001F4F7",
-                                         font=ctk.CTkFont(size=24),
+                                         image=self._camera_photo,
+                                         text="",
                                          state="disabled",
                                          anchor="center",
                                          command=self._take_screenshot)
@@ -168,7 +192,6 @@ class VideoTrimmer(ctk.CTkFrame):
     self._screenshot_btn.grid(row=0, column=6, padx=(5, 10), pady=5, sticky="nswe")
 
   def _create_time_labels(self) -> None:
-    self._control_panel.columnconfigure(1, weight=1)
     ctk.CTkLabel(self._time_panel, text="New Duration:").grid(row=0, column=0, padx=(10, 5), pady=5, sticky="w")
 
     self._current_duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
@@ -198,7 +221,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     if self._media_player.is_playing():
       self._media_player.pause()
-      self._play_pause_btn.configure(text="\U000025B6")
+      self._play_pause_btn.configure(image=self._play_photo)
       self._screenshot_btn.configure(state="normal")
 
     else:
@@ -213,7 +236,7 @@ class VideoTrimmer(ctk.CTkFrame):
         self._curtime_lbl.configure(text=self._ms_text_converter(start_ms))
 
       self._media_player.play()
-      self._play_pause_btn.configure(text='||')
+      self._play_pause_btn.configure(image=self._pause_photo)
 
   def _update_progress(self):
     try:
@@ -231,7 +254,7 @@ class VideoTrimmer(ctk.CTkFrame):
         if current_time_ms >= end_time_ms:
           self._media_player.pause()
           self._media_player.set_time(end_time_ms)
-          self._play_pause_btn.configure(text="\U000025B6")
+          self._play_pause_btn.configure(image=self._play_photo)
           current_time_ms = end_time_ms
           self._screenshot_btn.configure(state="normal")
 
@@ -242,7 +265,7 @@ class VideoTrimmer(ctk.CTkFrame):
         end_time_ms = int(self._end_time.get())
         self._current_time.set(end_time_ms)
         self._curtime_lbl.configure(text=self._ms_text_converter(end_time_ms))
-        self._play_pause_btn.configure(text="\U000025B6")
+        self._play_pause_btn.configure(image=self._play_photo)
         self._screenshot_btn.configure(state="normal")
     
     except Exception:
@@ -414,7 +437,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._forward_10s_btn.configure(state="normal")
 
     self._media_player.play()
-    self._play_pause_btn.configure(text=" ||")
+    self._play_pause_btn.configure(image=self._pause_photo)
     self.after(200, self._pause_initial_frame)
 
     self._update_progress()
@@ -456,7 +479,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._is_loading = False
 
-    self._play_pause_btn.configure(text="\U000025B6", state="disabled")
+    self._play_pause_btn.configure(image=self._play_photo, state="disabled")
     self._volume_btn.configure(state="disabled")
     self._volume_slider.configure(state="disabled")
 
@@ -467,7 +490,7 @@ class VideoTrimmer(ctk.CTkFrame):
     if self._media_player.is_playing():
       self._media_player.pause()
       self._media_player.set_time(0)
-      self._play_pause_btn.configure(text=" \U000025B6")
+      self._play_pause_btn.configure(image=self._play_photo)
       self._current_time.set(0)
       self._curtime_lbl.configure(text="00:00:00.000")
       self._screenshot_btn.configure(state="normal")
@@ -490,7 +513,7 @@ class VideoTrimmer(ctk.CTkFrame):
       return
     self._media_player.set_time(seek_ms)
     self._media_player.pause()
-    self._play_pause_btn.configure(text=" \U000025B6")
+    self._play_pause_btn.configure(image=self._play_photo)
     self._current_time.set(seek_ms)
     self._curtime_lbl.configure(text=self._ms_text_converter(seek_ms))
 
@@ -499,10 +522,10 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_player.audio_set_mute(self._is_muted)
 
     if self._is_muted:
-      self._volume_btn.configure(text="\U0001F507")
+      self._volume_btn.configure(image=self._mute_photo)
       self._volume_slider.set(0)
     else:
-      self._volume_btn.configure(text="\U0001F50A")
+      self._volume_btn.configure(image=self._unmute_photo)
       if self._volume != 0:
         self._volume_slider.set(self._volume)
         self._set_volume(self._volume)
@@ -517,11 +540,11 @@ class VideoTrimmer(ctk.CTkFrame):
     if self._volume == 0 and not self._is_muted:
       self._is_muted = True
       self._media_player.audio_set_mute(True)
-      self._volume_btn.configure(text="\U0001F507")
+      self._volume_btn.configure(image=self._mute_photo)
     elif self._volume > 0 and self._is_muted:
       self._is_muted = False
       self._media_player.audio_set_mute(False)
-      self._volume_btn.configure(text="\U0001F50A")
+      self._volume_btn.configure(image=self._unmute_photo)
 
   def _show_vol_popup(self, event=None) -> None:
     if self._vol_hide_id is not None:
