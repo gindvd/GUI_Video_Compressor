@@ -86,7 +86,7 @@ def get_linux_procs() -> list:
   return proc_paths
 
 def get_icon() -> os.PathLike | str | None:
-  icon_abspath = resource_path(os.path.join("assets", "icons", "icon.png"))
+  icon_abspath = resource_path(os.path.join("assets", "images", "icons", "thestrawhat.png"))
 
   if not icon_abspath.is_file():
     return None
@@ -94,7 +94,7 @@ def get_icon() -> os.PathLike | str | None:
   return icon_abspath
 
 def get_ico() -> os.PathLike | str | None:
-  icon_abspath = resource_path(os.path.join("assets", "icons", "icon.ico"))
+  icon_abspath = resource_path(os.path.join("assets", "images", "icons", "thestrawhat.ico"))
 
   if not icon_abspath.is_file():
     return None
