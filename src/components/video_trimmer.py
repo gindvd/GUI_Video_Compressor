@@ -505,7 +505,7 @@ class VideoTrimmer(ctk.CTkFrame):
       self.after(100, lambda: self._seek_and_pause(seek_ms))
     else:
       self.after(100, lambda: self._media_player.set_time(seek_ms))
-      self._play_pause_btn.configure(text=' ||')
+      self._play_pause_btn.configure(image=self._pause_photo)
 
   def _seek_and_pause(self, seek_ms: int, retries: int = 10) -> None:
     state = self._media_player.get_state()

@@ -289,7 +289,7 @@ class App(ctk.CTk):
     self._preset_speed_drpdwn.set("Medium")
     self._preset_speed_drpdwn.grid(row=1, column=1, padx=10, pady=(6, 10), sticky="ew")
 
-  def _show_about(self) -> None:
+  def _show_about(self, event=None) -> None:
     about_file = resource_path(os.path.join("assets", "about.txt"))
     with open(about_file, "r") as f:
       about_msg = f.read()
@@ -300,7 +300,7 @@ class App(ctk.CTk):
                   message=about_msg, 
                   icon="info")
   
-  def _browse_files(self):
+  def _browse_files(self, event=None):
     item = filedialog.askopenfilename(initialdir = os.path.expanduser("~"),
                                       filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
@@ -314,7 +314,7 @@ class App(ctk.CTk):
     
     self._update_gui()
  
-  def _file_entered(self, event) -> None:
+  def _file_entered(self, event=None) -> None:
     item = event.widget.get()
 
     if not self._compatible_file(item):
@@ -583,7 +583,7 @@ class App(ctk.CTk):
                     message=f"{msg}!", 
                     icon="info")
 
-  def on_quit(self) -> None:
+  def on_quit(self, event=None) -> None:
     self.cancel_compression()
     self._video_trimmer.release()
     self.quit()
