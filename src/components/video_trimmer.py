@@ -39,26 +39,19 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_player: vlc.MediaPlayer | None = None
 
     self._play_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("play_button.png")),
-                                                  dark_image=Image.open(get_button_image_path("play_button.png")),
-                                                  size=(18,18))
+                                                  dark_image=Image.open(get_button_image_path("play_button.png")))
     self._pause_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("pause_button.png")),
-                                                   dark_image=Image.open(get_button_image_path("pause_button.png")),
-                                                   size=(18,18))
+                                                   dark_image=Image.open(get_button_image_path("pause_button.png")))
     self._reverse_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("reverse.png")),
-                                                     dark_image=Image.open(get_button_image_path("reverse.png")),
-                                                     size=(18,18))
+                                                     dark_image=Image.open(get_button_image_path("reverse.png")))
     self._forward_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("forward.png")),
-                                                     dark_image=Image.open(get_button_image_path("forward.png")),
-                                                     size=(18,18))
+                                                     dark_image=Image.open(get_button_image_path("forward.png")))
     self._mute_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("muted_volume.png")),
-                                                  dark_image=Image.open(get_button_image_path("muted_volume.png")),
-                                                  size=(18,18))
+                                                  dark_image=Image.open(get_button_image_path("muted_volume.png")))
     self._unmute_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("unmuted_volume.png")),
-                                                    dark_image=Image.open(get_button_image_path("unmuted_volume.png")),
-                                                    size=(18,18))
+                                                    dark_image=Image.open(get_button_image_path("unmuted_volume.png")))
     self._camera_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("camera.png")),
-                                                    dark_image=Image.open(get_button_image_path("camera.png")),
-                                                    size=(24,24))
+                                                    dark_image=Image.open(get_button_image_path("camera.png")))
 
     self._create_ui()
 
@@ -84,21 +77,22 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _create_ui(self) -> None:
     self._media_viewer = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
-    self._media_viewer.pack(padx=10, pady=(10, 5), fill='both', expand=True)
+    self._media_viewer.pack(padx=(10, 5), pady=(10, 5), fill='both', expand=True)
 
-    self._control_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=6)
-    self._control_panel.pack(padx=10, pady=0, fill='x')
+    self._control_panel = ctk.CTkFrame(self, width=750, height=40, fg_color=("gray75", "gray25"), corner_radius=6)
+    self._control_panel.pack(padx=(10, 5), pady=0, fill='x')
+    self._control_panel.grid_propagate(False)
     self._create_controls()
 
     self._time_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=6)
-    self._time_panel.pack(padx=10, pady=5, fill='x')
+    self._time_panel.pack(padx=(10, 5), pady=(5, 10), fill='x')
     self._create_time_labels()
   
   def _create_controls(self) -> None:
     self._control_panel.columnconfigure(3, weight=3)
 
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
-                                                        width=30,
+                                                        width=35,
                                                         height=30,
                                                         fg_color="transparent",
                                                         image=self._play_photo,
@@ -109,7 +103,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._play_pause_btn.grid(row=0, column=0, padx=(10, 5), pady=5)
 
     self._reverse_10s_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
-                                                        width=30,
+                                                        width=35,
                                                         height=30,
                                                         fg_color="transparent",
                                                         image=self._reverse_photo,
@@ -121,7 +115,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._forward_10s_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                         width=30,
-                                                        height=30,
+                                                        height=35,
                                                         fg_color="transparent",
                                                         image=self._forward_photo,
                                                         text="",
@@ -144,7 +138,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._curtime_lbl.grid(row=0, column=4, padx=5, pady=5,)
 
     self._volume_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
-                                                    width=30,
+                                                    width=35,
                                                     height=30,
                                                     fg_color="transparent",
                                                     image=self._unmute_photo,
@@ -178,7 +172,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._screenshot_btn = ctk.CTkButton(self._control_panel,
                                          width=30,
-                                         height=30,
+                                         height=35,
                                          fg_color="transparent",
                                          image=self._camera_photo,
                                          text="",
