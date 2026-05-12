@@ -23,7 +23,7 @@ from utils.path_utils       import *
 from processors.ffmpeg_processor  import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
 
-from .components.ctk_scroll_msgbox import CTkScrollMsgbox
+from components.ctk_scroll_msgbox import CTkScrollMsgbox
 from components.progressbar_popup  import ProgressbarPopup
 from components.video_trimmer      import VideoTrimmer
 
@@ -70,7 +70,7 @@ class App(ctk.CTk):
     self._audio_bitrate: str = "128k"
 
     self.title("Media Conversion Tool")
-    self.minsize(1040, 675)
+    self.minsize(1040, 660)
     self.resizable(True, True)
     
     ctk.set_appearance_mode("System")  
@@ -117,7 +117,7 @@ class App(ctk.CTk):
     menubar = CTkMenuBar(self)
     
     file_btn = menubar.add_cascade("File")
-    tools_btn = menubar.add_cascade("Tools")
+    #tools_btn = menubar.add_cascade("Tools")
     help_btn = menubar.add_cascade("Help")
     
     file_drop = CustomDropdownMenu(widget=file_btn)
@@ -125,8 +125,8 @@ class App(ctk.CTk):
     file_drop.add_separator()
     file_drop.add_option(option="Exit", command=self.on_quit)
     
-    tools_drop = CustomDropdownMenu(widget=tools_btn)
-    tools_drop.add_option(option="Frame Viewer", command=self._open_frame_viewer)
+    #tools_drop = CustomDropdownMenu(widget=tools_btn)
+    #tools_drop.add_option(option="Frame Viewer", command=self._open_frame_viewer)
     
     help_drop = CustomDropdownMenu(widget=help_btn)
     help_drop.add_option(option="About", command=self._show_about)
