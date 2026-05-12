@@ -547,9 +547,15 @@ class App(ctk.CTk):
   
     return codecs
 
-  def _compress_video(self) -> None:
+  def _compress_video(self, event=None) -> None:
     self._compress_btn.configure(state="disabled")
     self._browse_btn.configure(state="disabled")
+
+    output_directory: str = filedialog.askdirectory(title="Compressed File Output",
+                                                    initialdir=os.path.expanduser("~"))
+    
+    if output_directory == "":
+      return
     
     self._progressbar_popup: ProgressbarPopup = ProgressbarPopup(self, cmd=self.cancel_compression)
     self._progressbar_popup.run_progressbar()
@@ -557,9 +563,9 @@ class App(ctk.CTk):
     # Run FFmpeg executable/binary in separate thread 
     # Keeps the process from blocking progress bar animation from rendering
  
-    Thread(target=self._run_compression_cmd, daemon=True).start()
+    Thread(target=self._run_compression_cmd, args=(output_directory,), daemon=True).start()
 
-  def _run_compression_cmd(self) -> None:
+  def _run_compression_cmd(self, output_directory: str) -> None:
     start_time: str = self._video_trimmer.get_start_time()
     duration: str = self._video_trimmer.get_duration()
 
@@ -574,7 +580,8 @@ class App(ctk.CTk):
                                                self._audio_codec,
                                                self._audio_bitrate,
                                                start_time,
-                                               duration)
+                                               duration,
+                                               output_directory)
 
     self.after(0, self._compression_finished, completed, err_msg)
   
