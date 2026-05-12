@@ -10,7 +10,8 @@ readme = "README.md"
 authors = [
   {name = "David Gingerich", email = "gingerichdvd@gmail.com"}
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.14"
+license = { file = "LICENSE" }
 
 dependencies = [
   "CTkMenuBar>=0.9",
