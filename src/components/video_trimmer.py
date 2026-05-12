@@ -19,6 +19,8 @@ class VideoTrimmer(ctk.CTkFrame):
     self._device_os: str = device_os
 
     self._media: vlc.Media | None = None
+    self._media_file: os.PathLike | str | None = None
+
     self._is_loading: bool = False
     self._load_request: int = 0
 
@@ -39,7 +41,6 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_player: vlc.MediaPlayer | None = None
 
     self._set_icons()
-
     self._create_ui()
 
   def _ensure_vlc_initialized(self) -> None:
@@ -417,6 +418,7 @@ class VideoTrimmer(ctk.CTkFrame):
   # Need to check for error states and destroy VLC instances and load new instances 
   def load_media(self, vid_file: os.PathLike | str) -> None:
     self._ensure_vlc_initialized()
+    self._media_file = vid_file
 
     if self._update_id is not None:
       self.after_cancel(self._update_id)
@@ -636,9 +638,15 @@ class VideoTrimmer(ctk.CTkFrame):
     if state not in [vlc.State.Paused, vlc.State.Ended]:
       return
     
+    if self._media_file is None: 
+      return
+    
+    basename, _ = os.path.basename(self._file_path)
+    name, _ = basename.split(".")
+    
     file  = filedialog.asksaveasfilename(title="Save As",
                                         initialdir=os.path.expanduser("~"),
-                                        initialfile="screenshot",
+                                        initialfile=f"{name}_screenshot",
                                         defaultextension=".png",
                                         filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg")],
                                         confirmoverwrite=True)
