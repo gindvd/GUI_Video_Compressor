@@ -1,0 +1,59 @@
+
+
+Media Conversion Tool
+Version 2.0.0
+Created by David Gingerich
+
+Graphical interface for trimming, compressing videos, and taking
+video screenhots.
+
+The Media Conversion Tool is Licenced under the GPLv3.0
+See LICENSE.GPL-v3.0.txt
+
+All icons created by David Gingerich in LibreSprite
+https://libresprite.github.io/#!/
+
+------------------------------------------------------------------------------
+Third Party Libraries
+
+See thirdpartylicences.txt for following libraries Licenses
+
+
+This software uses libraries from the FFmpeg project under the LGPLv2.1. 
+
+For more information, visit https://ffmpeg.org/.
+Source code located at https://github.com/FFmpeg/FFmpeg.
+
+
+This software uses libraries from the VLC project under the GPLv2. 
+
+For more information, visit https://www.videolan.org/legal.html.
+Source code located at https://github.com/videolan/vlc.
+
+
+This software uses the CustomTkinter library by 
+Tom Schimansky under the MIT LICENSE.
+
+For more information, visit https://customtkinter.tomschimansky.com/.
+Source code located at https://github.com/TomSchimansky/CustomTkinter.
+
+
+This software uses the CTkMessagebox, CTkMenubar by 
+Akascape under the Creative Commons CCO-1.0 License.
+
+For more information, visit https://github.com/Akascape.
+CTkMessagebox source code at https://github.com/Akascape/CTkMessagebox.
+CTkMenuBar source code at https://github.com/Akascape/CTkMenubar.
+
+
+This software uses the python-vlc library by oaubert under the LGPLv2.1.
+
+For more information, visit https://wiki.videolan.org/Python_bindings/.
+Source code located at https://github.com/oaubert/python-vlc.
+
+
+This software uses libraries from the python-pillow (fork) under the MIT-CMU.
+
+For more information, visit https://python-pillow.github.io/.
+Source code located at https://github.com/python-pillow/Pillow.
+
