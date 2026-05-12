@@ -1,5 +1,5 @@
                             
-                          FFmpeg
+                              FFmpeg
 https://www.ffmpeg.org
 https://github.com/ffmpeg/ffmpeg
 
@@ -344,7 +344,7 @@ Public License instead of this License.
 
 ----------------------------------------------------------------------------------
 
-                                VLC
+                              VLC
 https://www.videolan.org/
 https://github.com/videolan/vlc
 
@@ -881,7 +881,7 @@ SOFTWARE.
 
 ----------------------------------------------------------------------------------
 
-                            CTkMessagebox
+                              CTkMessagebox
 https://github.com/Akascape/CTkMessagebox
 
 Creative Commons Legal Code
@@ -1008,7 +1008,7 @@ express Statement of Purpose.
 
 ----------------------------------------------------------------------------------
 
-                            CTkMenubar
+                                CTkMenubar
 https://github.com/Akascape/CTkMenuBar
 
 Creative Commons Legal Code
@@ -1135,7 +1135,7 @@ express Statement of Purpose.
 
 ----------------------------------------------------------------------------------
 
-                            Python-VLC
+                          Python-VLC
 https://wiki.videolan.org/Python_bindings
 https://github.com/oaubert/python-vlc
 
