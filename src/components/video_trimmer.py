@@ -67,7 +67,9 @@ class VideoTrimmer(ctk.CTkFrame):
     if self._device_os == "Windows":
         return vlc.Instance(["--quiet",
                              "--verbose=0", 
-                             "--aout=directsound", 
+                             "--aout=directsound",
+                             "--avcodec-skiploopfilter=0",
+                             "--avcodec-hw=any",
                              f"--plugin-path={self._vlc_cmd}"])
 
     return vlc.Instance(["--quiet",
@@ -210,50 +212,45 @@ class VideoTrimmer(ctk.CTkFrame):
     state = self._media_player.get_state()
 
     if state == vlc.State.Ended:
-      self._restart_media(int(self._start_time.get()))
-      return
-
-    if self._media_player.is_playing():
-      self._media_player.pause()
-      self._play_pause_btn.configure(image=self._play_photo)
-      self._screenshot_btn.configure(state="normal")
-
-    else:
-      current_ms = self._media_player.get_time()
-      end_ms = int(self._end_time.get())
-      self._screenshot_btn.configure(state="disabled")
-
-      if current_ms >= end_ms:
-        start_ms = int(self._start_time.get())
-        self._media_player.set_time(start_ms)
-        self._current_time.set(start_ms)
-        self._curtime_lbl.configure(text=self._ms_text_converter(start_ms))
-
-      self._media_player.play()
-      self._play_pause_btn.configure(image=self._pause_photo)
-
-  def _update_progress(self):
-    try:
-      state = self._media_player.get_state()
-      
-      # Break out of update progress loop if VLC enters an Error state
-      if state == vlc.State.Error:
-        logger.exception("VLC Error")
+        self._restart_media(int(self._start_time.get()))
         return
 
-      if state == vlc.State.Playing and not self._is_seeking:
-        current_time_ms = self._media_player.get_time()
-        end_time_ms = int(self._end_time.get())
+    if self._media_player.is_playing():
+        self._media_player.pause()
+        self._play_pause_btn.configure(image=self._play_photo)
+        self._screenshot_btn.configure(state="normal")
 
-        if current_time_ms >= end_time_ms:
-          self._media_player.pause()
-          self._media_player.set_time(end_time_ms)
-          self._play_pause_btn.configure(image=self._play_photo)
-          current_time_ms = end_time_ms
-          self._screenshot_btn.configure(state="normal")
+    else:
+        current_ms = self._media_player.get_time()
+        end_ms = int(self._end_time.get())
 
-        self._current_time.set(current_time_ms)
-        self._curtime_lbl.configure(text=self._ms_text_converter(current_time_ms))
+        self._screenshot_btn.configure(state="disabled")
+
+        if current_ms >= end_ms:
+            start_ms = int(self._start_time.get())
+            self._media_player.set_time(start_ms)
+            self._current_time.set(start_ms)
+            self._curtime_lbl.configure(text=self._ms_text_converter(start_ms))
+
+        self._media_player.play()
+
+        self._play_pause_btn.configure(image=self._pause_photo)
+
+    self._start_update_loop()
+    
+  def _start_update_loop(self) -> None:
+    if self._update_id is None:
+        self._update_progress()
+
+  def _update_progress(self):
+    self._update_id = None
+
+    try:
+      state = self._media_player.get_state()
+
+      if state == vlc.State.Error:
+          logger.exception("VLC Error")
+          return
 
       elif state == vlc.State.Ended:
         end_time_ms = int(self._end_time.get())
@@ -261,7 +258,27 @@ class VideoTrimmer(ctk.CTkFrame):
         self._curtime_lbl.configure(text=self._ms_text_converter(end_time_ms))
         self._play_pause_btn.configure(image=self._play_photo)
         self._screenshot_btn.configure(state="normal")
-    
+
+      elif state == vlc.State.Playing and not self._is_seeking:
+        current_time_ms = self._media_player.get_time()
+        end_time_ms = int(self._end_time.get())
+
+        if current_time_ms >= end_time_ms:
+          self._media_player.pause()
+          self._media_player.set_time(end_time_ms)
+
+          current_time_ms = end_time_ms
+
+          self._play_pause_btn.configure(image=self._play_photo)
+          self._screenshot_btn.configure(state="normal")
+
+        self._current_time.set(current_time_ms)
+
+        self._curtime_lbl.configure(text=self._ms_text_converter(current_time_ms))
+
+      elif state == vlc.State.Paused:
+        self._play_pause_btn.configure(image=self._play_photo)
+
     except Exception:
       logger.exception("VLC Error")
       return
@@ -270,27 +287,42 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _seek(self, value):
     self._is_seeking = True
+
     target = int(value)
 
     state = self._media_player.get_state()
+
     if state == vlc.State.Ended:
       self._restart_media(target, paused=True)
+
     else:
       self._media_player.set_time(target)
 
+      # Helps force paused-frame refresh on some VLC backends
+      if state == vlc.State.Paused:
+          self.after(1, self._media_player.set_pause, 1)
+
+    self._current_time.set(target)
     self._curtime_lbl.configure(text=self._ms_text_converter(target))
+
     self._schedule_seek_reset()
+    self._start_update_loop()
   
   def _set_start_time(self, value):
     self._is_seeking = True
+
     target = int(value)
     self._current_time.set(target)
 
     state = self._media_player.get_state()
     if state == vlc.State.Ended:
       self._restart_media(target, paused=True)
+
     else:
       self._media_player.set_time(target)
+
+      if state == vlc.State.Paused:
+        self.after(1,  self._media_player.set_pause, 1)
 
     self._curtime_lbl.configure(text=self._ms_text_converter(target))
     self._schedule_seek_reset()
@@ -299,28 +331,42 @@ class VideoTrimmer(ctk.CTkFrame):
     self._current_duration_lbl.configure(text=self._ms_text_converter(new_duration))
     self._start_time_lbl.configure(text=self._ms_text_converter(target))
 
+    self._start_update_loop()
+
   def _set_end_time(self, value):
     self._is_seeking = True
+
     target = int(value)
     self._current_time.set(target)
+
+    if self._media_player.is_playing():
+      self._media_player.pause()
+      self._play_pause_btn.configure(image=self._play_photo)
+      self._screenshot_btn.configure(state="normal")
 
     state = self._media_player.get_state()
     if state == vlc.State.Ended:
       self._restart_media(target, paused=True)
+
     else:
       self._media_player.set_time(target)
-    
+      if state == vlc.State.Paused:
+        self.after(1, self._media_player.set_pause, 1)
+
     self._curtime_lbl.configure(text=self._ms_text_converter(target))
+
     self._schedule_seek_reset()
 
-    new_duration = target - int(self._start_time.get())
+    new_duration = (target - int(self._start_time.get()))
     self._current_duration_lbl.configure(text=self._ms_text_converter(new_duration))
     self._end_time_lbl.configure(text=self._ms_text_converter(target))
+
+    self._start_update_loop()
   
   def _schedule_seek_reset(self) -> None:
     if self._seek_reset_id is not None:
       self.after_cancel(self._seek_reset_id)
-    self._seek_reset_id = self.after(150, self._reset_seeking)
+    self._seek_reset_id = self.after(50, self._reset_seeking)
 
   def _reset_seeking(self) -> None:
     self._is_seeking = False
@@ -495,11 +541,15 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_player.set_media(self._media)
     self._display_video()
     self._media_player.play()
+
     if paused:
-      self.after(100, lambda: self._seek_and_pause(seek_ms))
+        self.after(100, self._seek_and_pause, seek_ms)
+
     else:
-      self.after(100, lambda: self._media_player.set_time(seek_ms))
-      self._play_pause_btn.configure(image=self._pause_photo)
+        self.after(100, self._media_player.set_time, seek_ms)
+        self._play_pause_btn.configure(image=self._pause_photo)
+
+    self._start_update_loop()
 
   def _seek_and_pause(self, seek_ms: int, retries: int = 10) -> None:
     state = self._media_player.get_state()
@@ -586,6 +636,7 @@ class VideoTrimmer(ctk.CTkFrame):
     file  = filedialog.asksaveasfilename(title="Save As",
                                         initialdir=os.path.expanduser("~"),
                                         initialfile="screenshot",
+                                        defaultextension=".png",
                                         filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg")],
                                         confirmoverwrite=True)
     
@@ -598,7 +649,7 @@ class VideoTrimmer(ctk.CTkFrame):
       CTkMessagebox(master=self,
                     title="Incompatible file type",
                     message=f"Screenshot cannot be saved as {ext}!",
-                    icon="cancel")
+                    icon="warning")
       return
     
     x =  self._media_player.video_take_snapshot(0, file, 0, 0)
@@ -611,7 +662,7 @@ class VideoTrimmer(ctk.CTkFrame):
       CTkMessagebox(master=self,
                     title="Screenshot Successful",
                     message=f"Screenshot taken!\n{file}",
-                    icon="info")
+                    icon="check")
 
   def release(self) -> None:
     if self._update_id is not None:
