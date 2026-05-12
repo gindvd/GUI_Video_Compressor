@@ -38,6 +38,19 @@ class VideoTrimmer(ctk.CTkFrame):
     self._instance: vlc.Instance | None = None
     self._media_player: vlc.MediaPlayer | None = None
 
+    self._set_icons()
+
+    self._create_ui()
+
+  def _ensure_vlc_initialized(self) -> None:
+    if self._instance is not None:
+      return
+
+    self._instance = self._platform_specific_inst()
+    self._instance.log_unset()
+    self._media_player = self._instance.media_player_new()
+  
+  def _set_icons(self) -> None:
     self._play_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("play_button.png")),
                                                   dark_image=Image.open(get_button_image_path("play_button.png")))
     self._pause_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("pause_button.png")),
@@ -52,16 +65,6 @@ class VideoTrimmer(ctk.CTkFrame):
                                                     dark_image=Image.open(get_button_image_path("unmuted_volume.png")))
     self._camera_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("camera.png")),
                                                     dark_image=Image.open(get_button_image_path("camera.png")))
-
-    self._create_ui()
-
-  def _ensure_vlc_initialized(self) -> None:
-    if self._instance is not None:
-      return
-
-    self._instance = self._platform_specific_inst()
-    self._instance.log_unset()
-    self._media_player = self._instance.media_player_new()
 
   def _platform_specific_inst(self):
     if self._device_os == "Windows":
