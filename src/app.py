@@ -116,15 +116,22 @@ class App(ctk.CTk):
     menubar = CTkMenuBar(self)
     
     file_btn = menubar.add_cascade("File")
+    tools_btn = menubar.add_cascade("Tools")
     help_btn = menubar.add_cascade("Help")
     
     file_drop = CustomDropdownMenu(widget=file_btn)
-    file_drop.add_option(option="Open    Ctrl+O", command=self._browse_files)
+    file_drop.add_option(option="Open", command=self._browse_files)
     file_drop.add_separator()
-    file_drop.add_option(option="Exit    Ctrl+Q", command=self.on_quit)
+    file_drop.add_option(option="Exit", command=self.on_quit)
+    
+    tools_drop = CustomDropdownMenu(widget=tools_btn)
+    tools_drop.add_option(option="Frame Viewer", command=self._open_frame_viewer)
     
     help_drop = CustomDropdownMenu(widget=help_btn)
-    help_drop.add_option(option="About    Ctrl+A", command=self._show_about)
+    help_drop.add_option(option="About", command=self._show_about)
+    help_drop.add_separator()
+    help_drop.add_option(option="Licnese", command=self._show_license)
+    help_drop.add_option(option="3rd Party Licneses", command=self._show_3rd_party_licenses)
 
   def _build_ui(self) -> None: 
     self._main_frame = ctk.CTkFrame(self, corner_radius=0)
@@ -134,7 +141,7 @@ class App(ctk.CTk):
 
     # File Selection Bar
     self._file_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color=("gray78", "gray22"))
-    self._file_frame.grid(row=0, column=0,padx=0, pady=(0, 10), sticky="ew")
+    self._file_frame.grid(row=0, column=0,padx=0, pady=0, sticky="ew")
     self._file_frame.columnconfigure(0, weight=1)
 
     self._file_entry = ctk.CTkEntry(self._file_frame, height=30)
@@ -148,27 +155,27 @@ class App(ctk.CTk):
 
     # Content Area - Video Preview left, Settings right
     self._content_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color="transparent")
-    self._content_frame.grid(row=1, column=0, padx=5, pady=0, sticky="nsew")
+    self._content_frame.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
     self._content_frame.columnconfigure(0, weight=1)
     self._content_frame.rowconfigure(0, weight=1)
 
     # Left: Video Trimmer
     self._video_trimmer = VideoTrimmer(self._content_frame,
                                        self._external_procs[2], 
-                                      self._device_os,
-                                      corner_radius=0,
-                                      fg_color="transparent")
-    self._video_trimmer.grid(row=0, column=0, padx=(0, 5), pady=0, sticky="nsew")
+                                       self._device_os,
+                                       corner_radius=0,
+                                       fg_color="transparent")
+    self._video_trimmer.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
 
     # Right: Settings Panel
-    self._settings_panel = ctk.CTkFrame(self._content_frame, width=320, corner_radius=8, fg_color="transparent")
-    self._settings_panel.grid(row=0, column=1, padx=0, pady=10, sticky="ns")
+    self._settings_panel = ctk.CTkFrame(self._content_frame, width=320, corner_radius=0, fg_color="transparent")
+    self._settings_panel.grid(row=0, column=1, padx=0, pady=0, sticky="ns")
 
     self._build_settings_panel()
 
     # Bottom: Compress Button
     self._compress_btn_frame = ctk.CTkFrame(self._main_frame, corner_radius=0, fg_color=("gray78", "gray22"))
-    self._compress_btn_frame.grid(row=2, column=0,padx=0, pady=(10, 0), sticky="ew")
+    self._compress_btn_frame.grid(row=2, column=0,padx=0, pady=0, sticky="ew")
 
     self._compress_btn = ctk.CTkButton(self._compress_btn_frame,
                                        width=150,
@@ -183,7 +190,7 @@ class App(ctk.CTk):
 
     # Video Settings Section 
     video_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=8)
-    video_section.pack(fill="x", padx=8, pady=(0, 4))
+    video_section.pack(fill="x", padx=(5, 10), pady=10)
     video_section.columnconfigure(1, weight=1)
 
     ctk.CTkLabel(video_section, text="Video Settings",
@@ -241,7 +248,7 @@ class App(ctk.CTk):
 
     # Audio Settings Section 
     audio_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=8)
-    audio_section.pack(fill="x", padx=8, pady=4)
+    audio_section.pack(fill="x", padx=(5, 10), pady=0)
     audio_section.columnconfigure(1, weight=1)
 
     ctk.CTkLabel(audio_section, text="Audio Settings",
@@ -273,7 +280,7 @@ class App(ctk.CTk):
 
     # Compression Settings Section 
     compression_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=8)
-    compression_section.pack(fill="x", padx=8, pady=(4,0))
+    compression_section.pack(fill="x", padx=(5, 10), pady=10)
     compression_section.columnconfigure(1, weight=1)
 
     ctk.CTkLabel(compression_section, text="Compression Settings",
@@ -287,7 +294,7 @@ class App(ctk.CTk):
                                                 state='readonly',
                                                 command=self._preset_choice)
     self._preset_speed_drpdwn.set("Medium")
-    self._preset_speed_drpdwn.grid(row=1, column=1, padx=10, pady=(6, 10), sticky="ew")
+    self._preset_speed_drpdwn.grid(row=1, column=1, padx=10, pady=(6, 12), sticky="ew")
 
   def _show_about(self, event=None) -> None:
     about_file = resource_path(os.path.join("assets", "about.txt"))
