@@ -22,10 +22,14 @@ class FFmpegProcessor():
               audio_codec: str,
               audio_bitrate: str,
               start_time: str ,
-              duration: str) -> tuple[bool, str | None]:
+              duration: str,
+              output_directory: str) -> tuple[bool, str | None]:
 
-    basename, _ = os.path.splitext(input_file)
-    output_file = basename + "_compressed." + file_format
+    basename = os.path.basename(input_file)
+    name, _ = basename.split(".")
+    new_name = name + "_compressed." + file_format
+
+    output_file = os.path.join(output_directory, new_name)
 
     if os.path.exists(output_file):
       output_file = self._uniquify(output_file)
