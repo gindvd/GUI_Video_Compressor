@@ -23,7 +23,8 @@ from utils.path_utils       import *
 from processors.ffmpeg_processor  import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
 
-from components.progressbar_popup import ProgressbarPopup
+from .components.ctk_scroll_msgbox import CTkScrollMsgbox
+from components.progressbar_popup  import ProgressbarPopup
 from components.video_trimmer      import VideoTrimmer
 
 class App(ctk.CTk):
