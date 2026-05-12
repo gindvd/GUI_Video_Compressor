@@ -302,30 +302,21 @@ class App(ctk.CTk):
     with open(about_file, "r") as f:
       about_msg = f.read()
 
-    CTkScrollMsgbox(master=self,
-                  title="About",
-                  message=about_msg,
-                  justify="center")
+    CTkScrollMsgbox(master=self, title="About", message=about_msg)
   
   def _show_license(self, event=None) -> None:
     license = resource_path(os.path.join("assets", "licenses", "LICENSE.GPL-3.0.txt"))
     with open(license, "r") as f:
       text = f.read()
     
-    CTkScrollMsgbox(self,
-                    title="GPLv3.0 License",
-                    message=text,
-                    justify="left")
+    CTkScrollMsgbox(self, title="GPLv3.0 License", message=text)
   
   def _show_3rd_party_licenses(self, event=None) -> None:
     third_party_license = resource_path(os.path.join("assets", "licenses", "thirdpartylicenses.txt"))
     with open(third_party_license, "r") as f:
       text = f.read()
     
-    CTkScrollMsgbox(self,
-                    title="Third Party Libraries Licenses",
-                    message=text,
-                    justify="left")
+    CTkScrollMsgbox(self, title="Third Party Libraries Licenses", message=text)
   
   def _browse_files(self, event=None):
     item = filedialog.askopenfilename(initialdir = os.path.expanduser("~"),
