@@ -3,10 +3,9 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "GUI_Video_Converter"
-version = "0.1.0"
+name = "MediaConversionTool"
+version = "2.0.0"
 description = "A GUI interface to select options and trim videos to compress and convert video files with FFmpeg"
-readme = "README.md"
 authors = [
   {name = "David Gingerich", email = "gingerichdvd@gmail.com"}
 ]
