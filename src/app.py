@@ -199,7 +199,7 @@ class App(ctk.CTk):
     section_color = ("gray75", "gray25")
 
     # Video Settings Section 
-    video_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=8)
+    video_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=10)
     video_section.pack(fill="x", padx=(5, 10), pady=10)
     video_section.columnconfigure(1, weight=1)
 
@@ -257,7 +257,7 @@ class App(ctk.CTk):
     self._quality_perc_lbl.grid(row=0, column=2, sticky="e")
 
     # Audio Settings Section 
-    audio_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=8)
+    audio_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=10)
     audio_section.pack(fill="x", padx=(5, 10), pady=0)
     audio_section.columnconfigure(1, weight=1)
 
@@ -289,7 +289,7 @@ class App(ctk.CTk):
     self._rm_aud_chkbox.grid(row=3, column=0, columnspan=2, padx=10, pady=(6, 10), sticky="w")
 
     # Compression Settings Section 
-    compression_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=8)
+    compression_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=10)
     compression_section.pack(fill="x", padx=(5, 10), pady=10)
     compression_section.columnconfigure(1, weight=1)
 
