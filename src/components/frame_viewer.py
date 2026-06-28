@@ -282,12 +282,12 @@ class FrameViewer(ctk.CTkToplevel):
     if self._img is None:
       return
     
-    basename, _ = os.path.basename(self._file_path)
-    name, _ = basename.split(".")
-    
+    fullname, ext = os.path.splitext(self._file_path)
+    name = os.path.basename(fullname)
+
     file  = filedialog.asksaveasfilename(title="Save As",
                                         initialdir=os.path.expanduser("~"),
-                                        initialfile=f"{name}_frame-{self._current_frame}",
+                                        initialfile=f"{name}_frame_{self._current_frame}",
                                         defaultextension=".png",
                                         filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg")],
                                         confirmoverwrite=True)
