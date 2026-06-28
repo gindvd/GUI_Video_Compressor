@@ -27,7 +27,7 @@ class FFmpegProcessor():
     
     fullname, ext = os.path.splitext(input_file)
     name = os.path.basename(fullname)
-    new_name = name + "_compressed"
+    new_name = f"{name}_compressed.{file_format}"
 
     output_file = os.path.join(output_directory, new_name)
 
@@ -140,12 +140,13 @@ class FFmpegProcessor():
       if rc != 0 and self._terminated == False:
         if os.path.exists(output_file):
           os.remove(output_file)
-        
-        # Log exception if return code is 0
-        try:
-          raise subprocess.CalledProcessError(rc, cmd, output=out, stderr=err)
-        except subprocess.CalledProcessError as e:
-          logger.exception(str(e))
+
+        logger.error("FFmpeg failed with exit code %d\n"
+                     "Command: %s\n"
+                     "Output:\n%s",
+                     rc,
+                     " ".join(cmd),
+                     out,)
         
         return False, "Compression Failed\nCheck logs for details!"
 
