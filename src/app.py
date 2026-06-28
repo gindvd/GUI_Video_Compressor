@@ -24,8 +24,9 @@ from processors.ffmpeg_processor  import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor
 
 from components.ctk_scroll_msgbox import CTkScrollMsgbox
-from components.progressbar_popup  import ProgressbarPopup
-from components.video_trimmer      import VideoTrimmer
+from components.progressbar_popup import ProgressbarPopup
+from components.video_trimmer     import VideoTrimmer
+from components.frame_viewer      import FrameViewer
 
 class App(ctk.CTk):
   HW_CODEC_OPTS: dict = \
@@ -58,6 +59,9 @@ class App(ctk.CTk):
     self._ffprobe: FFprobeProcessor = FFprobeProcessor(self._external_procs[1], self._device_os)
 
     self._input_file: os.PathLike | str = ""
+    self._vid_fps: str = "30/1"
+    self._vid_duration: float = 0.0
+    self._frame_viewer: FrameViewer | None = None
 
     self._target_format: str = "mp4"
     self._target_res:    str = "1920x1080"
@@ -75,6 +79,11 @@ class App(ctk.CTk):
     
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
+
+    self._icon_path: PhotoImage | None = None
+    self._ico_path: PhotoImage | None = None
+
+    self._progressbar_popup: ProgressbarPopup | None = None
 
     self._set_icon()
 
@@ -95,10 +104,10 @@ class App(ctk.CTk):
         raise SystemExit(f"Missing dependency: {proc}")
   
   def _set_icon(self) -> None:
-    icon_path = get_icon()
-    ico_path = get_ico()
+    self._icon_path = get_icon()
+    self._ico_path = get_ico()
     
-    if icon_path is None or ico_path is None:
+    if self._icon_path is None or self._ico_path is None:
       CTkMessagebox(master=self,
                     title="Missing icon",
                     message="Icon missing from assets folder",
@@ -108,16 +117,16 @@ class App(ctk.CTk):
     else:
 
       if self._device_os == "Windows":
-        self.iconbitmap(ico_path)
-      # using png since cross platform 
-      icon = PhotoImage(file=icon_path)
+        self.iconbitmap(self._ico_path)
+
+      icon = PhotoImage(file=self._icon_path)
       self.iconphoto(True, icon)
 	
   def _create_menubar(self) -> None:
     menubar = CTkMenuBar(self)
     
     file_btn = menubar.add_cascade("File")
-    #tools_btn = menubar.add_cascade("Tools")
+    tools_btn = menubar.add_cascade("Tools")
     help_btn = menubar.add_cascade("Help")
     
     file_drop = CustomDropdownMenu(widget=file_btn)
@@ -125,8 +134,8 @@ class App(ctk.CTk):
     file_drop.add_separator()
     file_drop.add_option(option="Exit", command=self.on_quit)
     
-    #tools_drop = CustomDropdownMenu(widget=tools_btn)
-    #tools_drop.add_option(option="Frame Viewer", command=self._open_frame_viewer)
+    tools_drop = CustomDropdownMenu(widget=tools_btn)
+    tools_drop.add_option(option="Frame Viewer", command=self._open_frame_viewer)
     
     help_drop = CustomDropdownMenu(widget=help_btn)
     help_drop.add_option(option="About", command=self._show_about)
@@ -297,26 +306,50 @@ class App(ctk.CTk):
     self._preset_speed_drpdwn.set("Medium")
     self._preset_speed_drpdwn.grid(row=1, column=1, padx=10, pady=(6, 12), sticky="ew")
 
+  def _open_frame_viewer(self) -> None:
+    if self._input_file == "":
+      CTkMessagebox(master=self,
+                    title="Missing File",
+                    message="Video file not loaded!",
+                    icon="warning")
+      return
+
+    if self._frame_viewer is not None and self._frame_viewer.winfo_exists():
+      self._frame_viewer.focus()
+      return
+
+    self._frame_viewer = FrameViewer(self, self._external_procs[0], self._device_os,)
+    self._frame_viewer.load_media(self._input_file, self._vid_duration, self._vid_fps)
+
   def _show_about(self, event=None) -> None:
     about_file = resource_path(os.path.join("assets", "about.txt"))
     with open(about_file, "r") as f:
       about_msg = f.read()
 
-    CTkScrollMsgbox(master=self, title="About", message=about_msg)
+    CTkScrollMsgbox(master=self,
+                  title="About",
+                  message=about_msg,
+                  justify="center")
   
   def _show_license(self, event=None) -> None:
-    license = resource_path(os.path.join("assets", "licenses", "LICENSE.GPL-3.0.txt"))
+    license = resource_path("LICENSE.GPL-3.0.txt")
     with open(license, "r") as f:
       text = f.read()
     
-    CTkScrollMsgbox(self, title="GPLv3.0 License", message=text)
+    CTkScrollMsgbox(self,
+                    title="GPLv3.0 License",
+                    message=text,
+                    justify="left")
   
   def _show_3rd_party_licenses(self, event=None) -> None:
-    third_party_license = resource_path(os.path.join("assets", "licenses", "thirdpartylicenses.txt"))
+    third_party_license = resource_path("thirdpartylicenses.txt")
     with open(third_party_license, "r") as f:
       text = f.read()
     
-    CTkScrollMsgbox(self, title="Third Party Libraries Licenses", message=text)
+    CTkScrollMsgbox(self,
+                    title="Third Party Libraries Licenses",
+                    message=text,
+                    justify="left")
   
   def _browse_files(self, event=None):
     item = filedialog.askopenfilename(initialdir = os.path.expanduser("~"),
@@ -432,6 +465,9 @@ class App(ctk.CTk):
     # Update label with the videos current duration
     vid_dur = float(attr_vals[2])
     
+    self._vid_fps = vid_fps
+    self._vid_duration = vid_dur
+
     self._video_trimmer.set_vid_values(vid_dur)
     self._video_trimmer.load_media(self._input_file)
 
@@ -546,6 +582,8 @@ class App(ctk.CTk):
                                                     initialdir=os.path.expanduser("~"))
     
     if output_directory == "":
+      self._compress_btn.configure(state="normal")
+      self._browse_btn.configure(state="normal")
       return
     
     self._progressbar_popup: ProgressbarPopup = ProgressbarPopup(self, cmd=self.cancel_compression)
@@ -577,15 +615,18 @@ class App(ctk.CTk):
     self.after(0, self._compression_finished, completed, err_msg)
   
   def _compression_finished(self, completed: bool, err_msg: str) -> None:
-    self._progressbar_popup.destroy_window()
     self._compress_btn.configure(state="normal")
     self._browse_btn.configure(state="normal")
+
+    if getattr(self, "_progressbar_popup", None):
+        self._progressbar_popup.destroy_window()
+        self._progressbar_popup = None
 
     if completed:
       CTkMessagebox(master=self,
                     title="Video Compression Completed", 
                     message="Success!\nVideo compressed!", 
-                    icon='info')
+                    icon='check')
 
     if not completed and err_msg is not None:
       CTkMessagebox(master=self,
@@ -593,7 +634,7 @@ class App(ctk.CTk):
                     message=f"ERROR\n{err_msg}", 
                     icon='cancel')
   
-  def cancel_compression(self) -> None:
+  def cancel_compression(self, event=None) -> None:
     killed, msg = self._ffmpeg.terminate_compression()
 
     if not killed:
