@@ -24,10 +24,10 @@ class FFmpegProcessor():
               start_time: str ,
               duration: str,
               output_directory: str) -> tuple[bool, str | None]:
-
-    basename = os.path.basename(input_file)
-    name, _ = basename.split(".")
-    new_name = name + "_compressed." + file_format
+    
+    fullname, ext = os.path.splitext(input_file)
+    name = os.path.basename(fullname)
+    new_name = name + "_compressed"
 
     output_file = os.path.join(output_directory, new_name)
 
