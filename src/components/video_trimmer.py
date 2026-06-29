@@ -83,15 +83,15 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _create_ui(self) -> None:
     self._media_viewer = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
-    self._media_viewer.pack(padx=(10, 5), pady=(10, 5), fill='both', expand=True)
+    self._media_viewer.pack(padx=(10, 5), pady=10, fill='both', expand=True)
 
-    self._control_panel = ctk.CTkFrame(self, width=750, height=40, fg_color=("gray75", "gray25"), corner_radius=0)
+    self._control_panel = ctk.CTkFrame(self, width=750, height=40, fg_color=("gray75", "gray25"), corner_radius=10)
     self._control_panel.pack(padx=(10, 5), pady=0, fill='x')
     self._control_panel.grid_propagate(False)
     self._create_controls()
 
-    self._time_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=0)
-    self._time_panel.pack(padx=(10, 5), pady=(0, 10), fill='x')
+    self._time_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=10)
+    self._time_panel.pack(padx=(10, 5), pady=10, fill='x')
     self._create_time_labels()
   
   def _create_controls(self) -> None:
