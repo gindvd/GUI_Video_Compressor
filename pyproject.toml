@@ -9,7 +9,7 @@ description = "A GUI interface to select options and trim videos to compress and
 authors = [
   {name = "David Gingerich", email = "gingerichdvd@gmail.com"}
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 license = { file = "LICENSE" }
 
 dependencies = [
