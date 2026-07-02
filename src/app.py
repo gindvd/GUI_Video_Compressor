@@ -18,7 +18,8 @@ from platform  import system
 
 from utils.log_utils        import logger
 from utils.resolution_utils import get_list_of_smaller_res
-from utils.path_utils       import *
+
+from resource_paths import *
 
 from processors.ffmpeg_processor  import FFmpegProcessor
 from processors.ffprobe_processor import FFprobeProcessor

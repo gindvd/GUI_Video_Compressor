@@ -7,7 +7,7 @@ except:
 
 from app import App
 
-from utils.path_utils import setup_vlc_environment
+from resource_paths import setup_vlc_environment
 
 def main():
   setup_vlc_environment()

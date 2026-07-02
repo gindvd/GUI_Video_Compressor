@@ -1,4 +1,5 @@
 import customtkinter as ctk
+
 from tkinter import DoubleVar
 from CTkMessagebox import CTkMessagebox
 from CTkTrimSlider import CTkTrimSlider
@@ -10,7 +11,7 @@ from threading import Thread, Event
 from PIL import Image
 
 from utils.log_utils import logger
-from utils.path_utils import get_button_image_path
+from resource_paths import get_button_image_path
 
 class VideoTrimmer(ctk.CTkFrame):
   def __init__(self, master, vlc_cmd: os.PathLike | str, device_os: str, **kwargs) -> None:

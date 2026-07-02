@@ -6,16 +6,8 @@ import os
 import shutil
 
 def resource_path(relative_path: str = "") -> Path:
-  if getattr(sys, 'frozen', False):
-    base_path = Path(sys._MEIPASS)
-  else:
-    base_path = Path(__file__).parents[1]
-  return base_path / relative_path
-
-def get_app_dir() -> Path:
-  if getattr(sys, 'frozen', False):
-    return Path(sys.executable).parent
-  return Path(__file__).parents[1]
+  base_path: str = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+  return Path(base_path + relative_path)
 
 def setup_vlc_environment() -> None:
   if system() != "Windows":
@@ -86,7 +78,7 @@ def get_linux_procs() -> list:
   return proc_paths
 
 def get_icon() -> os.PathLike | str | None:
-  icon_abspath = resource_path(os.path.join("assets", "images", "icons", "thestrawhat.png"))
+  icon_abspath: os.PathLike = resource_path(os.path.join("assets", "images", "icons", "thestrawhat.png"))
 
   if not icon_abspath.is_file():
     return None
