@@ -6,8 +6,8 @@ import os
 import shutil
 
 def resource_path(relative_path: str = "") -> Path:
-  base_path: str = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
-  return Path(base_path + relative_path)
+  base_path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+  return base_path / relative_path
 
 def setup_vlc_environment() -> None:
   if system() != "Windows":
