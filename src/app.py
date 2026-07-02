@@ -81,8 +81,8 @@ class App(ctk.CTk):
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
 
-    self._icon_path: PhotoImage | None = None
-    self._ico_path: PhotoImage | None = None
+    self._icon_path: os.PathLike | str | None = None
+    self._ico_path: os.PathLike | str | None = None
 
     self._progressbar_popup: ProgressbarPopup | None = None
 
@@ -587,7 +587,7 @@ class App(ctk.CTk):
       self._browse_btn.configure(state="normal")
       return
     
-    self._progressbar_popup: ProgressbarPopup = ProgressbarPopup(self, cmd=self.cancel_compression)
+    self._progressbar_popup = ProgressbarPopup(self, cmd=self.cancel_compression)
     self._progressbar_popup.run_progressbar()
 
     # Run FFmpeg executable/binary in separate thread 

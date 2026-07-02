@@ -189,15 +189,6 @@ class FrameViewer(ctk.CTkToplevel):
                             creationflags=creation_flags,
                             timeout=10)
 
-      if proc.returncode != 0 or not proc.stdout:
-        raise subprocess.CalledProcessError
-
-      self._img = Image.open(io.BytesIO(proc.stdout))
-    
-    except subprocess.CalledProcessError:
-      logger.exception(f"ffmpeg frame extraction failed: {proc.stderr.decode(errors='replace')}")
-      self._display_error()
-
     except subprocess.TimeoutExpired:
       logger.exception("ffmpeg frame extraction timed out")
       self._display_error()
@@ -207,6 +198,13 @@ class FrameViewer(ctk.CTkToplevel):
       self._display_error()
     
     else:
+      if proc.returncode != 0 or not proc.stdout:
+        logger.error(f"ffmpeg frame extraction failed: {proc.stderr.decode(errors='replace')}")
+        self._display_error()
+
+        return
+
+      self._img = Image.open(io.BytesIO(proc.stdout))
       # Store the full-resolution frame and display a scaled copy.
       self._img = self._img.convert("RGB")
       self._display_image()
