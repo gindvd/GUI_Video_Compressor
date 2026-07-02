@@ -35,6 +35,9 @@ class FrameViewer(ctk.CTkToplevel):
     self._photo: ImageTk.PhotoImage | None = None
     self._seek_id: str | None = None
 
+    self._image_id: int | None = None
+    self._text_id: int | None = None
+
     self._create_ui()
 
   def _create_ui(self) -> None:
@@ -278,6 +281,9 @@ class FrameViewer(ctk.CTkToplevel):
   
   def _save_frame(self, event=None) -> None:
     if self._img is None:
+      return
+    
+    if self._file_path is None:
       return
     
     fullname, ext = os.path.splitext(self._file_path)

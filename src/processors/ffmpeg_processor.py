@@ -145,7 +145,7 @@ class FFmpegProcessor():
                      "Command: %s\n"
                      "Output:\n%s",
                      rc,
-                     " ".join(cmd),
+                     " ".join(str(arg) for arg in cmd),
                      out,)
         
         return False, "Compression Failed\nCheck logs for details!"
@@ -190,7 +190,7 @@ class FFmpegProcessor():
     return int(crf)
 
   @staticmethod
-  def _uniquify(path: os.PathLike | str) -> os.PathLike | str:
+  def _uniquify(path: os.PathLike | str) -> os.PathLike:
     filename, extension = os.path.splitext(path)
     counter = 1
 
