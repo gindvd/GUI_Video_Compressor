@@ -53,19 +53,19 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_player = self._instance.media_player_new()
   
   def _set_icons(self) -> None:
-    self._play_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("play_button.png")),
+    self._play_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("play_button.png")),
                                                   dark_image=Image.open(get_button_image_path("play_button.png")))
-    self._pause_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("pause_button.png")),
+    self._pause_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("pause_button.png")),
                                                    dark_image=Image.open(get_button_image_path("pause_button.png")))
-    self._reverse_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("reverse.png")),
+    self._reverse_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("reverse.png")),
                                                      dark_image=Image.open(get_button_image_path("reverse.png")))
-    self._forward_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("forward.png")),
+    self._forward_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("forward.png")),
                                                      dark_image=Image.open(get_button_image_path("forward.png")))
-    self._mute_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("muted_volume.png")),
+    self._mute_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("muted_volume.png")),
                                                   dark_image=Image.open(get_button_image_path("muted_volume.png")))
-    self._unmute_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("unmuted_volume.png")),
+    self._unmute_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("unmuted_volume.png")),
                                                     dark_image=Image.open(get_button_image_path("unmuted_volume.png")))
-    self._camera_photo: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("camera.png")),
+    self._camera_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("camera.png")),
                                                     dark_image=Image.open(get_button_image_path("camera.png")))
 
   def _platform_specific_inst(self):
@@ -102,7 +102,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                                         width=35,
                                                         height=30,
                                                         fg_color="transparent",
-                                                        image=self._play_photo,
+                                                        image=self._play_btn_icon,
                                                         text="",
                                                         state="disabled",
                                                         command=self._play_pause)
@@ -113,7 +113,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                                         width=35,
                                                         height=30,
                                                         fg_color="transparent",
-                                                        image=self._reverse_photo,
+                                                        image=self._reverse_btn_icon,
                                                         text="",
                                                         state="disabled",
                                                         command=self._reverse_10_seconds)
@@ -124,7 +124,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                                         width=30,
                                                         height=35,
                                                         fg_color="transparent",
-                                                        image=self._forward_photo,
+                                                        image=self._forward_btn_icon,
                                                         text="",
                                                         state="disabled",
                                                         command=self._forward_10_seconds)
@@ -148,7 +148,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                                     width=35,
                                                     height=30,
                                                     fg_color="transparent",
-                                                    image=self._unmute_photo,
+                                                    image=self._unmute_btn_icon,
                                                     text="",
                                                     state="disabled",
                                                     command=self._toggle_mute)
@@ -181,7 +181,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                          width=30,
                                          height=35,
                                          fg_color="transparent",
-                                         image=self._camera_photo,
+                                         image=self._camera_btn_icon,
                                          text="",
                                          state="disabled",
                                          anchor="center",
@@ -222,7 +222,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     if self._media_player.is_playing():
         self._media_player.pause()
-        self._play_pause_btn.configure(image=self._play_photo)
+        self._play_pause_btn.configure(image=self._play_btn_icon)
         self._screenshot_btn.configure(state="normal")
 
     else:
@@ -239,7 +239,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
         self._media_player.play()
 
-        self._play_pause_btn.configure(image=self._pause_photo)
+        self._play_pause_btn.configure(image=self._pause_btn_icon)
 
     self._start_update_loop()
     
@@ -261,7 +261,7 @@ class VideoTrimmer(ctk.CTkFrame):
         end_time_ms = int(self._end_time.get())
         self._current_time.set(end_time_ms)
         self._curtime_lbl.configure(text=self._ms_text_converter(end_time_ms))
-        self._play_pause_btn.configure(image=self._play_photo)
+        self._play_pause_btn.configure(image=self._play_btn_icon)
         self._screenshot_btn.configure(state="normal")
 
       elif state == vlc.State.Playing and not self._is_seeking:
@@ -274,7 +274,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
           current_time_ms = end_time_ms
 
-          self._play_pause_btn.configure(image=self._play_photo)
+          self._play_pause_btn.configure(image=self._play_btn_icon)
           self._screenshot_btn.configure(state="normal")
 
         self._current_time.set(current_time_ms)
@@ -282,7 +282,7 @@ class VideoTrimmer(ctk.CTkFrame):
         self._curtime_lbl.configure(text=self._ms_text_converter(current_time_ms))
 
       elif state == vlc.State.Paused:
-        self._play_pause_btn.configure(image=self._play_photo)
+        self._play_pause_btn.configure(image=self._play_btn_icon)
 
     except Exception:
       logger.exception("VLC Error")
@@ -346,7 +346,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     if self._media_player.is_playing():
       self._media_player.pause()
-      self._play_pause_btn.configure(image=self._play_photo)
+      self._play_pause_btn.configure(image=self._play_btn_icon)
       self._screenshot_btn.configure(state="normal")
 
     state = self._media_player.get_state()
@@ -485,7 +485,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._forward_10s_btn.configure(state="normal")
 
     self._media_player.play()
-    self._play_pause_btn.configure(image=self._pause_photo)
+    self._play_pause_btn.configure(image=self._pause_btn_icon)
     self.after(200, self._pause_initial_frame)
 
     self._update_progress()
@@ -527,7 +527,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._is_loading = False
 
-    self._play_pause_btn.configure(image=self._play_photo, state="disabled")
+    self._play_pause_btn.configure(image=self._play_btn_icon, state="disabled")
     self._volume_btn.configure(state="disabled")
     self._volume_slider.configure(state="disabled")
 
@@ -538,7 +538,7 @@ class VideoTrimmer(ctk.CTkFrame):
     if self._media_player.is_playing():
       self._media_player.pause()
       self._media_player.set_time(0)
-      self._play_pause_btn.configure(image=self._play_photo)
+      self._play_pause_btn.configure(image=self._play_btn_icon)
       self._current_time.set(0)
       self._curtime_lbl.configure(text="00:00:00.000")
       self._screenshot_btn.configure(state="normal")
@@ -553,7 +553,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     else:
         self.after(100, self._media_player.set_time, seek_ms)
-        self._play_pause_btn.configure(image=self._pause_photo)
+        self._play_pause_btn.configure(image=self._pause_btn_icon)
 
     self._start_update_loop()
 
@@ -565,7 +565,7 @@ class VideoTrimmer(ctk.CTkFrame):
       return
     self._media_player.set_time(seek_ms)
     self._media_player.pause()
-    self._play_pause_btn.configure(image=self._play_photo)
+    self._play_pause_btn.configure(image=self._play_btn_icon)
     self._current_time.set(seek_ms)
     self._curtime_lbl.configure(text=self._ms_text_converter(seek_ms))
 
@@ -574,10 +574,10 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_player.audio_set_mute(self._is_muted)
 
     if self._is_muted:
-      self._volume_btn.configure(image=self._mute_photo)
+      self._volume_btn.configure(image=self._mute_btn_icon)
       self._volume_slider.set(0)
     else:
-      self._volume_btn.configure(image=self._unmute_photo)
+      self._volume_btn.configure(image=self._unmute_btn_icon)
       if self._volume != 0:
         self._volume_slider.set(self._volume)
         self._set_volume(self._volume)
@@ -592,11 +592,11 @@ class VideoTrimmer(ctk.CTkFrame):
     if self._volume == 0 and not self._is_muted:
       self._is_muted = True
       self._media_player.audio_set_mute(True)
-      self._volume_btn.configure(image=self._mute_photo)
+      self._volume_btn.configure(image=self._mute_btn_icon)
     elif self._volume > 0 and self._is_muted:
       self._is_muted = False
       self._media_player.audio_set_mute(False)
-      self._volume_btn.configure(image=self._unmute_photo)
+      self._volume_btn.configure(image=self._unmute_btn_icon)
 
   def _show_vol_popup(self, event=None) -> None:
     if self._vol_hide_id is not None:
