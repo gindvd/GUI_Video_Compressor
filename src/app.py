@@ -54,21 +54,21 @@ class App(ctk.CTk):
     self._device_os: str = system()
 
     # Get path of FFmpeg, FFprobe and VLC
-    self._external_dependencies: list[Path | str] = get_external_dependencies(self._device_os)
+    self._dependencies: list[Path | str] = get_dependencies(self._device_os)
     
     # Create process handler classes for running commands
-    self._ffmpeg: FFmpegProcessHandler   = FFmpegProcessHandler(self._external_dependencies[0], self._device_os)
-    self._ffprobe: FFprobeProcessHandler = FFprobeProcessHandler(self._external_dependencies[1], self._device_os)
+    self._ffmpeg: FFmpegProcessHandler   = FFmpegProcessHandler(self._dependencies[0], self._device_os)
+    self._ffprobe: FFprobeProcessHandler = FFprobeProcessHandler(self._dependencies[1], self._device_os)
 
     self._input_file: os.PathLike[str] | str = ""
     self._vid_fps: str = "30/1"
     self._vid_duration: float = 0.0
 
     # Command args for FFmpeg to compress media files
-    self._target_format: str = "mp4"
-    self._target_res:    str = "1920x1080"
-    self._codec:         str = "libx264"
-    self._target_fps:    str = "30"
+    self._container:     str = "mp4"
+    self._resolution:    str = "1920x1080"
+    self._video_codec:   str = "libx264"
+    self._frame_rate:    str = "30"
     self._preset:        str | None = "medium"
     self._quality:       int = 90
     self._audio:         bool = True
@@ -99,6 +99,7 @@ class App(ctk.CTk):
     self._icon_path = get_icon()
     self._ico_path = get_ico()
     
+    # Warns user about missing icons, lets app run with default icons
     if self._icon_path is None or self._ico_path is None:
       CTkMessagebox(master=self,
                     title="Missing icon",
@@ -166,7 +167,7 @@ class App(ctk.CTk):
 
     # Left: Video Trimmer
     self._video_trimmer = VideoTrimmer(self._content_frame,
-                                       self._external_dependencies[2], 
+                                       self._dependencies[2], 
                                        self._device_os,
                                        corner_radius=0,
                                        fg_color="transparent")
@@ -204,12 +205,12 @@ class App(ctk.CTk):
                    row=0, column=0, columnspan=2, padx=10, pady=(10, 4), sticky="w")
 
     ctk.CTkLabel(video_section, text="Codec:").grid(row=1, column=0, padx=10, pady=6, sticky="w")
-    self._codec_drpdwn = ctk.CTkComboBox(video_section, 
+    self._video_codec_drpdwn = ctk.CTkComboBox(video_section, 
                                         values=self._get_codec_values(),
                                         state='readonly',
-                                        command=self._codec_choice)
-    self._codec_drpdwn.set("libx264")
-    self._codec_drpdwn.grid(row=1, column=1, padx=10, pady=6, sticky="ew")
+                                        command=self._video_codec_choice)
+    self._video_codec_drpdwn.set("libx264")
+    self._video_codec_drpdwn.grid(row=1, column=1, padx=10, pady=6, sticky="ew")
 
     ctk.CTkLabel(video_section, text="Format:").grid(row=2, column=0, padx=10, pady=6, sticky="w")
     self._containers_drpdwn = ctk.CTkComboBox(video_section, 
@@ -319,7 +320,7 @@ class App(ctk.CTk):
       return
     
     # Creates a frame viewer window and loads media file
-    self._frame_viewer = FrameViewer(self, self._external_dependencies[0], self._device_os,)
+    self._frame_viewer = FrameViewer(self, self._dependencies[0], self._device_os,)
     self._frame_viewer.load_media(self._input_file, self._vid_duration, self._vid_fps)
 
   def _show_about(self, event: Event | None = None) -> None:
@@ -451,7 +452,7 @@ class App(ctk.CTk):
 
     self._resolutions_drpdwn.configure(values=res_list)
     self._resolutions_drpdwn.set(res_list[0])
-    self._target_res = res_list[0]
+    self._resolution = res_list[0]
     
     # Update combo box with list of FPS options lower than video's current FPS
     vid_fps = attr_vals[1]
@@ -482,7 +483,7 @@ class App(ctk.CTk):
 
     self._frames_drpdwn.configure(values=upd_fps)
     self._frames_drpdwn.set(upd_fps[0])
-    self._target_fps = upd_fps[0]
+    self._frame_rate = upd_fps[0]
 
     vid_dur = float(attr_vals[2])
     
@@ -505,17 +506,17 @@ class App(ctk.CTk):
     Set file format when new value selected 
     Updates file format choices based on compatibility
     """
-    self._codec = choice
+    self._video_codec = choice
 
     if choice in ["libsvtav1", "libvpx-vp9"]:
       self._containers_drpdwn.configure(values=[ "mkv", "webm", "mp4"])
       self._containers_drpdwn.set("mkv")
-      self._target_format = "mkv"
+      self._container = "mkv"
     
     else:
       self._containers_drpdwn.configure(values=["mp4", "mkv", "mov"])
       self._containers_drpdwn.set("mp4")
-      self._target_format = "mp4"
+      self._container = "mp4"
 
     if choice in ["h264_amf", "hevc_amf", "h264_vaapi", "hevc_vaapi", "libsvtav1"]:
       self._preset_speed_drpdwn.configure(state="disabled")
@@ -531,7 +532,7 @@ class App(ctk.CTk):
     Updates audio codecs choices based on compatibility
     """
 
-    self._target_format = choice
+    self._container = choice
 
     if choice == "mkv":
       self._audio_codec_drpdwn.configure(values=("aac", "mp3", "libopus", "libvorbis"))
@@ -555,11 +556,11 @@ class App(ctk.CTk):
 
   def _resolution_choice(self, choice: str) -> None:
     """ Set resolution when new value selected """
-    self._target_res = choice
+    self._resolution = choice
 
   def _fps_choice(self, choice: str) -> None:
     """ Set fps when new value selected """
-    self._target_fps = choice
+    self._frame_rate = choice
   
   def _preset_choice(self, choice: str) -> None:
     """ Set preset compression speed when new value selected """
@@ -649,10 +650,10 @@ class App(ctk.CTk):
     duration: str = self._video_trimmer.get_duration()
 
     completed, err_msg = self._ffmpeg.compress(self._input_file, 
-                                               self._target_format, 
-                                               self._target_res,
-                                               self._codec,
-                                               self._target_fps,
+                                               self._container, 
+                                               self._resolution,
+                                               self._video_codec,
+                                               self._frame_rate,
                                                self._preset,
                                                self._quality,
                                                self._audio,
