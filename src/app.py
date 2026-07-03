@@ -351,7 +351,7 @@ class App(ctk.CTk):
   
   def _show_license(self, event: Event | None = None) -> None:
     """ Display the app's license in a pop up """
-    license = resource_path("LICENSE.GPL-3.0.txt")
+    license = resource_path(os.path.join("assets", "licenses", "LICENSE.GPL-3.0.txt"))
     with open(license, "r") as f:
       text = f.read()
     
@@ -362,7 +362,7 @@ class App(ctk.CTk):
   
   def _show_3rd_party_licenses(self, event: Event | None = None) -> None:
     """ Display thrird party licenses in a pop up """
-    third_party_license = resource_path("thirdpartylicenses.txt")
+    third_party_license = resource_path(os.path.join("assets", "licenses", "thirdpartylicenses.txt"))
     with open(third_party_license, "r") as f:
       text = f.read()
     
