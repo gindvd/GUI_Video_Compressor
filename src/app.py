@@ -733,7 +733,3 @@ class App(ctk.CTk):
     self.bind("<Control-o>", self._browse_files)
     self.bind("<Control-q>", self.teardown)
     self.bind("<Control-a>", self._show_about)
-    self.bind("<space>", self._video_trimmer._play_pause)
-    self.bind("k", self._video_trimmer._play_pause)
-    self.bind("j", self._video_trimmer._reverse_10_seconds)
-    self.bind("l", self._video_trimmer._forward_10_seconds)
