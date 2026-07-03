@@ -3,8 +3,8 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "MediaConversionTool"
-version = "2.0.0"
+name = "MediaCOptimizationTool"
+version = "2.1.0"
 description = "A GUI interface to select options and trim videos to compress and convert video files with FFmpeg"
 authors = [
   {name = "David Gingerich", email = "gingerichdvd@gmail.com"}

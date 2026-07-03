@@ -77,8 +77,7 @@ class App(ctk.CTk):
     self._audio_codec:   str = "aac"
     self._audio_bitrate: str = "128k"
     
-    # base tkinter / customtkinter setting
-    self.title("Media Conversion Tool")
+    self.title("Media Optimization Tool")
     self.minsize(1040, 660)
     self.resizable(True, True)
     
