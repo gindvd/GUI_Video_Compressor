@@ -346,8 +346,7 @@ class App(ctk.CTk):
 
     CTkScrollMsgbox(master=self,
                   title="About",
-                  message=about_msg,
-                  justify="center")
+                  message=about_msg)
   
   def _show_license(self, event: Event | None = None) -> None:
     """ Display the app's license in a pop up """
@@ -357,8 +356,7 @@ class App(ctk.CTk):
     
     CTkScrollMsgbox(self,
                     title="GPLv3.0 License",
-                    message=text,
-                    justify="left")
+                    message=text)
   
   def _show_3rd_party_licenses(self, event: Event | None = None) -> None:
     """ Display thrird party licenses in a pop up """
@@ -368,8 +366,7 @@ class App(ctk.CTk):
     
     CTkScrollMsgbox(self,
                     title="Third Party Libraries Licenses",
-                    message=text,
-                    justify="left")
+                    message=text)
   
   def _browse_files(self, event: Event | None = None) -> None:
     """ Open file explorer to select video file to be loaded and compressed """
