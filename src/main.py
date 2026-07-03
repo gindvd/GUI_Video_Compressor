@@ -11,11 +11,11 @@ from app import App
 from resource_paths import setup_vlc_environment
 
 def main() -> None:
-  # Set up the VLC dll / plugin paths before the python-vlc library is imported
-  setup_vlc_environment()
-  
-  # Compatibility with high DPI monitor with windows
   if system() == "Windows":
+    # Set up the VLC dll / plugin paths before the python-vlc library is imported
+    setup_vlc_environment()
+
+    # Compatibility with high DPI monitor with windows
     windll.shcore.SetProcessDpiAwareness(2)
 
   app = App()

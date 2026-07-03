@@ -1,5 +1,4 @@
 from pathlib import Path
-from platform import system
 
 import sys
 import os
@@ -12,8 +11,6 @@ def resource_path(relative_path: str = "") -> Path:
 
 def setup_vlc_environment() -> None:
   """ Set up VLC paths for the python-vlc library to use bundled VLC dlls / plugins in the lib folder """
-  if system() != "Windows":
-    return
 
   vlc_dir = resource_path(os.path.join("lib", "vlc"))
 
@@ -29,15 +26,15 @@ def setup_vlc_environment() -> None:
 
   os.environ['PATH'] = str(vlc_dir) + os.pathsep + os.environ.get('PATH', '')
 
-def get_external_dependencies(device_os: str) -> list[Path | str | None]:
+def get_dependencies(device_os: str) -> list[Path | str]:
   if device_os == "Windows":
     return get_win_dependencies()
   elif device_os == "Linux":
     return get_linux_dependencies()
 
-  return [None, None, None]
+  raise SystemExit(f"App not compatible with {device_os}")
 
-def get_win_dependencies() -> list[Path | None]:
+def get_win_dependencies() -> list[Path]:
   """ Gets the paths for FFmpeg, FFprobe, and VLC in the lib folder """
   proc_paths: list[Path | None] = []
 
@@ -45,12 +42,9 @@ def get_win_dependencies() -> list[Path | None]:
     # gets path of the vlc plugins folder
     if proc == "vlc":
       abs_path = resource_path(os.path.join("lib", "vlc", "plugins"))
-      try:
-        if not abs_path.is_dir():
-          raise FileNotFoundError
       
-      except FileNotFoundError:
-        proc_paths.append(None)
+      if not abs_path.is_dir():
+          raise SystemExit(f"Missing dependency: {proc} missing from lib folder!")
       
       else:
         proc_paths.append(abs_path)
@@ -65,20 +59,20 @@ def get_win_dependencies() -> list[Path | None]:
         proc_paths.append(None)
 
       else:
-        proc_paths.append(abs_path)
+        raise SystemExit(f"Missing dependency: {proc} missing from lib folder!")
   
   return proc_paths
 
-def get_linux_dependencies() -> list[str | None]:
+def get_linux_dependencies() -> list[str]:
   """ get command strings for linux """
-  proc_paths: list[str | None] = []
+  proc_paths: list[str] = []
 
   for proc in ("ffmpeg", "ffprobe", "vlc"):
     if shutil.which(proc):
       proc_paths.append(proc)
     
     else:
-      proc_paths.append(None)
+      raise SystemExit(f"Missing dependency: {proc}")
   
   return proc_paths
 

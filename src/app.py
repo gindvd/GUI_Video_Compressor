@@ -54,9 +54,7 @@ class App(ctk.CTk):
     self._device_os: str = system()
 
     # Get path of FFmpeg, FFprobe and VLC
-    self._external_dependencies: list[Path | str | None] = get_external_dependencies(self._device_os)
-
-    self._check_dependencies_exist()
+    self._external_dependencies: list[Path | str] = get_external_dependencies(self._device_os)
     
     # Create process handler classes for running commands
     self._ffmpeg: FFmpegProcessHandler   = FFmpegProcessHandler(self._external_dependencies[0], self._device_os)
@@ -95,19 +93,6 @@ class App(ctk.CTk):
     self._create_menubar()
     self._build_ui()
     self._bind_keys()
-
-  def _check_dependencies_exist(self) -> None:
-    """ Checks if all 3 dependencies exist on the user's machine"""
-    for proc in self._external_dependencies:
-      if proc is None:
-        CTkMessagebox(master=self,
-                      title="Missing Dependency", 
-                      message=f"Missing External Processor:\n {proc}!", 
-                      icon="cancel")
-        
-        # Kills the app if dependency is missing, displays error message
-        self.destroy()
-        raise SystemExit(f"Missing dependency: {proc}")
   
   def _set_icon(self) -> None:
     """ Sets the window icon in the top left corner """
