@@ -1,17 +1,21 @@
 import json
 from os import PathLike
+from typing import Any
 
 from utils.log_utils import logger
 
-class FFprobeProcessor():
+class FFprobeProcessHandler():
+  """ Handler class for running FFprobe to retrieve media stream information """
 
-  def __init__(self, ffprobe: PathLike | str, device_os: str) -> None:
-    self._ffprobe: PathLike | str = ffprobe
+  def __init__(self, ffprobe: PathLike[str] | str, device_os: str) -> None:
+    self._ffprobe: PathLike[str] | str = ffprobe
     self._device_os: str = device_os
     
-  def get_video_attributions(self, filepath: PathLike | str) -> tuple[bool, list[str] | None, str | None]:
+  def get_video_attributions(self, filepath: PathLike[str] | str) -> tuple[bool, list[str] | None, str | None]:
+    """ Run command to have FFprobe extract file stream data """
     import subprocess
 
+    # Returns json formatted stream with mdia file's resolution, frame rate, and duration
     cmd = [self._ffprobe,
            "-v",
            "error",
@@ -25,27 +29,29 @@ class FFprobeProcessor():
            "json",
            filepath]
 
-    startupinfo = None
-    creation_flags = 0
-
+    flags: dict[str, Any] = {}
+    
     # flags to hide console window
-    if self._device_os == 'Windows':
-      startupinfo = subprocess.STARTUPINFO()
-      startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-      creation_flags = subprocess.CREATE_NO_WINDOW
+    if self._device_os == "Windows":
+      flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+      si = subprocess.STARTUPINFO()
+      si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      flags["startupinfo"] = si
+
+    else:
+      flags["start_new_session"] = True
 
     proc = subprocess.Popen(cmd, 
                             stdout=subprocess.PIPE, 
                             stderr=subprocess.PIPE, 
                             shell=False, 
                             text=True,
-                            startupinfo=startupinfo,
-                            creationflags=creation_flags)
+                            **flags)
     
     try: 
       result, err = proc.communicate()
       rc = proc.returncode
-
+    
     except FileNotFoundError:
       return False, None, "FFprobe not found!"
 
@@ -62,13 +68,14 @@ class FFprobeProcessor():
       return False, None, "OS Error Occured!\nCheck logs for details!"
     
     else:
+      # Log error when return code is non-zero, return error message
       if rc != 0:
-        # Raise error if return code is 0 to log info
-        try:
-          raise subprocess.CalledProcessError(rc, cmd, output=result, stderr=err)
-          
-        except subprocess.CalledProcessError as e:
-          logger.exception(str(e))
+        logger.error("FFmpeg failed with exit code %d\n"
+                     "Command: %s\n"
+                     "Output:\n%s",
+                     rc,
+                     " ".join(str(arg) for arg in cmd),
+                     err,)
       
         return False, None, "Called Process Error Occured!\nCheck logs for details!"
       
@@ -78,7 +85,8 @@ class FFprobeProcessor():
       return self._parse_attributes(result)
       
   @staticmethod
-  def _parse_attributes(result) -> tuple[bool, list[str] | None, str | None]:
+  def _parse_attributes(result: str) -> tuple[bool, list[str] | None, str | None]:
+    """ Parses through returned JSON and gets clean values for video frame rate, resolution, and duration """
     import json
 
     try:
@@ -94,10 +102,10 @@ class FFprobeProcessor():
       return False, None, "No video stream found."
 
     s = streams[0]
-    width: str = s.get("width")
-    height: str = s.get("height")
-    avg_frame_rate: str = s.get("avg_frame_rate")
-    duration: str = fmt.get("duration")
+    width: int | None = s.get("width")
+    height: int | None = s.get("height")
+    avg_frame_rate: str | None = s.get("avg_frame_rate")
+    duration: str | None = fmt.get("duration")
 
     if None in (width, height, avg_frame_rate, duration):
       return False, None, "Issue getting info from file headers."
@@ -105,6 +113,6 @@ class FFprobeProcessor():
     if "N/A" in str(avg_frame_rate) or "N/A" in str(duration):
       return False, None, "Issue getting info from file headers."
 
-    attrs = [f"{width}x{height}", avg_frame_rate, duration]
+    attrs = [f"{width}x{height}", str(avg_frame_rate), str(duration)]
 
     return True, attrs, None

@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import tkinter as tk
 
-from tkinter import ttk, DoubleVar
+from tkinter import DoubleVar, Event
 from customtkinter import filedialog
 from CTkMessagebox import CTkMessagebox
 from PIL import Image, ImageTk
@@ -9,21 +9,24 @@ from PIL import Image, ImageTk
 import subprocess
 import io
 import os
+from typing import Any
 
 from utils.log_utils import logger
 
 class FrameViewer(ctk.CTkToplevel):
-  def __init__(self, master, ffmpeg_path: os.PathLike | str, device_os: str, **kwargs) -> None:
+  """ Toplevel window for view and extracting individual frames from a media file """
+
+  def __init__(self, master: Any, ffmpeg_path: os.PathLike[str] | str, device_os: str, **kwargs: Any) -> None:
     super().__init__(master=master, **kwargs)
 
     self.title("Frame Viewer")
     self.minsize(850, 600)
     self.geometry("960x640")
 
-    self._ffmpeg_path: os.PathLike | str = ffmpeg_path
+    self._ffmpeg_path: os.PathLike[str] | str = ffmpeg_path
     self._device_os: str = device_os
 
-    self._file_path: os.PathLike | str | None = None
+    self._file_path: os.PathLike[str] | str | None = None
     self._duration_ms: int = 0
     self._fps: float = 30.0
     self._frame_duration_ms: float = 33.33
@@ -35,12 +38,11 @@ class FrameViewer(ctk.CTkToplevel):
     self._photo: ImageTk.PhotoImage | None = None
     self._seek_id: str | None = None
 
-    self._image_id: int | None = None
-    self._text_id: int | None = None
+    self._build_ui()
 
-    self._create_ui()
-
-  def _create_ui(self) -> None:
+  def _build_ui(self) -> None:
+    """ Builds and places all widgets and UI elements """
+    # Image canvas
     self._canvas = tk.Canvas(self,
                              bg="black",
                              highlightthickness=0,
@@ -51,14 +53,17 @@ class FrameViewer(ctk.CTkToplevel):
                       fill="both",
                       expand=True)
     
+    # Resize the fame image when the window is resized
     self._canvas.bind("<Configure>", self._on_canvas_resize)
     
-    self._image_id = None
-    self._text_id = self._canvas.create_text(0, 0,
+    
+    self._image_id: int | None = None
+    self._text_id: int | None = self._canvas.create_text(0, 0,
                                              text="No media loaded",
                                              fill="white",
                                              anchor="center")
-
+    
+    # Control frame: controls for fingding frames
     control_frame = ctk.CTkFrame(self, fg_color=("gray75", "gray25"), corner_radius=6)
     control_frame.pack(padx=10, pady=5, fill="x")
     control_frame.columnconfigure(1, weight=1)
@@ -82,7 +87,8 @@ class FrameViewer(ctk.CTkToplevel):
                                    font=ctk.CTkFont(size=20),
                                    state="disabled", command=self._next_frame)
     self._next_btn.grid(row=0, column=2, padx=(5, 10), pady=5)
-
+    
+    # Info Frame: Displays frame number, timestamp, and other media info
     info_frame = ctk.CTkFrame(self, fg_color=("gray75", "gray25"), corner_radius=6)
     info_frame.pack(padx=10, pady=(0, 10), fill="x")
 
@@ -98,11 +104,13 @@ class FrameViewer(ctk.CTkToplevel):
     self._fps_lbl = ctk.CTkLabel(info_frame, text="--")
     self._fps_lbl.grid(row=0, column=5, padx=(0, 10), pady=5, sticky="w")
     
+    # Save button
     info_frame.columnconfigure(6, weight=1)
     self._save_button = ctk.CTkButton(info_frame, text="Save", command=self._save_frame)
     self._save_button.grid(row=0, column=6, padx=10, pady=5, sticky="e")
 
-  def load_media(self, file_path: os.PathLike | str, duration_s: float, fps_str: str) -> None:
+  def load_media(self, file_path: os.PathLike[str] | str, duration_s: float, fps_str: str) -> None:
+    """ Loads media file, and media info, then displays the displays the first frame"""
     self._file_path = file_path
 
     try:
@@ -130,12 +138,15 @@ class FrameViewer(ctk.CTkToplevel):
     self._update_info_labels()
     self._extract_and_display(0.0)
 
-  def _on_slider_move(self, value) -> None:
+  def _on_slider_move(self, value: float) -> None:
+    """ Finds frame when slider handle in moved """
+    # Waits until previous seek is complete before starting next seek
     if self._seek_id is not None:
       self.after_cancel(self._seek_id)
     self._seek_id = self.after(50, lambda: self._seek_to(float(value)))
 
   def _seek_to(self, ms: float) -> None:
+    """ Gets the selected tmestamp, extracts the frame, and updates information labels """
     self._seek_id = None
     self._current_ms = max(0.0, min(ms, self._duration_ms))
     self._current_time.set(self._current_ms)
@@ -143,28 +154,28 @@ class FrameViewer(ctk.CTkToplevel):
     self._extract_and_display(self._current_ms)
 
   def _prev_frame(self) -> None:
+    """ Calculates timestamps to get the exact previous frame """
     target = self._current_ms - self._frame_duration_ms
     target = max(0.0, target)
     self._current_time.set(target)
     self._seek_to(target)
 
   def _next_frame(self) -> None:
+    """ Calculates timestamps to get the exact next frame """
     target = self._current_ms + self._frame_duration_ms
     target = min(target, self._duration_ms)
     self._current_time.set(target)
     self._seek_to(target)
 
   def _extract_and_display(self, ms: float) -> None:
-    """
-    Extracts exact frames using FFmpeg and
-    displays in a tkinter canvas
-    """
+    """ Extracts exact frames using FFmpeg """
     if self._file_path is None:
       return
 
     seconds = ms / 1000.0
     timestamp = self._seconds_to_timestamp(seconds)
-
+    
+    # Command to have FFmpeg extract the frame at the specied timestamp
     cmd = [
       str(self._ffmpeg_path),
       "-ss", timestamp,
@@ -176,21 +187,33 @@ class FrameViewer(ctk.CTkToplevel):
       "pipe:1"
     ]
 
-    startupinfo = None
-    creation_flags = 0
-
+    flags: dict[str, Any] = {}
+    
+    # flags to hide console window
     if self._device_os == "Windows":
-      startupinfo = subprocess.STARTUPINFO()
-      startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-      creation_flags = subprocess.CREATE_NO_WINDOW
+      flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+      si = subprocess.STARTUPINFO()
+      si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      flags["startupinfo"] = si
+      
+    else:
+      flags["start_new_session"] = True
 
     try:
       proc = subprocess.run(cmd,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
-                            startupinfo=startupinfo,
-                            creationflags=creation_flags,
+                            **flags,
                             timeout=10)
+
+      if proc.returncode != 0 or not proc.stdout:
+        raise subprocess.CalledProcessError
+
+      self._img = Image.open(io.BytesIO(proc.stdout))
+    
+    except subprocess.CalledProcessError:
+      logger.exception(f"ffmpeg frame extraction failed: {proc.stderr.decode(errors='replace')}")
+      self._display_error()
 
     except subprocess.TimeoutExpired:
       logger.exception("ffmpeg frame extraction timed out")
@@ -201,18 +224,12 @@ class FrameViewer(ctk.CTkToplevel):
       self._display_error()
     
     else:
-      if proc.returncode != 0 or not proc.stdout:
-        logger.error(f"ffmpeg frame extraction failed: {proc.stderr.decode(errors='replace')}")
-        self._display_error()
-
-        return
-
-      self._img = Image.open(io.BytesIO(proc.stdout))
       # Store the full-resolution frame and display a scaled copy.
       self._img = self._img.convert("RGB")
       self._display_image()
 
   def _display_error(self) -> None:
+    """ Displays an error message on the canvas if one occurs """
     self._canvas.delete("all")
 
     self._image_id = None
@@ -223,9 +240,11 @@ class FrameViewer(ctk.CTkToplevel):
                                              fill="white")
 
   def _display_image(self) -> None:
+    """ Displays extracted frame in the canvas """
     if self._img is None:
       return
-
+    
+    # Sets image size to fit inside the canvas
     canvas_width = self._canvas.winfo_width()
     canvas_height = self._canvas.winfo_height()
 
@@ -263,7 +282,8 @@ class FrameViewer(ctk.CTkToplevel):
       self._canvas.delete(self._text_id)
       self._text_id = None
 
-  def _on_canvas_resize(self, event):
+  def _on_canvas_resize(self, event: Event) -> None:
+    """ Resizes the image to fit the canvas when the window is resized """
     if self._img is not None:
         self._display_image()
 
@@ -273,22 +293,23 @@ class FrameViewer(ctk.CTkToplevel):
                             event.height // 2)
 
   def _update_info_labels(self) -> None:
+    """ Update current frame and timestamp labels """
     self._time_lbl.configure(text=self._ms_text_converter(int(self._current_ms)))
 
     self._current_frame = int(self._current_ms / self._frame_duration_ms) if self._frame_duration_ms > 0 else 0
     total_frames = int(self._duration_ms / self._frame_duration_ms) if self._frame_duration_ms > 0 else 0
     self._frame_lbl.configure(text=f"{self._current_frame} / {total_frames}")
   
-  def _save_frame(self, event=None) -> None:
+  def _save_frame(self, event: Event | None = None) -> None:
+    """ Saves the current frame as a JPEG or PNG """
     if self._img is None:
       return
     
-    if self._file_path is None:
-      return
-    
+    # Gets basename of media file
     fullname, ext = os.path.splitext(self._file_path)
     name = os.path.basename(fullname)
-
+    
+    # Opens file dialog to get new file name, and save directory from a user
     file  = filedialog.asksaveasfilename(title="Save As",
                                         initialdir=os.path.expanduser("~"),
                                         initialfile=f"{name}_frame_{self._current_frame}",
@@ -300,14 +321,16 @@ class FrameViewer(ctk.CTkToplevel):
       return
     
     _, ext = os.path.splitext(file)
-
+    
+    # Only allows files to be saved a jpeg or png
     if ext not in (".png", ".jpg", ".jpeg"):
       CTkMessagebox(master=self,
                     title="Incompatible file type",
                     message=f"Screenshot cannot be saved as {ext}!",
                     icon="warning")
       return
-  
+    
+    # Use PIL functions to save frame
     try:
       self._img.save(file)
 
@@ -324,6 +347,7 @@ class FrameViewer(ctk.CTkToplevel):
 
   @staticmethod
   def _seconds_to_timestamp(s: float) -> str:
+    """ Converts seconds to timestamp to be displayed """
     hours = int(s // 3600)
     minutes = int((s % 3600) // 60)
     secs = s % 60
@@ -332,6 +356,7 @@ class FrameViewer(ctk.CTkToplevel):
 
   @staticmethod
   def _ms_text_converter(ms: int) -> str:
+    """ Converts milliseconds to timestamp string """
     s = ms // 1000
     ms_remainder = ms % 1000
 

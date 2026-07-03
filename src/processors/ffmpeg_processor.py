@@ -1,17 +1,20 @@
 import os
 import subprocess
+from typing import Any
 
 from utils.log_utils import logger
 
-class FFmpegProcessor():
-  def __init__(self, ffmpeg: os.PathLike | str, device_os: str) -> None:
-    self._ffmpeg: os.PathLike | str = ffmpeg
+class FFmpegProcessHandler():
+  """ Handler class for running FFmpeg to compress media file """
+  
+  def __init__(self, ffmpeg: os.PathLike[str] | str, device_os: str) -> None:
+    self._ffmpeg: os.PathLike[str] | str = ffmpeg
     self._proc: subprocess.Popen[str] | None = None
     self._terminated: bool = False
     self._device_os: str = device_os
 
   def compress(self, 
-              input_file: os.PathLike | str, 
+              input_file: os.PathLike[str] | str, 
               file_format: str, 
               resolution: str, 
               codec: str, 
@@ -24,10 +27,11 @@ class FFmpegProcessor():
               start_time: str ,
               duration: str,
               output_directory: str) -> tuple[bool, str | None]:
-    
-    fullname, ext = os.path.splitext(input_file)
-    name = os.path.basename(fullname)
-    new_name = f"{name}_compressed.{file_format}"
+    """ Creates FFmpeg command with all args and executes it to compress video files """
+
+    basename = os.path.basename(input_file)
+    name, _ = basename.split(".")
+    new_name = name + "_compressed." + file_format
 
     output_file = os.path.join(output_directory, new_name)
 
@@ -35,19 +39,21 @@ class FFmpegProcessor():
       output_file = self._uniquify(output_file)
 
     width, height = resolution.split("x")
-
+    
     crf = self._quality_converter(quality)
     
     if not audio:
       aud_opts = ["-an"]
     elif audio:
       aud_opts = ["-c:a", audio_codec, "-b:a", audio_bitrate]
-
+    
+    # Base hardware and scale args that might change based on hardware codecs
     hwaccel_args = None
     scale_args = ["-vf", f"scale={width}:{height},fps={fps}"]
 
     _,__, hw_id = codec.partition("_")
-
+    
+    # Matches hardware codec and changes the quality args that work with the codec
     match hw_id:
       case 'nvenc':
         quality_args = ["-rc", "vbr","-cq", str(crf), "-b:v", "0"]
@@ -70,6 +76,7 @@ class FFmpegProcessor():
     if codec == "libvpx-vp9":
       quality_args.extend(["-b:v", "0"])
     
+    # Begin assembling the command list in order
     cmd = [self._ffmpeg] 
     
     if hwaccel_args is not None:
@@ -88,7 +95,7 @@ class FFmpegProcessor():
                 *aud_opts,
                 output_file])
 
-    flags = {}
+    flags: dict[str, Any] = {}
     
     # flags to hide console window
     if self._device_os == "Windows":
@@ -98,7 +105,8 @@ class FFmpegProcessor():
       flags["startupinfo"] = si
     else:
       flags["start_new_session"] = True
-
+    
+    # Try compressing the video file and cleaning log / display any errors that occur
     try:
       self._proc = subprocess.Popen(cmd,
                               stdout=subprocess.PIPE, 
@@ -137,6 +145,7 @@ class FFmpegProcessor():
       return False, "OS Error Occured!\nCheck logs for details!"
     
     else:
+      # Log / display error when return code is non-zero and process was not terminated by user
       if rc != 0 and self._terminated == False:
         if os.path.exists(output_file):
           os.remove(output_file)
@@ -150,6 +159,7 @@ class FFmpegProcessor():
         
         return False, "Compression Failed\nCheck logs for details!"
 
+      # Handles user terminating the process and supresses error messages
       elif rc != 0 and self._terminated == True:
         if os.path.exists(output_file):
           os.remove(output_file)
@@ -160,19 +170,24 @@ class FFmpegProcessor():
         return True, None
     
     finally:
+      # Resets values
       self._proc = None
       self._terminated = False
     
   def terminate_compression(self) -> tuple[bool, str | None]:
+    """ Terminates compression process running at users request """
     # _proc_poll will only be None when process is running
     if self._proc and self._proc.poll() is None:
+      
+      # Send termination command to the process
       self._proc.terminate()
       self._terminated = True
-
+      
       try:
         self._proc.wait(timeout=5)
       
       except subprocess.TimeoutExpired:
+        # Send harsher kill command if timeout expires
         self._proc.kill()
         return True, "Video compression killed"
       
@@ -184,13 +199,15 @@ class FFmpegProcessor():
 
   @staticmethod
   def _quality_converter(quality: int) -> int:
+    """ Converts quality percentage into inerted CRF number to specify bitrate """
     # Quality needs be inverted as the lower the CRF number, the better the quality
     quality_inverted = abs(quality / 100 - 1)
     crf = quality_inverted * 33 + 18  # Range 18 to 51
     return int(crf)
 
   @staticmethod
-  def _uniquify(path: os.PathLike | str) -> os.PathLike:
+  def _uniquify(path: os.PathLike[str] | str) -> os.PathLike[str] | str:
+    """ Adds unique number to filename, if file already exists """
     filename, extension = os.path.splitext(path)
     counter = 1
 

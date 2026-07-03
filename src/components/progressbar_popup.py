@@ -1,10 +1,12 @@
 import customtkinter as ctk
 from collections.abc import Callable
+from typing import Any
 
 class ProgressbarPopup(ctk.CTkToplevel):
-  def __init__(self, master, cmd: Callable) -> None:
+  """ Pop up for displaying progress bar while background task is preformed """
+
+  def __init__(self, master: Any, cmd: Callable[..., Any]) -> None:
     super().__init__(master)
-    self._master = master
 
     self.title("Compression in Progress")
     self.resizable(False, False)
@@ -32,7 +34,9 @@ class ProgressbarPopup(ctk.CTkToplevel):
     self.protocol("WM_DELETE_WINDOW", cmd)
   
   def run_progressbar(self) -> None:
+    """ Starts the progression bar """
     self._progressbar.start()
 
   def destroy_window(self) -> None:
+    """ Destroys the popup window """
     self.destroy()

@@ -1,17 +1,27 @@
 import customtkinter as ctk
+from typing import Any
 
 class CTkScrollMsgbox(ctk.CTkToplevel):
-  def __init__(self, master, title: str, message: str, **kwargs):
+  """ Top level popup for displaying text from text files """
+
+  def __init__(self, master: Any, title: str, message: str, justify: str = "center", **kwargs: Any) -> None:
     super().__init__(master=master, **kwargs)
 
     self.title(title)
-    self.geometry("600x400")
+    self.geometry("700x450")
+    
+    ctk.set_appearance_mode("System")  
+    ctk.set_default_color_theme("blue")
 
-    self._messagebox = ctk.CTkTextbox(self, wrap="word")
-    self._messagebox.pack(expand=True,fill="both", padx=10, pady=10)
-
-    self._messagebox.insert("1.0", message)
-    self._messagebox.configure(state="disabled")
+    self._messagebox_frame = ctk.CTkScrollableFrame(self, corner_radius=0)
+    self._messagebox_frame.pack(expand=True, fill='both')
+    
+    self._messagebox = ctk.CTkLabel(self._messagebox_frame,
+                                    wraplength=400,
+                                    text=message,
+                                    justify=justify)
+    
+    self._messagebox.pack(padx=10, pady=10, expand=True, fill='both')
     
     self._close_btn =ctk.CTkButton(self,
                                    text="Close",

@@ -1,4 +1,8 @@
 def get_list_of_smaller_res(vid_res: str) -> list[str]:
+  """ 
+  Creates list of resolutions that are smaler than the inputted resolution 
+  Maintains the same aspect ratio 
+  """
   dimensions = vid_res.split('x')
     
   width = int(dimensions[0])
@@ -64,4 +68,5 @@ def get_list_of_smaller_res(vid_res: str) -> list[str]:
   return resolutions
 
 def round_to_even(f: float) -> int:
+  """ Rounds number to closest even number for proper resolution sizes"""
   return int(round(f / 2.) * 2)

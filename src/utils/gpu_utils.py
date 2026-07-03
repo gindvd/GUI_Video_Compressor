@@ -1,17 +1,22 @@
 import platform
 import subprocess
 import re
+from collections.abc import Sequence
+from typing import Any
 
 class CompatibiltyError(Exception):
-  def __init__(self, message: str, oper_system: str) -> None:
+  """ Error raised when devices operating system is not compatible with the script """
+  def __init__(self, message: str, device_os: str) -> None:
     super().__init__()
-    self._oper_system = oper_system
+    self._device_os = device_os
     self._message = message
   
   def __str__(self) -> str:
-    return f"{self._message}\n(Incompatible Operating System: {self._oper_system})\n\nCompatible Operating Stsyems: Windows, Linux, MacOS"
+    """ Formatted string with information to get logged when error is raised """
+    return f"{self._message}\n(Incompatible Operating System: {self._device_os})\n\nCompatible Operating Stsyems: Windows, Linux, MacOS"
 
-system_commands: dict = {
+# Dictonary on parent and child commands to retreive GPU names from a specific device
+system_commands: dict[str, tuple[tuple[str, ...], ...]] = {
     "Linux" : (("lspci"), ("grep", "-iE", "VGA|3D|video"), ("awk", "-F", ": ", "{print $2}"), ("sed", "s/ (rev .*)$//")),
     "Darwin" : (("system_profiler", "SPDisplaysDataType"),  ("grep", "Chipset Model"), ("awk", "-F", ": ", "{print $2}")),
     # empty list is temp solution to keep parent command from being set to 'powershell' / "wmic" and not the full list
@@ -20,45 +25,63 @@ system_commands: dict = {
 }
 
 def get_gpu_names() -> str:
-  oper_system: str = platform.system()
+  """ Begins process of getting the names of all connected GPUs """
+  device_os: str = platform.system()
 
-  if oper_system not in ["Linux", "Darwin", "Windows"]:
-    raise CompatibiltyError("The GPU info cannot be obtained on this device", oper_system)
+  if device_os not in ["Linux", "Darwin", "Windows"]:
+    raise CompatibiltyError("The GPU info cannot be obtained on this device", device_os)
 
-  # use powershell on Windows 11, bash on older Windows versions
-  if oper_system == "Windows":
+  # use powershell on Windows 11, batch on older Windows versions
+  if device_os == "Windows":
     version = platform.release()
     if version != "11":
-      oper_system = "win-legacy"
+      device_os = "win-legacy"
     
     else:
-      oper_system = "win11"
+      device_os = "win11"
 
-  parent_cmd = system_commands[oper_system][0]
-  child_cmds = system_commands[oper_system][1:]
+  parent_cmd = system_commands[device_os][0]
+  child_cmds = system_commands[device_os][1:]
 
-  output: bytes = run_parent(parent_cmd)
+  flags: dict[str, Any] = {}
+    
+  # flags to hide console window
+  if device_os == "Windows":
+    flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    flags["startupinfo"] = si
+    
+  else:
+    flags["start_new_session"] = True
 
+  output: bytes = run_parent(parent_cmd, flags)
+
+  # Immediately returns decoded data if no child commands exist     
   if child_cmds[0] == ():
     return output.decode()
-
+  
+  # Runs all child commands inputting the output from the previous command
   for child_cmd in child_cmds:
-    output = run_child(child_cmd, output)
+    output = run_child(child_cmd, output, flags)
 
   return output.decode()
   
-def run_parent(cmd: list[str]) -> bytes:
+def run_parent(cmd: Sequence[str], flags: dict[str, Any]) -> bytes:
+  """ Run parent command, returns undecode bytes to be piped into child commands """
   try:
     proc = subprocess.Popen(cmd, 
                             stdout=subprocess.PIPE, 
                             stderr=subprocess.PIPE, 
-                            shell=False)
+                            shell=False,
+                            **flags)
 
     out, err = proc.communicate()
     proc.wait()
     
     rc = proc.returncode
-
+  
+  # Raise errors to stop script if issues occur, errors are caught in the _get_codec_values function
   except FileNotFoundError as e:
     raise FileNotFoundError("Command not found in PATH") from e
 
@@ -77,18 +100,21 @@ def run_parent(cmd: list[str]) -> bytes:
 
     return out
   
-def run_child(child_cmd: list[str], parent_output: bytes) -> bytes:
+def run_child(child_cmd: Sequence[str], parent_output: bytes, flags: dict[str, Any]) -> bytes:
+  """ Takes prvious commands output and runs new command to extract information """
   try:
     proc = subprocess.Popen(child_cmd,
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             shell=False) 
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            shell=False,
+                            **flags) 
     
     out, err = proc.communicate(input=parent_output)
     proc.wait()
     rc = proc.returncode
-
+  
+  # Raise errors to stop script if issues occur, errors are caught in the _get_codec_values function
   except FileNotFoundError as e:
     raise FileNotFoundError("Command not found in PATH") from e
 
@@ -111,6 +137,7 @@ def run_child(child_cmd: list[str], parent_output: bytes) -> bytes:
     return out
   
 def remove_symbols(input: str) -> str:
+  """ Remove characters and symbols added to GPU names and returns clean names for better comparison """
   clean_list = []
   if input == "Name":
     return ""
@@ -137,7 +164,7 @@ def manufacturers() -> list[str]:
   
   list_of_connected_gpus: list[str] = string_of_connected_gpus.splitlines()
 
-  device_manufacturers = []
+  device_manufacturers: list[str] = []
   for connected_gpu in list_of_connected_gpus:
     temp = []
     connected_gpu = remove_symbols(connected_gpu)

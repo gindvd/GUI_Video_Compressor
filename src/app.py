@@ -1,8 +1,8 @@
 """
-Media Conversion Tool
+Media Optimization Tool
 GUI tool for editing, compressing, and converting media files.
 Author: David Gingerich
-Version: 2.0.0
+Version: 2.1.0
 """
 
 import customtkinter  as ctk
@@ -10,19 +10,20 @@ import customtkinter  as ctk
 from CTkMenuBar    import CTkMenuBar, CustomDropdownMenu
 from CTkMessagebox import CTkMessagebox
 from customtkinter import filedialog
-from tkinter       import PhotoImage, IntVar
+from tkinter       import PhotoImage, IntVar, Event
 
 import os
+from pathlib   import Path
 from threading import Thread
 from platform  import system
+from typing    import Any
 
 from utils.log_utils        import logger
 from utils.resolution_utils import get_list_of_smaller_res
+from resource_paths       import *
 
-from resource_paths import *
-
-from processors.ffmpeg_processor  import FFmpegProcessor
-from processors.ffprobe_processor import FFprobeProcessor
+from processors.ffmpeg_processor  import FFmpegProcessHandler
+from processors.ffprobe_processor import FFprobeProcessHandler
 
 from components.ctk_scroll_msgbox import CTkScrollMsgbox
 from components.progressbar_popup import ProgressbarPopup
@@ -30,40 +31,42 @@ from components.video_trimmer     import VideoTrimmer
 from components.frame_viewer      import FrameViewer
 
 class App(ctk.CTk):
-  HW_CODEC_OPTS: dict = \
-  {
-    "NVIDIA" :  \
-    {
+  """ Optimization tool for compression, converting, and trimming media files with FFmpeg """
+
+  # Dictionary of hardware codecs
+  HW_CODEC_OPTS: dict[str, dict[str, list[str]]] = {
+    "NVIDIA" :  {
       "Windows" : ["h264_nvenc", "hevc_nvenc"],
       "Linux" : ["h264_nvenc", "hevc_nvenc"],
     },
-    "AMD" : \
-    {
+    "AMD" : {
       "Windows" : ["h264_amf", "hevc_amf"],
       "Linux" : ["h264_amf", "hevc_amf"],
     },
-    "Intel" : \
-    {
+    "Intel" : {
       "Windows" : ["h264_qsv", "hevc_qsv"],
       "Linux" : ["h264_vaapi", "hevc_vaapi"],
     },
   }
 
-  def __init__(self) -> None:
-    super().__init__()
+  def __init__(self, *args, **kwargs) -> None:
+    super().__init__(*args, **kwargs)
     self._device_os: str = system()
-    self._external_procs: list = get_external_procs(self._device_os)
 
-    self._check_procs_exist()
+    # Get path of FFmpeg, FFprobe and VLC
+    self._external_dependencies: list[Path | str | None] = get_external_dependencies(self._device_os)
+
+    self._check_dependencies_exist()
     
-    self._ffmpeg: FFmpegProcessor   = FFmpegProcessor(self._external_procs[0], self._device_os)
-    self._ffprobe: FFprobeProcessor = FFprobeProcessor(self._external_procs[1], self._device_os)
+    # Create process handler classes for running commands
+    self._ffmpeg: FFmpegProcessHandler   = FFmpegProcessHandler(self._external_dependencies[0], self._device_os)
+    self._ffprobe: FFprobeProcessHandler = FFprobeProcessHandler(self._external_dependencies[1], self._device_os)
 
-    self._input_file: os.PathLike | str = ""
+    self._input_file: os.PathLike[str] | str = ""
     self._vid_fps: str = "30/1"
     self._vid_duration: float = 0.0
-    self._frame_viewer: FrameViewer | None = None
 
+    # Command args for FFmpeg to compress media files
     self._target_format: str = "mp4"
     self._target_res:    str = "1920x1080"
     self._codec:         str = "libx264"
@@ -73,7 +76,8 @@ class App(ctk.CTk):
     self._audio:         bool = True
     self._audio_codec:   str = "aac"
     self._audio_bitrate: str = "128k"
-
+    
+    # base tkinter / customtkinter setting
     self.title("Media Conversion Tool")
     self.minsize(1040, 660)
     self.resizable(True, True)
@@ -81,30 +85,33 @@ class App(ctk.CTk):
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
 
-    self._icon_path: os.PathLike | str | None = None
-    self._ico_path: os.PathLike | str | None = None
-
+    self._icon_path: Path | None = None
+    self._ico_path: Path | None = None
+    
+    self._frame_viewer: FrameViewer | None = None
     self._progressbar_popup: ProgressbarPopup | None = None
 
+    # Functions for creating the apps UI
     self._set_icon()
-
     self._create_menubar()
     self._build_ui()
-
     self._bind_keys()
 
-  def _check_procs_exist(self) -> None:
-    for proc in self._external_procs:
+  def _check_dependencies_exist(self) -> None:
+    """ Checks if all 3 dependencies exist on the user's machine"""
+    for proc in self._external_dependencies:
       if proc is None:
         CTkMessagebox(master=self,
                       title="Missing Dependency", 
                       message=f"Missing External Processor:\n {proc}!", 
                       icon="cancel")
         
+        # Kills the app if dependency is missing, displays error message
         self.destroy()
         raise SystemExit(f"Missing dependency: {proc}")
   
   def _set_icon(self) -> None:
+    """ Sets the window icon in the top left corner """
     self._icon_path = get_icon()
     self._ico_path = get_ico()
     
@@ -116,14 +123,16 @@ class App(ctk.CTk):
       return
     
     else:
-
+      # Uses an .ico file for Windows 
       if self._device_os == "Windows":
-        self.iconbitmap(self._ico_path)
-
-      icon = PhotoImage(file=self._icon_path)
+        self.iconbitmap(str(self._ico_path))
+      
+      # Uses PNG file for non-Windows devices
+      icon = PhotoImage(file=str(self._icon_path))
       self.iconphoto(True, icon)
 	
   def _create_menubar(self) -> None:
+    """ Build menu bar with dropdown options """
     menubar = CTkMenuBar(self)
     
     file_btn = menubar.add_cascade("File")
@@ -145,6 +154,7 @@ class App(ctk.CTk):
     help_drop.add_option(option="3rd Party Licneses", command=self._show_3rd_party_licenses)
 
   def _build_ui(self) -> None: 
+    """ Build the apps main area """
     self._main_frame = ctk.CTkFrame(self, corner_radius=0)
     self._main_frame.pack(fill='both', expand=True)
     self._main_frame.columnconfigure(0, weight=1)
@@ -172,7 +182,7 @@ class App(ctk.CTk):
 
     # Left: Video Trimmer
     self._video_trimmer = VideoTrimmer(self._content_frame,
-                                       self._external_procs[2], 
+                                       self._external_dependencies[2], 
                                        self._device_os,
                                        corner_radius=0,
                                        fg_color="transparent")
@@ -197,6 +207,7 @@ class App(ctk.CTk):
     self._compress_btn.pack(padx=10, pady=10)
   
   def _build_settings_panel(self) -> None:
+    """ Builds the setting panel with widgets for video, audio, and compression options """
     section_color = ("gray75", "gray25")
 
     # Video Settings Section 
@@ -210,7 +221,7 @@ class App(ctk.CTk):
 
     ctk.CTkLabel(video_section, text="Codec:").grid(row=1, column=0, padx=10, pady=6, sticky="w")
     self._codec_drpdwn = ctk.CTkComboBox(video_section, 
-                                        values=self._codec_values(),
+                                        values=self._get_codec_values(),
                                         state='readonly',
                                         command=self._codec_choice)
     self._codec_drpdwn.set("libx264")
@@ -308,21 +319,27 @@ class App(ctk.CTk):
     self._preset_speed_drpdwn.grid(row=1, column=1, padx=10, pady=(6, 12), sticky="ew")
 
   def _open_frame_viewer(self) -> None:
+    """ Open new window with Frame Viewer for individual frame view and extraction """
+    
+    # Only opens frame viewer if media file is loaded
     if self._input_file == "":
       CTkMessagebox(master=self,
                     title="Missing File",
                     message="Video file not loaded!",
                     icon="warning")
       return
-
+    
+    # Focuses on frame viewer if already opened
     if self._frame_viewer is not None and self._frame_viewer.winfo_exists():
       self._frame_viewer.focus()
       return
-
-    self._frame_viewer = FrameViewer(self, self._external_procs[0], self._device_os,)
+    
+    # Creates a frame viewer window and loads media file
+    self._frame_viewer = FrameViewer(self, self._external_dependencies[0], self._device_os,)
     self._frame_viewer.load_media(self._input_file, self._vid_duration, self._vid_fps)
 
-  def _show_about(self, event=None) -> None:
+  def _show_about(self, event: Event | None = None) -> None:
+    """ Show about pop up with App info and license information """
     about_file = resource_path(os.path.join("assets", "about.txt"))
     with open(about_file, "r") as f:
       about_msg = f.read()
@@ -332,7 +349,8 @@ class App(ctk.CTk):
                   message=about_msg,
                   justify="center")
   
-  def _show_license(self, event=None) -> None:
+  def _show_license(self, event: Event | None = None) -> None:
+    """ Display the app's license in a pop up """
     license = resource_path("LICENSE.GPL-3.0.txt")
     with open(license, "r") as f:
       text = f.read()
@@ -342,7 +360,8 @@ class App(ctk.CTk):
                     message=text,
                     justify="left")
   
-  def _show_3rd_party_licenses(self, event=None) -> None:
+  def _show_3rd_party_licenses(self, event: Event | None = None) -> None:
+    """ Display thrird party licenses in a pop up """
     third_party_license = resource_path("thirdpartylicenses.txt")
     with open(third_party_license, "r") as f:
       text = f.read()
@@ -352,34 +371,44 @@ class App(ctk.CTk):
                     message=text,
                     justify="left")
   
-  def _browse_files(self, event=None):
+  def _browse_files(self, event: Event | None = None) -> None:
+    """ Open file explorer to select video file to be loaded and compressed """
     item = filedialog.askopenfilename(initialdir = os.path.expanduser("~"),
                                       filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
-
+    
     if not self._compatible_file(item):
       return
+    
+    # Deletes old file path from entry field before inserting newly selected file
     self._file_entry.delete(0, "end")
 
     self._input_file = item
-    self._file_entry.insert(0, self._input_file)
+    self._file_entry.insert(0, str(self._input_file))
     
-    self._update_gui()
+    self._update_video_compression_choices()
  
-  def _file_entered(self, event=None) -> None:
-    item = event.widget.get()
+  def _file_entered(self, event: Event | None = None) -> None:
+    """ Checks file pasted / typed into the entry field """
+    if event is None:
+      return
 
+    item = event.widget.get()
+    
     if not self._compatible_file(item):
       return
 
     self._input_file = item
     
-    self._update_gui()
+    self._update_video_compression_choices()
   
-  def _compatible_file(self, item: os.PathLike | str) -> bool:
+  def _compatible_file(self, item: os.PathLike[str] | str | tuple[Any, ...]) -> bool:
+    """ Checks if file is a compatible media file """
+    # Returns false if no file was selected
     if item == "" or item == ():
       return False
-
+    
+    # Checks if path is not an existing file (mainly for text entered into entry field)
     if not os.path.isfile(item):
       CTkMessagebox(master=self,
                     title="File Warning", 
@@ -389,7 +418,8 @@ class App(ctk.CTk):
       return False
 
     _, ext = os.path.splitext(item)   
-
+    
+    # Checks if files is not a supported media file
     if ext not in [".mp4", ".mov", ".mkv", ".avi", ".webm"]:
       CTkMessagebox(master=self,
                     title="Video File Warning", 
@@ -400,23 +430,31 @@ class App(ctk.CTk):
 
     return True
   
-  def _update_gui(self) -> None:
+  def _update_video_compression_choices(self) -> None:
+    """ 
+    Calls FFprobe on a new thread to extract video attributes from the media file
+    Updates choices for selectable video compression settigns
+    """
     self._browse_btn.configure(state="disabled")
     self._compress_btn.configure(state="disabled")
 
-    # threading to keep ffprobe call from blocking UI updates
+    # Run FFprobe on separate thread to not block main thread
     Thread(target=self._extract_video_attrs, daemon=True).start()
 
   def _extract_video_attrs(self) -> None:
+    """ Run FFprobe command to get video FPS, resolution and duration """
     completed, attributions, err_msg = self._ffprobe.get_video_attributions(self._input_file)
-
+    
+    # Displays message if error occurs running FFprobe
     if not completed:
       self.after(0, self._display_ffprobe_error, err_msg)
       return
-   
+    
+    # Sets video attributes and updates cideo compression settings
     self.after(0, self._set_attr_values, attributions)
     
-  def _display_ffprobe_error(self, err_msg: str) -> None:
+  def _display_ffprobe_error(self, err_msg: str | None) -> None:
+    """ Displays error message if FFprobe cannot extract video attribute values """
     CTkMessagebox(master=self,
                   title="FFprobe Error", 
                   message=f"Error getting video file info!\n{err_msg}", 
@@ -425,7 +463,7 @@ class App(ctk.CTk):
     self._browse_btn.configure(state="normal")
 
   def _set_attr_values(self, attr_vals: list[str]) -> None:
-    # Update combo box with list of resolution options lower than video's current resolution
+    """ Update resolution, and FPS choices for video compression settings """
     vid_res = attr_vals[0]
     
     res_list = get_list_of_smaller_res(vid_res)
@@ -450,10 +488,12 @@ class App(ctk.CTk):
     fps_list = [120, 60, 30, 24, 15]
     upd_fps = []
     
+    # set video's current FPS as only choice if less than 15 FPS
     if fps < fps_list[-1]:
       self._frames_drpdwn.configure(values=str(fps))
       upd_fps.extend([str(fps)])
     
+    # Update FPS choices with values less than or equal to videos current FPS
     else:
       for i in fps_list:
         if i <= fps:
@@ -463,20 +503,27 @@ class App(ctk.CTk):
     self._frames_drpdwn.set(upd_fps[0])
     self._target_fps = upd_fps[0]
 
-    # Update label with the videos current duration
     vid_dur = float(attr_vals[2])
     
     self._vid_fps = vid_fps
     self._vid_duration = vid_dur
 
-    self._video_trimmer.set_vid_values(vid_dur)
+    self._load_media()
+  
+  def _load_media(self) -> None:
+    """ Send media to video trimmer to be displayed for playback and trimming """
+    self._video_trimmer.set_vid_values(self._vid_duration)
     self._video_trimmer.load_media(self._input_file)
 
     # Enable compression button and display the video file
     self._browse_btn.configure(state="normal")
     self._compress_btn.configure(state="normal")
 
-  def _codec_choice(self, choice) -> None:
+  def _codec_choice(self, choice: str) -> None:
+    """ 
+    Set file format when new value selected 
+    Updates file format choices based on compatibility
+    """
     self._codec = choice
 
     if choice in ["libsvtav1", "libvpx-vp9"]:
@@ -497,7 +544,12 @@ class App(ctk.CTk):
       self._preset_speed_drpdwn.configure(state="normal")
       self._preset = self._preset_speed_drpdwn.get().lower()
   
-  def _container_choice(self, choice) -> None:
+  def _container_choice(self, choice: str) -> None:
+    """ 
+    Set file format when new value selected 
+    Updates audio codecs choices based on compatibility
+    """
+
     self._target_format = choice
 
     if choice == "mkv":
@@ -520,22 +572,28 @@ class App(ctk.CTk):
       self._audio_codec_drpdwn.set("aac")
       self._audio_codec = "aac"
 
-  def _resolution_choice(self, choice) -> None:
+  def _resolution_choice(self, choice: str) -> None:
+    """ Set resolution when new value selected """
     self._target_res = choice
 
-  def _fps_choice(self, choice) -> None:
+  def _fps_choice(self, choice: str) -> None:
+    """ Set fps when new value selected """
     self._target_fps = choice
   
-  def _preset_choice(self, choice) -> None:
+  def _preset_choice(self, choice: str) -> None:
+    """ Set preset compression speed when new value selected """
     self._preset = choice.lower()
 
-  def _quality_choice(self, value) -> None:
+  def _quality_choice(self, value: float) -> None:
+    """ Updates quality value based on the sliders position """
     self._quality = int(value)
     self._quality_perc_lbl.configure(text=f"{int(value)}%")
 
   def _remove_audio(self) -> None:
+    """ Sets audio value to true false based on if checkmark checked or not"""
     self._audio = False if self._aud_on_off.get() else True
 
+    # Enables or disables other audio settings option if checked or not
     if not self._audio:
       self._audio_codec_drpdwn.configure(state="disabled")
       self._audio_bitrate_drpdwn.configure(state="disabled")
@@ -543,15 +601,20 @@ class App(ctk.CTk):
       self._audio_codec_drpdwn.configure(state="normal")
       self._audio_bitrate_drpdwn.configure(state="normal")
 
-  def _aud_codec_choice(self, value) -> None:
+  def _aud_codec_choice(self, value: str) -> None:
+    """ Set audio codec when new value selected """
     self._audio_codec = value
   
-  def _bitrate_choice(self, value) -> None:
+  def _bitrate_choice(self, value: str) -> None:
+    """ Set audio bitrate when new value selected """
     self._audio_bitrate = value
 
-  def _codec_values(self) -> list[str]:
+  def _get_codec_values(self) -> list[str]:
+    """ Gets a list of codecs based on the user's hardware """
+    # Base codecs, compatible with modern system hardware
     codecs = ["libx264", "libx265", "libsvtav1", "libvpx-vp9"]
 
+    # Gets list of the manufacturers of the devices integrated abnd discrete GPUs
     try:
       from utils.gpu_utils import manufacturers
       connected_gpus = manufacturers()
@@ -562,40 +625,45 @@ class App(ctk.CTk):
                     title="System GPU Command Error",
                     message="Error getting connected GPU info!\nCheck logs for details!",
                     icon="warning")
-
+      
+      # If error occurs getting device GPUs, return the base codecs
       return codecs
 
     for name in connected_gpus:
       if name is None:
         continue
 
+      # Gets the H264 and H265 codecs compatible with the user's hardware
       hw_codecs = self.HW_CODEC_OPTS.get(name, {}).get(self._device_os)
       if hw_codecs is not None:
         codecs.extend(hw_codecs)
   
     return codecs
 
-  def _compress_video(self, event=None) -> None:
+  def _compress_video(self, event: Event | None = None) -> None:
+    """ Starts compression of the media through FFmpeg of a new thread"""
     self._compress_btn.configure(state="disabled")
     self._browse_btn.configure(state="disabled")
 
+    # Ask the user where they want the compressed video to be put
     output_directory: str = filedialog.askdirectory(title="Compressed File Output",
                                                     initialdir=os.path.expanduser("~"))
     
+    # Stop compression process if the user closes the file dialog without giving a location
     if output_directory == "":
       self._compress_btn.configure(state="normal")
       self._browse_btn.configure(state="normal")
       return
-    
+  
     self._progressbar_popup = ProgressbarPopup(self, cmd=self.cancel_compression)
     self._progressbar_popup.run_progressbar()
 
     # Run FFmpeg executable/binary in separate thread 
     # Keeps the process from blocking progress bar animation from rendering
- 
     Thread(target=self._run_compression_cmd, args=(output_directory,), daemon=True).start()
 
   def _run_compression_cmd(self, output_directory: str) -> None:
+    """ Calls the FFmpeg process handler to start video compression """
     start_time: str = self._video_trimmer.get_start_time()
     duration: str = self._video_trimmer.get_duration()
 
@@ -613,12 +681,15 @@ class App(ctk.CTk):
                                                duration,
                                                output_directory)
 
+    # Uses tkinter functionality to call finish function on main thread when media is finished compressing
     self.after(0, self._compression_finished, completed, err_msg)
   
-  def _compression_finished(self, completed: bool, err_msg: str) -> None:
+  def _compression_finished(self, completed: bool, err_msg: str | None) -> None:
+    """ Tells the user if FFmpeg successfully finished compressing """
     self._compress_btn.configure(state="normal")
     self._browse_btn.configure(state="normal")
 
+    # Closes the progressbar popup if still exists
     if getattr(self, "_progressbar_popup", None):
         self._progressbar_popup.destroy_window()
         self._progressbar_popup = None
@@ -635,9 +706,10 @@ class App(ctk.CTk):
                     message=f"ERROR\n{err_msg}", 
                     icon='cancel')
   
-  def cancel_compression(self, event=None) -> None:
+  def cancel_compression(self, event: Event | None = None) -> None:
+    """ Cancels FFmpeg compression process if user wants to abort """
     killed, msg = self._ffmpeg.terminate_compression()
-
+    
     if not killed:
       return
       
@@ -650,12 +722,14 @@ class App(ctk.CTk):
                     message=f"{msg}!", 
                     icon="info")
 
-  def on_quit(self, event=None) -> None:
+  def teardown(self, event: Event | None = None) -> None:
+    """ Safely cancels compression process and unloads media files before closing the app """
     self.cancel_compression()
     self._video_trimmer.release()
     self.quit()
   
   def _bind_keys(self) -> None:
+    """ Binds keys to certain app functions """
     self.bind("<Control-o>", self._browse_files)
     self.bind("<Control-q>", self.on_quit)
     self.bind("<Control-a>", self._show_about)

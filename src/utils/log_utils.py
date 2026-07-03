@@ -8,6 +8,7 @@ from resource_paths import resource_path
 logger = logging.getLogger('app_logger')
 logger.setLevel(logging.DEBUG)
 
+# Creates the actual log file when logger is called
 if not logger.handlers:
   now = datetime.now()
   strnow = now.strftime("%m-%d-%Y_%H-%M-%S")
