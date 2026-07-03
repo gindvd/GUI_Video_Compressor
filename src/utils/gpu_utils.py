@@ -16,7 +16,7 @@ class CompatibiltyError(Exception):
     return f"{self._message}\n(Incompatible Operating System: {self._device_os})\n\nCompatible Operating Stsyems: Windows, Linux, MacOS"
 
 # Dictonary on parent and child commands to retreive GPU names from a specific device
-system_commands: dict[str, tuple[tuple[str, ...], ...]] = {
+system_commands: dict[str: tuple[str, tuple[str, str, str], tuple[str, str, str, str], tuple[str, str]]] = {
     "Linux" : (("lspci"), ("grep", "-iE", "VGA|3D|video"), ("awk", "-F", ": ", "{print $2}"), ("sed", "s/ (rev .*)$//")),
     "Darwin" : (("system_profiler", "SPDisplaysDataType"),  ("grep", "Chipset Model"), ("awk", "-F", ": ", "{print $2}")),
     # empty list is temp solution to keep parent command from being set to 'powershell' / "wmic" and not the full list

@@ -142,7 +142,7 @@ class App(ctk.CTk):
     file_drop = CustomDropdownMenu(widget=file_btn)
     file_drop.add_option(option="Open", command=self._browse_files)
     file_drop.add_separator()
-    file_drop.add_option(option="Exit", command=self.on_quit)
+    file_drop.add_option(option="Exit", command=self.teardown)
     
     tools_drop = CustomDropdownMenu(widget=tools_btn)
     tools_drop.add_option(option="Frame Viewer", command=self._open_frame_viewer)
