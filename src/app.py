@@ -193,17 +193,20 @@ class App(ctk.CTk):
   def _build_settings_panel(self) -> None:
     """ Builds the setting panel with widgets for video, audio, and compression options """
     section_color = ("gray75", "gray25")
+    header_font = ctk.CTKFont(size=14, weight="bold")
 
     # Video Settings Section 
     video_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=10)
     video_section.pack(fill="x", padx=(5, 10), pady=10)
     video_section.columnconfigure(1, weight=1)
 
-    ctk.CTkLabel(video_section, text="Video Settings",
-                 font=ctk.CTkFont(size=14, weight="bold")).grid(
+    ctk.CTkLabel(video_section, 
+                 text="Video Settings",
+                 font=header_font).grid(
                    row=0, column=0, columnspan=2, padx=10, pady=(10, 4), sticky="w")
 
     ctk.CTkLabel(video_section, text="Codec:").grid(row=1, column=0, padx=10, pady=6, sticky="w")
+
     self._video_codec_drpdwn = ctk.CTkComboBox(video_section, 
                                         values=self._get_codec_values(),
                                         state='readonly',
@@ -212,6 +215,7 @@ class App(ctk.CTk):
     self._video_codec_drpdwn.grid(row=1, column=1, padx=10, pady=6, sticky="ew")
 
     ctk.CTkLabel(video_section, text="Format:").grid(row=2, column=0, padx=10, pady=6, sticky="w")
+
     self._containers_drpdwn = ctk.CTkComboBox(video_section, 
                                               values=["mp4", "mkv", "mov"],
                                               state='readonly',
@@ -220,6 +224,7 @@ class App(ctk.CTk):
     self._containers_drpdwn.grid(row=2, column=1, padx=10, pady=6, sticky="ew")
 
     ctk.CTkLabel(video_section, text="Resolution:").grid(row=3, column=0, padx=10, pady=6, sticky="w")
+
     self._resolutions_drpdwn = ctk.CTkComboBox(video_section, 
                                               values=["3840x2160", "2560x1440", "1920x1080", 
                                                       "1280x720", "854x480", "640x360"],
@@ -229,6 +234,7 @@ class App(ctk.CTk):
     self._resolutions_drpdwn.grid(row=3, column=1, padx=10, pady=6, sticky="ew")
 
     ctk.CTkLabel(video_section, text="FPS:").grid(row=4, column=0, padx=10, pady=6, sticky="w")
+
     self._frames_drpdwn = ctk.CTkComboBox(video_section, 
                                           values=["60", "30", "24", "15"],
                                           state='readonly',
@@ -241,6 +247,7 @@ class App(ctk.CTk):
     quality_row.columnconfigure(1, weight=1)
 
     ctk.CTkLabel(quality_row, text="Quality:").grid(row=0, column=0, padx=(0, 8), sticky="w")
+
     self._quality_slider = ctk.CTkSlider(quality_row, 
                                         button_corner_radius=4,
                                         from_=0,
@@ -258,10 +265,11 @@ class App(ctk.CTk):
     audio_section.columnconfigure(1, weight=1)
 
     ctk.CTkLabel(audio_section, text="Audio Settings",
-                font=ctk.CTkFont(size=14, weight="bold")).grid(
+                font=header_font).grid(
                    row=0, column=0, columnspan=2, padx=10, pady=(10, 4), sticky="w")
 
     ctk.CTkLabel(audio_section, text="Codec:").grid(row=1, column=0, padx=10, pady=6, sticky="w")
+
     self._audio_codec_drpdwn = ctk.CTkComboBox(audio_section, 
                                               values=["aac", "mp3", "libopus"],
                                               state='readonly',
@@ -270,8 +278,9 @@ class App(ctk.CTk):
     self._audio_codec_drpdwn.grid(row=1, column=1, padx=10, pady=6, sticky="ew")
 
     ctk.CTkLabel(audio_section, text="Bitrate:").grid(row=2, column=0, padx=10, pady=6, sticky="w")
+    
     self._audio_bitrate_drpdwn = ctk.CTkComboBox(audio_section, 
-                                                values=["96k", "128k", "192k", "256k"],
+                                                values=["256k", "192k", "128k", "96k"],
                                                 state='readonly',
                                                 command=self._bitrate_choice)
     self._audio_bitrate_drpdwn.set("128k")
@@ -282,6 +291,7 @@ class App(ctk.CTk):
                                           text="Remove Audio",
                                           variable=self._aud_on_off,
                                           command=self._remove_audio)
+    
     self._rm_aud_chkbox.grid(row=3, column=0, columnspan=2, padx=10, pady=(6, 10), sticky="w")
 
     # Compression Settings Section 
@@ -289,16 +299,24 @@ class App(ctk.CTk):
     compression_section.pack(fill="x", padx=(5, 10), pady=10)
     compression_section.columnconfigure(1, weight=1)
 
-    ctk.CTkLabel(compression_section, text="Compression Settings",
-                 font=ctk.CTkFont(size=14, weight="bold")).grid(
-                   row=0, column=0, columnspan=2, padx=10, pady=(10, 4), sticky="w")
+    ctk.CTkLabel(compression_section, 
+                text="Compression Settings",
+                font=header_font).grid(
+                        row=0, column=0, columnspan=2, padx=10, pady=(10, 4), sticky="w")
 
     ctk.CTkLabel(compression_section, text="Speed:").grid(row=1, column=0, padx=10, pady=6, sticky="w")
+
     self._preset_speed_drpdwn = ctk.CTkComboBox(compression_section, 
-                                                values=["Veryfast", "Faster", "Fast", 
-                                                        "Medium", "Slow", "Slower", "Veryslow"],
+                                                values=["Veryfast", 
+                                                        "Faster", 
+                                                        "Fast", 
+                                                        "Medium", 
+                                                        "Slow", 
+                                                        "Slower", 
+                                                        "Veryslow"],
                                                 state='readonly',
                                                 command=self._preset_choice)
+    
     self._preset_speed_drpdwn.set("Medium")
     self._preset_speed_drpdwn.grid(row=1, column=1, padx=10, pady=(6, 12), sticky="ew")
 
