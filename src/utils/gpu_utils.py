@@ -105,7 +105,7 @@ def parse_mac_output(output: str) -> list[str]:
     if "Chipset Model:" in line:
       gpus.append(line.split(":", 1)[1].strip())
   
-  returngpus
+  return gpus
 
 def parse_win_output(output: str) -> list[str]:
   gpus = []
