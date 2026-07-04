@@ -14,6 +14,53 @@ class FFmpegProcessHandler():
     self._terminated: bool = False
     self._device_os: str = device_os
 
+    self._flags: dict[str, Any] = {}
+    
+    # flags to hide console window
+    if self._device_os == "Windows":
+      self._flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+      si = subprocess.STARTUPINFO()
+      si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      self._flags["startupinfo"] = si
+    else:
+      self._flags["start_new_session"] = True
+  
+  def extract_frame(self, input_file: str, timestamp: str) -> tuple[bool, bytes | None]:
+    """ Ectracts frame of media file at the given timestamp """
+    # Command to have FFmpeg extract the frame at the specied timestamp
+    cmd = [self._ffmpeg,
+           "-ss", timestamp,
+           "-i", input_file,
+           "-frames:v", "1",
+           "-f", "image2pipe",
+           "-vcodec", "png",
+           "-loglevel", "error",
+           "pipe:1"]
+
+    try:
+      proc = subprocess.run(cmd,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            shell=False,
+                            check=True,
+                            timeout=10,
+                            **self._flags)
+    
+    except subprocess.CalledProcessError as e:
+      logger.exception(f"ffmpeg frame extraction failed: {str(e)}")
+      return False, None
+
+    except subprocess.TimeoutExpired:
+      logger.exception("ffmpeg frame extraction timed out")
+      return False, None
+
+    except Exception as e:
+      logger.exception(f"Frame extraction error: {str(e)}")
+      return False, None
+    
+    else:
+      return True, proc.stdout
+
   def compress(self, 
               input_file: str, 
               file_format: str, 
@@ -96,17 +143,6 @@ class FFmpegProcessHandler():
                 *aud_opts,
                 output_file])
 
-    flags: dict[str, Any] = {}
-    
-    # flags to hide console window
-    if self._device_os == "Windows":
-      flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
-      si = subprocess.STARTUPINFO()
-      si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-      flags["startupinfo"] = si
-    else:
-      flags["start_new_session"] = True
-    
     # Try compressing the video file and cleaning log / display any errors that occur
     try:
       self._proc = subprocess.Popen(
@@ -115,7 +151,7 @@ class FFmpegProcessHandler():
           stderr=subprocess.STDOUT,
           shell=False,
           text=True,
-          **flags
+          **self._flags
       )
 
       out, err = self._proc.communicate()

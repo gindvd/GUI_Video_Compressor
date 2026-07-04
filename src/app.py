@@ -56,8 +56,8 @@ class App(ctk.CTk):
     self._dependencies: list[str] = get_dependencies(self._device_os)
     
     # Create process handler classes for running commands
-    self._ffmpeg: FFmpegProcessHandler   = FFmpegProcessHandler(self._dependencies[0], self._device_os)
-    self._ffprobe: FFprobeProcessHandler = FFprobeProcessHandler(self._dependencies[1], self._device_os)
+    self._ffmpeg_handler: FFmpegProcessHandler   = FFmpegProcessHandler(self._dependencies[0], self._device_os)
+    self._ffprobe_handler: FFprobeProcessHandler = FFprobeProcessHandler(self._dependencies[1], self._device_os)
 
     self._input_file: str | None = None
     self._vid_fps: str = "30/1"
@@ -193,7 +193,7 @@ class App(ctk.CTk):
   def _build_settings_panel(self) -> None:
     """ Builds the setting panel with widgets for video, audio, and compression options """
     section_color = ("gray75", "gray25")
-    header_font = ctk.CTKFont(size=14, weight="bold")
+    header_font = ctk.CTkFont(size=14, weight="bold")
 
     # Video Settings Section 
     video_section = ctk.CTkFrame(self._settings_panel, fg_color=section_color, corner_radius=10)
@@ -337,7 +337,7 @@ class App(ctk.CTk):
       return
     
     # Creates a frame viewer window and loads media file
-    self._frame_viewer = FrameViewer(self, self._dependencies[0], self._device_os,)
+    self._frame_viewer = FrameViewer(self, self._ffmpeg_handler, self._device_os)
     self._frame_viewer.load_media(self._input_file, self._vid_duration, self._vid_fps)
 
   def _show_about(self, event: Event | None = None) -> None:
@@ -448,7 +448,7 @@ class App(ctk.CTk):
     if self._input_file is None:
       return
     
-    completed, attributions, err_msg = self._ffprobe.get_video_attributions(self._input_file)
+    completed, attributions, err_msg = self._ffprobe_handler.get_video_attributions(self._input_file)
     
     # Displays message if error occurs running FFprobe
     if not completed:
@@ -678,7 +678,7 @@ class App(ctk.CTk):
     start_time: str = self._video_trimmer.get_start_time()
     duration: str = self._video_trimmer.get_duration()
 
-    completed, err_msg = self._ffmpeg.compress(
+    completed, err_msg = self._ffmpeg_handler.compress(
         self._input_file, 
         self._container, 
         self._resolution,
@@ -721,7 +721,7 @@ class App(ctk.CTk):
   
   def cancel_compression(self, event: Event | None = None) -> None:
     """ Cancels FFmpeg compression process if user wants to abort """
-    killed, msg = self._ffmpeg.terminate_compression()
+    killed, msg = self._ffmpeg_handler.terminate_compression()
     
     if not killed:
       return

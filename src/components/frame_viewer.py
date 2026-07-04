@@ -11,19 +11,19 @@ import os
 from io import BytesIO
 from typing import Any
 
-from utils.log_utils import logger
+from processors.ffmpeg_processor import FFmpegProcessHandler
 
 class FrameViewer(ctk.CTkToplevel):
   """ Toplevel window for view and extracting individual frames from a media file """
 
-  def __init__(self, master: Any, ffmpeg_path: str, device_os: str, **kwargs: Any) -> None:
+  def __init__(self, master: Any, ffmpeg_handler: FFmpegProcessHandler, device_os: str, **kwargs: Any) -> None:
     super().__init__(master=master, **kwargs)
 
     self.title("Frame Viewer")
     self.minsize(850, 600)
     self.geometry("960x640")
 
-    self._ffmpeg_path: str = ffmpeg_path
+    self._ffmpeg_handler: FFmpegProcessHandler = ffmpeg_handler
     self._device_os: str = device_os
 
     self._file_path: str | None = None
@@ -175,60 +175,18 @@ class FrameViewer(ctk.CTkToplevel):
 
     seconds = ms / 1000.0
     timestamp = self._seconds_to_timestamp(seconds)
-    
-    # Command to have FFmpeg extract the frame at the specied timestamp
-    cmd = [
-      self._ffmpeg_path,
-      "-ss", timestamp,
-      "-i", self._file_path,
-      "-frames:v", "1",
-      "-f", "image2pipe",
-      "-vcodec", "png",
-      "-loglevel", "error",
-      "pipe:1"
-    ]
 
-    flags: dict[str, Any] = {}
+    extracted, frame_bytes  = self._ffmpeg_handler.extract_frame(self._file_path, timestamp)
     
-    # flags to hide console window
-    if self._device_os == "Windows":
-      flags["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
-      si = subprocess.STARTUPINFO()
-      si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-      flags["startupinfo"] = si
-      
-    else:
-      flags["start_new_session"] = True
-
-    try:
-      proc = subprocess.run(
-          cmd,
-          stdout=subprocess.PIPE,
-          stderr=subprocess.PIPE,
-          shell=False,
-          check=True,
-          **flags,
-          timeout=10
-      )
-    
-    except subprocess.CalledProcessError as e:
-      logger.exception(f"ffmpeg frame extraction failed: {str(e)}")
+    if extracted is False or frame_bytes is None:
       self._display_error()
-
-    except subprocess.TimeoutExpired:
-      logger.exception("ffmpeg frame extraction timed out")
-      self._display_error()
-
-    except Exception as e:
-      logger.exception(f"Frame extraction error: {str(e)}")
-      self._display_error()
+      return
     
-    else:
-      self._img = Image.open(BytesIO(proc.stdout))
+    self._img = Image.open(BytesIO(frame_bytes))
 
-      # Store the full-resolution frame and display a scaled copy.
-      self._img = self._img.convert("RGB")
-      self._display_image()
+    # Store the full-resolution frame and display a scaled copy.
+    self._img = self._img.convert("RGB")
+    self._display_image()
 
   def _display_error(self) -> None:
     """ Displays an error message on the canvas if one occurs """
