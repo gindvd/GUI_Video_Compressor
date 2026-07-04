@@ -1,5 +1,5 @@
 import json
-from os import PathLike
+from pathlib import Path
 from typing import Any
 
 from utils.log_utils import logger
@@ -7,11 +7,11 @@ from utils.log_utils import logger
 class FFprobeProcessHandler():
   """ Handler class for running FFprobe to retrieve media stream information """
 
-  def __init__(self, ffprobe: PathLike[str] | str, device_os: str) -> None:
-    self._ffprobe: PathLike[str] | str = ffprobe
+  def __init__(self, ffprobe: Path, device_os: str) -> None:
+    self._ffprobe: Path = ffprobe
     self._device_os: str = device_os
     
-  def get_video_attributions(self, filepath: PathLike[str] | str) -> tuple[bool, list[str] | None, str | None]:
+  def get_video_attributions(self, filepath: Path) -> tuple[bool, list[str] | None, str | None]:
     """ Run command to have FFprobe extract file stream data """
     import subprocess
 

@@ -26,7 +26,7 @@ def setup_vlc_environment() -> None:
 
   os.environ['PATH'] = str(vlc_dir) + os.pathsep + os.environ.get('PATH', '')
 
-def get_dependencies(device_os: str) -> list[Path | str]:
+def get_dependencies(device_os: str) -> list[Path]:
   if device_os == "Windows":
     return get_win_dependencies()
   elif device_os == "Linux":
@@ -36,7 +36,7 @@ def get_dependencies(device_os: str) -> list[Path | str]:
 
 def get_win_dependencies() -> list[Path]:
   """ Gets the paths for FFmpeg, FFprobe, and VLC in the lib folder """
-  proc_paths: list[Path | None] = []
+  proc_paths: list[Path] = []
 
   for proc in ("ffmpeg", "ffprobe", "vlc"):
     # gets path of the vlc plugins folder
@@ -48,28 +48,25 @@ def get_win_dependencies() -> list[Path]:
       
       else:
         proc_paths.append(abs_path)
+
     else:
       abs_path = resource_path(os.path.join("lib", f"{proc}.exe"))
     
-      try:
-        if not abs_path.is_file():
-          raise FileNotFoundError
-      
-      except FileNotFoundError:
-        proc_paths.append(None)
+      if not abs_path.is_file():
+        raise SystemExit(f"Missing dependency: {proc} missing from lib folder!")
 
       else:
-        raise SystemExit(f"Missing dependency: {proc} missing from lib folder!")
+        proc_paths.append(abs_path)
   
   return proc_paths
 
-def get_linux_dependencies() -> list[str]:
+def get_linux_dependencies() -> list[Path]:
   """ get command strings for linux """
   proc_paths: list[str] = []
 
   for proc in ("ffmpeg", "ffprobe", "vlc"):
     if shutil.which(proc):
-      proc_paths.append(proc)
+      proc_paths.append(Path(proc))
     
     else:
       raise SystemExit(f"Missing dependency: {proc}")

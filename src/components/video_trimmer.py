@@ -8,19 +8,20 @@ from customtkinter import filedialog
 import vlc
 import os
 from threading import Thread, Event
+from pathlib import Path
 from PIL import Image
 
 from utils.log_utils import logger
 from resource_paths import get_button_image_path
 
 class VideoTrimmer(ctk.CTkFrame):
-  def __init__(self, master, vlc_cmd: os.PathLike | str, device_os: str, **kwargs) -> None:
+  def __init__(self, master, vlc_cmd: Path, device_os: str, **kwargs) -> None:
     super().__init__(master=master, **kwargs)
-    self._vlc_cmd: os.PathLike | str = vlc_cmd
+    self._vlc_cmd: Path = vlc_cmd
     self._device_os: str = device_os
 
     self._media: vlc.Media | None = None
-    self._media_file: os.PathLike | str | None = None
+    self._media_file: Path | None = None
 
     self._is_loading: bool = False
     self._load_request: int = 0
@@ -417,7 +418,7 @@ class VideoTrimmer(ctk.CTkFrame):
   # VLC enters error state sometimes on loading new media
   # Need to unload previous videos, and load new videos on separate threads
   # Need to check for error states and destroy VLC instances and load new instances 
-  def load_media(self, vid_file: os.PathLike | str) -> None:
+  def load_media(self, vid_file: Path) -> None:
     self._ensure_vlc_initialized()
     self._media_file = vid_file
 
@@ -431,7 +432,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
     Thread(target=self._stop_and_load_media, args=(vid_file, request,), daemon=True).start()
   
-  def _stop_and_load_media(self, vid_file: os.PathLike | str, request: int) -> None:
+  def _stop_and_load_media(self, vid_file: Path, request: int) -> None:
     try:
       self._media_player.stop()
 
@@ -496,7 +497,7 @@ class VideoTrimmer(ctk.CTkFrame):
     elif self._device_os == "Windows":
       self._media_player.set_hwnd(self._media_viewer.winfo_id())
   
-  def _reset_vlc(self, reload_file: os.PathLike | str | None = None) -> None:
+  def _reset_vlc(self, reload_file: Path | None = None) -> None:
     if self._update_id is not None:
       self.after_cancel(self._update_id)
       self._update_id = None
@@ -520,7 +521,7 @@ class VideoTrimmer(ctk.CTkFrame):
     # Putting on separate thread to keep VLC from blocking main thread if error occurs
     Thread(target=_teardown_vlc, daemon=True).start()
   
-  def _rebuild_instance(self, reload_file: os.PathLike | str | None = None) -> None:
+  def _rebuild_instance(self, reload_file: Path | None = None) -> None:
     self._media = None
     self._instance = self._platform_specific_inst()
     self._media_player = self._instance.media_player_new()

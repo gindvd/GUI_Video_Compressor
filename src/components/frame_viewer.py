@@ -7,26 +7,27 @@ from CTkMessagebox import CTkMessagebox
 from PIL import Image, ImageTk
 
 import subprocess
-import io
 import os
+from io import BytesIO
 from typing import Any
+from pathlib import Path
 
 from utils.log_utils import logger
 
 class FrameViewer(ctk.CTkToplevel):
   """ Toplevel window for view and extracting individual frames from a media file """
 
-  def __init__(self, master: Any, ffmpeg_path: os.PathLike[str] | str, device_os: str, **kwargs: Any) -> None:
+  def __init__(self, master: Any, ffmpeg_path: Path, device_os: str, **kwargs: Any) -> None:
     super().__init__(master=master, **kwargs)
 
     self.title("Frame Viewer")
     self.minsize(850, 600)
     self.geometry("960x640")
 
-    self._ffmpeg_path: os.PathLike[str] | str = ffmpeg_path
+    self._ffmpeg_path: Path = ffmpeg_path
     self._device_os: str = device_os
 
-    self._file_path: os.PathLike[str] | str | None = None
+    self._file_path: Path | None = None
     self._duration_ms: int = 0
     self._fps: float = 30.0
     self._frame_duration_ms: float = 33.33
@@ -109,7 +110,7 @@ class FrameViewer(ctk.CTkToplevel):
     self._save_button = ctk.CTkButton(info_frame, text="Save", command=self._save_frame)
     self._save_button.grid(row=0, column=6, padx=10, pady=5, sticky="e")
 
-  def load_media(self, file_path: os.PathLike[str] | str, duration_s: float, fps_str: str) -> None:
+  def load_media(self, file_path: Path | str, duration_s: float, fps_str: str) -> None:
     """ Loads media file, and media info, then displays the displays the first frame"""
     self._file_path = file_path
 
@@ -209,7 +210,7 @@ class FrameViewer(ctk.CTkToplevel):
       if proc.returncode != 0 or not proc.stdout:
         raise subprocess.CalledProcessError
 
-      self._img = Image.open(io.BytesIO(proc.stdout))
+      self._img = Image.open(BytesIO(proc.stdout))
     
     except subprocess.CalledProcessError:
       logger.exception(f"ffmpeg frame extraction failed: {proc.stderr.decode(errors='replace')}")

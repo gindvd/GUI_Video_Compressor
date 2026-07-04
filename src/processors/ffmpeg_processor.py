@@ -1,20 +1,21 @@
 import os
 import subprocess
 from typing import Any
+from pathlib import Path
 
 from utils.log_utils import logger
 
 class FFmpegProcessHandler():
   """ Handler class for running FFmpeg to compress media file """
   
-  def __init__(self, ffmpeg: os.PathLike[str] | str, device_os: str) -> None:
-    self._ffmpeg: os.PathLike[str] | str = ffmpeg
+  def __init__(self, ffmpeg: Path, device_os: str) -> None:
+    self._ffmpeg: Path = ffmpeg
     self._proc: subprocess.Popen[str] | None = None
     self._terminated: bool = False
     self._device_os: str = device_os
 
   def compress(self, 
-              input_file: os.PathLike[str] | str, 
+              input_file: Path, 
               file_format: str, 
               resolution: str, 
               codec: str, 
@@ -174,7 +175,7 @@ class FFmpegProcessHandler():
       self._proc = None
       self._terminated = False
     
-  def terminate_compression(self) -> tuple[bool, str | None]:
+  def terminate_compression(self) -> tuple[bool, str]:
     """ Terminates compression process running at users request """
     # _proc_poll will only be None when process is running
     if self._proc and self._proc.poll() is None:
@@ -206,13 +207,13 @@ class FFmpegProcessHandler():
     return int(crf)
 
   @staticmethod
-  def _uniquify(path: os.PathLike[str] | str) -> os.PathLike[str] | str:
+  def _uniquify(file_path: str) -> Path:
     """ Adds unique number to filename, if file already exists """
-    filename, extension = os.path.splitext(path)
+    filename, extension = os.path.splitext(file_path)
     counter = 1
 
-    while os.path.exists(path):
-        path = filename + " (" + str(counter) + ")" + extension
+    while os.path.exists(file_path):
+        file_path = filename + " (" + str(counter) + ")" + extension
         counter += 1
 
-    return path
+    return Path(file_path)

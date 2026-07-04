@@ -54,13 +54,13 @@ class App(ctk.CTk):
     self._device_os: str = system()
 
     # Get path of FFmpeg, FFprobe and VLC
-    self._dependencies: list[Path | str] = get_dependencies(self._device_os)
+    self._dependencies: list[Path] = get_dependencies(self._device_os)
     
     # Create process handler classes for running commands
     self._ffmpeg: FFmpegProcessHandler   = FFmpegProcessHandler(self._dependencies[0], self._device_os)
     self._ffprobe: FFprobeProcessHandler = FFprobeProcessHandler(self._dependencies[1], self._device_os)
 
-    self._input_file: os.PathLike[str] | str = ""
+    self._input_file: Path | None = None
     self._vid_fps: str = "30/1"
     self._vid_duration: float = 0.0
 
@@ -359,6 +359,9 @@ class App(ctk.CTk):
                                       filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
     
+    if item == "" or item == ():
+      return
+
     if not self._compatible_file(item):
       return
     
@@ -376,6 +379,9 @@ class App(ctk.CTk):
       return
 
     item = event.widget.get()
+
+    if item == "" or item == ():
+      return 
     
     if not self._compatible_file(item):
       return
@@ -384,7 +390,7 @@ class App(ctk.CTk):
     
     self._update_video_compression_choices()
   
-  def _compatible_file(self, item: os.PathLike[str] | str | tuple[Any, ...]) -> bool:
+  def _compatible_file(self, item: Path | tuple[Any, ...]) -> bool:
     """ Checks if file is a compatible media file """
     # Returns false if no file was selected
     if item == "" or item == ():
@@ -501,7 +507,7 @@ class App(ctk.CTk):
     self._browse_btn.configure(state="normal")
     self._compress_btn.configure(state="normal")
 
-  def _codec_choice(self, choice: str) -> None:
+  def _video_codec_choice(self, choice: str) -> None:
     """ 
     Set file format when new value selected 
     Updates file format choices based on compatibility
