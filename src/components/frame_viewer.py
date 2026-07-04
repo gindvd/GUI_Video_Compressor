@@ -205,7 +205,7 @@ class FrameViewer(ctk.CTkToplevel):
           cmd,
           stdout=subprocess.PIPE,
           stderr=subprocess.PIPE,
-          shell=false,
+          shell=False,
           check=True,
           **flags,
           timeout=10
