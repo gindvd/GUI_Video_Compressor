@@ -110,13 +110,13 @@ class FFmpegProcessHandler():
     # Try compressing the video file and cleaning log / display any errors that occur
     try:
       self._proc = subprocess.Popen(
-                        cmd,
-                        stdout=subprocess.PIPE, 
-                        stderr=subprocess.STDOUT,
-                        shell=False,
-                        text=True,
-                        **flags
-                    )
+          cmd,
+          stdout=subprocess.PIPE, 
+          stderr=subprocess.STDOUT,
+          shell=False,
+          text=True,
+          **flags
+      )
 
       out, err = self._proc.communicate()
       self._proc.wait()
