@@ -22,7 +22,7 @@ type SystemCommands = dict[str, Pipeline]
 
 # Dictonary on parent and child commands to retreive GPU names from a specific device
 system_commands: SystemCommands = {
-    "Linux" : (("lspci"), ("grep", "-iE", "VGA|3D|video"), ("awk", "-F", ": ", "{print $2}"), ("sed", "s/ (rev .*)$//")),
+    "Linux" : (("lspci",), ("grep", "-iE", "VGA|3D|video"), ("awk", "-F", ": ", "{print $2}"), ("sed", "s/ (rev .*)$//")),
     "Darwin" : (("system_profiler", "SPDisplaysDataType"),  ("grep", "Chipset Model"), ("awk", "-F", ": ", "{print $2}")),
     # empty list is temp solution to keep parent command from being set to 'powershell' / "wmic" and not the full list
     "win11" : (("powershell", "-Command", "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"), () ),

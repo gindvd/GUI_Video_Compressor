@@ -13,7 +13,6 @@ from customtkinter import filedialog
 from tkinter       import PhotoImage, IntVar, Event
 
 import os
-from pathlib   import Path
 from threading import Thread
 from platform  import system
 from typing    import Any
@@ -54,13 +53,13 @@ class App(ctk.CTk):
     self._device_os: str = system()
 
     # Get path of FFmpeg, FFprobe and VLC
-    self._dependencies: list[Path] = get_dependencies(self._device_os)
+    self._dependencies: list[str] = get_dependencies(self._device_os)
     
     # Create process handler classes for running commands
     self._ffmpeg: FFmpegProcessHandler   = FFmpegProcessHandler(self._dependencies[0], self._device_os)
     self._ffprobe: FFprobeProcessHandler = FFprobeProcessHandler(self._dependencies[1], self._device_os)
 
-    self._input_file: Path | None = None
+    self._input_file: str | None = None
     self._vid_fps: str = "30/1"
     self._vid_duration: float = 0.0
 
@@ -82,8 +81,8 @@ class App(ctk.CTk):
     ctk.set_appearance_mode("System")  
     ctk.set_default_color_theme("blue")
 
-    self._icon_path: Path | None = None
-    self._ico_path: Path | None = None
+    self._icon_path: str | None = None
+    self._ico_path: str | None = None
     
     self._frame_viewer: FrameViewer | None = None
     self._progressbar_popup: ProgressbarPopup | None = None
@@ -307,7 +306,7 @@ class App(ctk.CTk):
     """ Open new window with Frame Viewer for individual frame view and extraction """
     
     # Only opens frame viewer if media file is loaded
-    if self._input_file == "":
+    if self._input_file == "" or self._input_file is None:
       CTkMessagebox(master=self,
                     title="Missing File",
                     message="Video file not loaded!",
@@ -358,9 +357,6 @@ class App(ctk.CTk):
     item = filedialog.askopenfilename(initialdir = os.path.expanduser("~"),
                                       filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
-    
-    if item == "" or item == ():
-      return
 
     if not self._compatible_file(item):
       return
@@ -379,9 +375,6 @@ class App(ctk.CTk):
       return
 
     item = event.widget.get()
-
-    if item == "" or item == ():
-      return 
     
     if not self._compatible_file(item):
       return
@@ -390,10 +383,10 @@ class App(ctk.CTk):
     
     self._update_video_compression_choices()
   
-  def _compatible_file(self, item: Path | tuple[Any, ...]) -> bool:
+  def _compatible_file(self, item: str) -> bool:
     """ Checks if file is a compatible media file """
     # Returns false if no file was selected
-    if item == "" or item == ():
+    if item == "":
       return False
     
     # Checks if path is not an existing file (mainly for text entered into entry field)
@@ -431,6 +424,9 @@ class App(ctk.CTk):
 
   def _extract_video_attrs(self) -> None:
     """ Run FFprobe command to get video FPS, resolution and duration """
+    if self._input_file is None:
+      return
+    
     completed, attributions, err_msg = self._ffprobe.get_video_attributions(self._input_file)
     
     # Displays message if error occurs running FFprobe
@@ -501,6 +497,9 @@ class App(ctk.CTk):
   def _load_media(self) -> None:
     """ Send media to video trimmer to be displayed for playback and trimming """
     self._video_trimmer.set_vid_values(self._vid_duration)
+
+    if self._input_file is None:
+      return
     self._video_trimmer.load_media(self._input_file)
 
     # Enable compression button and display the video file
@@ -652,6 +651,9 @@ class App(ctk.CTk):
 
   def _run_compression_cmd(self, output_directory: str) -> None:
     """ Calls the FFmpeg process handler to start video compression """
+    if self._input_file is None:
+      return
+    
     start_time: str = self._video_trimmer.get_start_time()
     duration: str = self._video_trimmer.get_duration()
 
@@ -678,7 +680,7 @@ class App(ctk.CTk):
     self._browse_btn.configure(state="normal")
 
     # Closes the progressbar popup if still exists
-    if getattr(self, "_progressbar_popup", None):
+    if self._progressbar_popup is not None:
         self._progressbar_popup.destroy_window()
         self._progressbar_popup = None
 

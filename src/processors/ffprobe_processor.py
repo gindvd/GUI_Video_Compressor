@@ -1,5 +1,5 @@
 import json
-from pathlib import Path
+import os
 from typing import Any
 
 from utils.log_utils import logger
@@ -7,27 +7,29 @@ from utils.log_utils import logger
 class FFprobeProcessHandler():
   """ Handler class for running FFprobe to retrieve media stream information """
 
-  def __init__(self, ffprobe: Path, device_os: str) -> None:
-    self._ffprobe: Path = ffprobe
+  def __init__(self, ffprobe: str, device_os: str) -> None:
+    self._ffprobe: str = ffprobe
     self._device_os: str = device_os
     
-  def get_video_attributions(self, filepath: Path) -> tuple[bool, list[str] | None, str | None]:
+  def get_video_attributions(self, filepath:str) -> tuple[bool, list[str] | None, str | None]:
     """ Run command to have FFprobe extract file stream data """
     import subprocess
 
     # Returns json formatted stream with mdia file's resolution, frame rate, and duration
-    cmd = [self._ffprobe,
-           "-v",
-           "error",
-           "-select_streams",
-           "v:0",
-           "-show_entries",
-           "stream=width,height,avg_frame_rate",
-           "-show_entries",
-           "format=duration",
-           "-of",
-           "json",
-           filepath]
+    cmd: list[str] = [
+        self._ffprobe,
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "stream=width,height,avg_frame_rate",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "json",
+        filepath
+    ]
 
     flags: dict[str, Any] = {}
     
@@ -41,12 +43,14 @@ class FFprobeProcessHandler():
     else:
       flags["start_new_session"] = True
 
-    proc = subprocess.Popen(cmd, 
-                            stdout=subprocess.PIPE, 
-                            stderr=subprocess.PIPE, 
-                            shell=False, 
-                            text=True,
-                            **flags)
+    proc = subprocess.Popen(
+        cmd, 
+        stdout=subprocess.PIPE, 
+        stderr=subprocess.PIPE, 
+        shell=False, 
+        text=True,
+        **flags
+    )
     
     try: 
       result, err = proc.communicate()

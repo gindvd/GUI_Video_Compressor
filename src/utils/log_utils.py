@@ -1,7 +1,6 @@
 import logging
 import os
 
-from pathlib import Path
 from datetime import datetime
 
 from resource_paths import resource_path
@@ -14,7 +13,7 @@ if not logger.handlers:
   now = datetime.now()
   strnow = now.strftime("%m-%d-%Y_%H-%M-%S")
 
-  log_file: Path = resource_path(os.path.join("logs", f"{strnow}.log"))
+  log_file: str = resource_path(os.path.join("logs", f"{strnow}.log"))
   os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
   file_handler = logging.FileHandler(log_file, delay=True)

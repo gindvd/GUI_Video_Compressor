@@ -10,24 +10,23 @@ import subprocess
 import os
 from io import BytesIO
 from typing import Any
-from pathlib import Path
 
 from utils.log_utils import logger
 
 class FrameViewer(ctk.CTkToplevel):
   """ Toplevel window for view and extracting individual frames from a media file """
 
-  def __init__(self, master: Any, ffmpeg_path: Path, device_os: str, **kwargs: Any) -> None:
+  def __init__(self, master: Any, ffmpeg_path: str, device_os: str, **kwargs: Any) -> None:
     super().__init__(master=master, **kwargs)
 
     self.title("Frame Viewer")
     self.minsize(850, 600)
     self.geometry("960x640")
 
-    self._ffmpeg_path: Path = ffmpeg_path
+    self._ffmpeg_path: str = ffmpeg_path
     self._device_os: str = device_os
 
-    self._file_path: Path | None = None
+    self._file_path: str | None = None
     self._duration_ms: int = 0
     self._fps: float = 30.0
     self._frame_duration_ms: float = 33.33
@@ -110,8 +109,9 @@ class FrameViewer(ctk.CTkToplevel):
     self._save_button = ctk.CTkButton(info_frame, text="Save", command=self._save_frame)
     self._save_button.grid(row=0, column=6, padx=10, pady=5, sticky="e")
 
-  def load_media(self, file_path: Path | str, duration_s: float, fps_str: str) -> None:
+  def load_media(self, file_path: str, duration_s: float, fps_str: str) -> None:
     """ Loads media file, and media info, then displays the displays the first frame"""
+
     self._file_path = file_path
 
     try:
@@ -178,9 +178,9 @@ class FrameViewer(ctk.CTkToplevel):
     
     # Command to have FFmpeg extract the frame at the specied timestamp
     cmd = [
-      str(self._ffmpeg_path),
+      self._ffmpeg_path,
       "-ss", timestamp,
-      "-i", str(self._file_path),
+      "-i", self._file_path,
       "-frames:v", "1",
       "-f", "image2pipe",
       "-vcodec", "png",
@@ -207,15 +207,6 @@ class FrameViewer(ctk.CTkToplevel):
                             **flags,
                             timeout=10)
 
-      if proc.returncode != 0 or not proc.stdout:
-        raise subprocess.CalledProcessError
-
-      self._img = Image.open(BytesIO(proc.stdout))
-    
-    except subprocess.CalledProcessError:
-      logger.exception(f"ffmpeg frame extraction failed: {proc.stderr.decode(errors='replace')}")
-      self._display_error()
-
     except subprocess.TimeoutExpired:
       logger.exception("ffmpeg frame extraction timed out")
       self._display_error()
@@ -225,6 +216,13 @@ class FrameViewer(ctk.CTkToplevel):
       self._display_error()
     
     else:
+      if proc.returncode != 0 or not proc.stdout:
+        logger.exception(f"ffmpeg frame extraction failed: {proc.stderr.decode(errors='replace')}")
+        self._display_error()
+        return
+
+      self._img = Image.open(BytesIO(proc.stdout))
+
       # Store the full-resolution frame and display a scaled copy.
       self._img = self._img.convert("RGB")
       self._display_image()
@@ -306,6 +304,9 @@ class FrameViewer(ctk.CTkToplevel):
     if self._img is None:
       return
     
+    if self._file_path is None:
+      return
+    
     # Gets basename of media file
     fullname, ext = os.path.splitext(self._file_path)
     name = os.path.basename(fullname)
@@ -318,7 +319,7 @@ class FrameViewer(ctk.CTkToplevel):
                                         filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg")],
                                         confirmoverwrite=True)
     
-    if file == "":
+    if file == "" or file is None:
       return
     
     _, ext = os.path.splitext(file)

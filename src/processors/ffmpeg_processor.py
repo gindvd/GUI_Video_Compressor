@@ -8,14 +8,14 @@ from utils.log_utils import logger
 class FFmpegProcessHandler():
   """ Handler class for running FFmpeg to compress media file """
   
-  def __init__(self, ffmpeg: Path, device_os: str) -> None:
-    self._ffmpeg: Path = ffmpeg
-    self._proc: subprocess.Popen[str] | None = None
+  def __init__(self, ffmpeg: str, device_os: str) -> None:
+    self._ffmpeg: str = ffmpeg
+    self._proc: subprocess.Popen | None = None
     self._terminated: bool = False
     self._device_os: str = device_os
 
   def compress(self, 
-              input_file: Path, 
+              input_file: str, 
               file_format: str, 
               resolution: str, 
               codec: str, 
@@ -78,7 +78,7 @@ class FFmpegProcessHandler():
       quality_args.extend(["-b:v", "0"])
     
     # Begin assembling the command list in order
-    cmd = [self._ffmpeg] 
+    cmd: list[str] = [self._ffmpeg] 
     
     if hwaccel_args is not None:
       cmd.extend(hwaccel_args)
@@ -109,12 +109,14 @@ class FFmpegProcessHandler():
     
     # Try compressing the video file and cleaning log / display any errors that occur
     try:
-      self._proc = subprocess.Popen(cmd,
-                              stdout=subprocess.PIPE, 
-                              stderr=subprocess.STDOUT,
-                              shell=False,
-                              text=True,
-                              **flags)
+      self._proc = subprocess.Popen(
+                        cmd,
+                        stdout=subprocess.PIPE, 
+                        stderr=subprocess.STDOUT,
+                        shell=False,
+                        text=True,
+                        **flags
+                    )
 
       out, err = self._proc.communicate()
       self._proc.wait()
@@ -207,7 +209,7 @@ class FFmpegProcessHandler():
     return int(crf)
 
   @staticmethod
-  def _uniquify(file_path: str) -> Path:
+  def _uniquify(file_path: str) -> str:
     """ Adds unique number to filename, if file already exists """
     filename, extension = os.path.splitext(file_path)
     counter = 1
@@ -216,4 +218,4 @@ class FFmpegProcessHandler():
         file_path = filename + " (" + str(counter) + ")" + extension
         counter += 1
 
-    return Path(file_path)
+    return file_path
