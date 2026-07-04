@@ -337,7 +337,7 @@ class App(ctk.CTk):
       return
     
     # Creates a frame viewer window and loads media file
-    self._frame_viewer = FrameViewer(self, self._ffmpeg_handler, self._device_os)
+    self._frame_viewer = FrameViewer(self, self._ffmpeg_handler)
     self._frame_viewer.load_media(self._input_file, self._vid_duration, self._vid_fps)
 
   def _show_about(self, event: Event | None = None) -> None:

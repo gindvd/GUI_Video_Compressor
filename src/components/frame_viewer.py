@@ -16,7 +16,7 @@ from processors.ffmpeg_processor import FFmpegProcessHandler
 class FrameViewer(ctk.CTkToplevel):
   """ Toplevel window for view and extracting individual frames from a media file """
 
-  def __init__(self, master: Any, ffmpeg_handler: FFmpegProcessHandler, device_os: str, **kwargs: Any) -> None:
+  def __init__(self, master: Any, ffmpeg_handler: FFmpegProcessHandler, **kwargs: Any) -> None:
     super().__init__(master=master, **kwargs)
 
     self.title("Frame Viewer")
@@ -24,7 +24,6 @@ class FrameViewer(ctk.CTkToplevel):
     self.geometry("960x640")
 
     self._ffmpeg_handler: FFmpegProcessHandler = ffmpeg_handler
-    self._device_os: str = device_os
 
     self._file_path: str | None = None
     self._duration_ms: int = 0
