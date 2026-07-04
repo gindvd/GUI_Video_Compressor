@@ -11,6 +11,7 @@ from typing import Any
 from PIL import Image
 
 from utils.log_utils import logger
+from utils.timestamp_untils import ms_text_converter
 from resource_paths import get_button_image_path
 
 class VideoTrimmer(ctk.CTkFrame):
@@ -258,7 +259,7 @@ class VideoTrimmer(ctk.CTkFrame):
             start_ms = int(self._start_time.get())
             self._media_player.set_time(start_ms)
             self._current_time.set(start_ms)
-            self._curtime_lbl.configure(text=self._ms_text_converter(start_ms))
+            self._curtime_lbl.configure(text=ms_text_converter(start_ms))
 
         self._media_player.play()
 
@@ -287,7 +288,7 @@ class VideoTrimmer(ctk.CTkFrame):
       elif state == vlc.State.Ended:
         end_time_ms = int(self._end_time.get())
         self._current_time.set(end_time_ms)
-        self._curtime_lbl.configure(text=self._ms_text_converter(end_time_ms))
+        self._curtime_lbl.configure(text=self.ms_text_converter(end_time_ms))
         self._play_pause_btn.configure(image=self._play_btn_icon)
         self._screenshot_btn.configure(state="normal")
       
@@ -308,7 +309,7 @@ class VideoTrimmer(ctk.CTkFrame):
 
         self._current_time.set(current_time_ms)
 
-        self._curtime_lbl.configure(text=self._ms_text_converter(current_time_ms))
+        self._curtime_lbl.configure(text=self.ms_text_converter(current_time_ms))
 
       elif state == vlc.State.Paused:
         self._play_pause_btn.configure(image=self._play_btn_icon)
@@ -340,7 +341,7 @@ class VideoTrimmer(ctk.CTkFrame):
           self.after(1, self._media_player.set_pause, 1)
 
     self._current_time.set(target)
-    self._curtime_lbl.configure(text=self._ms_text_converter(target))
+    self._curtime_lbl.configure(text=self.ms_text_converter(target))
 
     self._schedule_seek_reset()
     self._start_update_loop()
@@ -364,13 +365,13 @@ class VideoTrimmer(ctk.CTkFrame):
       if state == vlc.State.Paused:
         self.after(1,  self._media_player.set_pause, 1)
 
-    self._curtime_lbl.configure(text=self._ms_text_converter(target))
+    self._curtime_lbl.configure(text=self.ms_text_converter(target))
     self._schedule_seek_reset()
     
     # Updates labels
     new_duration = int(self._end_time.get()) - target
-    self._current_duration_lbl.configure(text=self._ms_text_converter(new_duration))
-    self._start_time_lbl.configure(text=self._ms_text_converter(target))
+    self._current_duration_lbl.configure(text=self.ms_text_converter(new_duration))
+    self._start_time_lbl.configure(text=self.ms_text_converter(target))
 
     self._start_update_loop()
 
@@ -398,13 +399,13 @@ class VideoTrimmer(ctk.CTkFrame):
       if state == vlc.State.Paused:
         self.after(1, self._media_player.set_pause, 1)
 
-    self._curtime_lbl.configure(text=self._ms_text_converter(target))
+    self._curtime_lbl.configure(text=self.ms_text_converter(target))
 
     self._schedule_seek_reset()
 
     new_duration = (target - int(self._start_time.get()))
-    self._current_duration_lbl.configure(text=self._ms_text_converter(new_duration))
-    self._end_time_lbl.configure(text=self._ms_text_converter(target))
+    self._current_duration_lbl.configure(text=self.ms_text_converter(new_duration))
+    self._end_time_lbl.configure(text=self.ms_text_converter(target))
 
     self._start_update_loop()
   
@@ -460,11 +461,11 @@ class VideoTrimmer(ctk.CTkFrame):
     self._current_time.set(0)
     self._end_time.set(original_duration)
 
-    self._current_duration_lbl.configure(text=self._ms_text_converter(original_duration))
-    self._duration_lbl.configure(text=self._ms_text_converter(original_duration))
+    self._current_duration_lbl.configure(text=self.ms_text_converter(original_duration))
+    self._duration_lbl.configure(text=self.ms_text_converter(original_duration))
 
-    self._start_time_lbl.configure(text=self._ms_text_converter(0))
-    self._end_time_lbl.configure(text=self._ms_text_converter(original_duration))
+    self._start_time_lbl.configure(text=self.ms_text_converter(0))
+    self._end_time_lbl.configure(text=self.ms_text_converter(original_duration))
 
   
   def load_media(self, vid_file: str) -> None:
@@ -642,7 +643,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_player.pause()
     self._play_pause_btn.configure(image=self._play_btn_icon)
     self._current_time.set(seek_ms)
-    self._curtime_lbl.configure(text=self._ms_text_converter(seek_ms))
+    self._curtime_lbl.configure(text=self.ms_text_converter(seek_ms))
 
   def _toggle_mute(self) -> None:
     """ Toggles mute """
@@ -802,17 +803,7 @@ class VideoTrimmer(ctk.CTkFrame):
     return int(self._end_time.get()) - int(self._start_time.get())
   
   def get_start_time(self) -> str:
-    return self._ms_text_converter(self.start_time_ms)
+    return self.ms_text_converter(self.start_time_ms)
   
   def get_duration(self) -> str:
-    return self._ms_text_converter(self.duration_ms)
-
-  @staticmethod
-  def _ms_text_converter(ms: int) -> str:
-    s = ms // 1000
-    ms_remainder = ms % 1000
-
-    m, sec = divmod(s, 60)
-    h, m = divmod(m, 60)
-
-    return f"{h:02d}:{m:02d}:{sec:02d}.{ms_remainder:03d}"
+    return self.ms_text_converter(self.duration_ms)

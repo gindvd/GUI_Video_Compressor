@@ -12,6 +12,7 @@ from io import BytesIO
 from typing import Any
 
 from processors.ffmpeg_processor import FFmpegProcessHandler
+from utils.timestamp_untils import ms_text_converter, seconds_to_timestamp
 
 class FrameViewer(ctk.CTkToplevel):
   """ Toplevel window for view and extracting individual frames from a media file """
@@ -173,7 +174,7 @@ class FrameViewer(ctk.CTkToplevel):
       return
 
     seconds = ms / 1000.0
-    timestamp = self._seconds_to_timestamp(seconds)
+    timestamp = self.seconds_to_timestamp(seconds)
 
     extracted, frame_bytes  = self._ffmpeg_handler.extract_frame(self._file_path, timestamp)
     
@@ -253,7 +254,7 @@ class FrameViewer(ctk.CTkToplevel):
 
   def _update_info_labels(self) -> None:
     """ Update current frame and timestamp labels """
-    self._time_lbl.configure(text=self._ms_text_converter(int(self._current_ms)))
+    self._time_lbl.configure(text=self.ms_text_converter(int(self._current_ms)))
 
     self._current_frame = int(self._current_ms / self._frame_duration_ms) if self._frame_duration_ms > 0 else 0
     total_frames = int(self._duration_ms / self._frame_duration_ms) if self._frame_duration_ms > 0 else 0
@@ -306,23 +307,3 @@ class FrameViewer(ctk.CTkToplevel):
                     title="Screenshot Successful",
                     message=f"Screenshot taken!\n{file}",
                     icon="check")
-
-  @staticmethod
-  def _seconds_to_timestamp(s: float) -> str:
-    """ Converts seconds to timestamp to be displayed """
-    hours = int(s // 3600)
-    minutes = int((s % 3600) // 60)
-    secs = s % 60
-    
-    return f"{hours:02d}:{minutes:02d}:{secs:06.3f}"
-
-  @staticmethod
-  def _ms_text_converter(ms: int) -> str:
-    """ Converts milliseconds to timestamp string """
-    s = ms // 1000
-    ms_remainder = ms % 1000
-
-    m, sec = divmod(s, 60)
-    h, m = divmod(m, 60)
-
-    return f"{h:02d}:{m:02d}:{sec:02d}.{ms_remainder:03d}"
