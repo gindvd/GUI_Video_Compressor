@@ -11,9 +11,9 @@ class ProgressbarPopup(ctk.CTkToplevel):
     self.title("Compression in Progress")
     self.resizable(False, False)
 
-    self._btm_frame = ctk.CTkFrame(self, corner_radius=0)
+    self._btn_frame = ctk.CTkFrame(self, corner_radius=0)
 
-    self._progressbar = ctk.CTkProgressBar(self._btm_frame,
+    self._progressbar = ctk.CTkProgressBar(self._btn_frame,
                                            height=15,
                                            width=300,
                                            orientation='horizontal', 
@@ -22,7 +22,7 @@ class ProgressbarPopup(ctk.CTkToplevel):
 
     self._progressbar.pack(padx=30, pady=50)
 
-    self._btm_frame.pack(expand=True, fill='both')
+    self._btn_frame.pack(expand=True, fill='both')
     
     self._cancel_compression_btn = ctk.CTkButton(self, 
                                                  text="Cancel", 
