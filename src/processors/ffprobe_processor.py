@@ -42,19 +42,16 @@ class FFprobeProcessHandler():
 
     else:
       flags["start_new_session"] = True
-
-    proc = subprocess.Popen(
+    
+    try: 
+      proc = subprocess.run(
         cmd, 
-        stdout=subprocess.PIPE, 
-        stderr=subprocess.PIPE, 
+        capture_output=True, 
+        check=True,
         shell=False, 
         text=True,
         **flags
-    )
-    
-    try: 
-      result, err = proc.communicate()
-      rc = proc.returncode
+      )
     
     except FileNotFoundError:
       return False, None, "FFprobe not found!"
@@ -62,6 +59,10 @@ class FFprobeProcessHandler():
     except PermissionError as e:
       logger.exception(str(e))
       return False, None, "Permission Error Occured!\nCheck logs for details!"
+    
+    except subprocess.CalledProcessError as e:
+      logger.exception(str(e))
+      return False, None, "Subprocess Error Occured!\nCheck logs for details!"
 
     except subprocess.SubprocessError as e:
       logger.exception(str(e))
@@ -72,17 +73,8 @@ class FFprobeProcessHandler():
       return False, None, "OS Error Occured!\nCheck logs for details!"
     
     else:
-      # Log error when return code is non-zero, return error message
-      if rc != 0:
-        logger.error("FFmpeg failed with exit code %d\n"
-                     "Command: %s\n"
-                     "Output:\n%s",
-                     rc,
-                     " ".join(str(arg) for arg in cmd),
-                     err,)
-      
-        return False, None, "Called Process Error Occured!\nCheck logs for details!"
-      
+      result = proc.stdout
+
       if result is None or "N/A" in result:
         return False, None, "Issue getting info from file headers."
       

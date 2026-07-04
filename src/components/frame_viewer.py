@@ -211,8 +211,8 @@ class FrameViewer(ctk.CTkToplevel):
           timeout=10
       )
     
-    except subprocess.CalledProcessError:
-      logger.exception(f"ffmpeg frame extraction failed: {proc.stderr.decode(errors='replace')}")
+    except subprocess.CalledProcessError as e:
+      logger.exception(f"ffmpeg frame extraction failed: {str(e)}")
       self._display_error()
 
     except subprocess.TimeoutExpired:
@@ -220,7 +220,7 @@ class FrameViewer(ctk.CTkToplevel):
       self._display_error()
 
     except Exception as e:
-      logger.exception(f"Frame extraction error: {e}")
+      logger.exception(f"Frame extraction error: {str(e)}")
       self._display_error()
     
     else:
