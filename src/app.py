@@ -357,6 +357,9 @@ class App(ctk.CTk):
     item = filedialog.askopenfilename(initialdir = os.path.expanduser("~"),
                                       filetypes=({("Video Files",  "*.mp4 *.mov *.mkv *.avi *.webm"),
                                                   ("All Files", "*.*")}))
+    
+    if item == ():
+      return
 
     if not self._compatible_file(item):
       return
@@ -657,19 +660,21 @@ class App(ctk.CTk):
     start_time: str = self._video_trimmer.get_start_time()
     duration: str = self._video_trimmer.get_duration()
 
-    completed, err_msg = self._ffmpeg.compress(self._input_file, 
-                                               self._container, 
-                                               self._resolution,
-                                               self._video_codec,
-                                               self._frame_rate,
-                                               self._preset,
-                                               self._quality,
-                                               self._audio,
-                                               self._audio_codec,
-                                               self._audio_bitrate,
-                                               start_time,
-                                               duration,
-                                               output_directory)
+    completed, err_msg = self._ffmpeg.compress(
+        self._input_file, 
+        self._container, 
+        self._resolution,
+        self._video_codec,
+        self._frame_rate,
+        self._preset,
+        self._quality,
+        self._audio,
+        self._audio_codec,
+        self._audio_bitrate,
+        start_time,
+        duration,
+        output_directory
+    )
 
     # Uses tkinter functionality to call finish function on main thread when media is finished compressing
     self.after(0, self._compression_finished, completed, err_msg)
