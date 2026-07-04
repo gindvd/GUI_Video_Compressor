@@ -174,7 +174,7 @@ class FrameViewer(ctk.CTkToplevel):
       return
 
     seconds = ms / 1000.0
-    timestamp = self.seconds_to_timestamp(seconds)
+    timestamp = seconds_to_timestamp(seconds)
 
     extracted, frame_bytes  = self._ffmpeg_handler.extract_frame(self._file_path, timestamp)
     
@@ -254,7 +254,7 @@ class FrameViewer(ctk.CTkToplevel):
 
   def _update_info_labels(self) -> None:
     """ Update current frame and timestamp labels """
-    self._time_lbl.configure(text=self.ms_text_converter(int(self._current_ms)))
+    self._time_lbl.configure(text=ms_text_converter(int(self._current_ms)))
 
     self._current_frame = int(self._current_ms / self._frame_duration_ms) if self._frame_duration_ms > 0 else 0
     total_frames = int(self._duration_ms / self._frame_duration_ms) if self._frame_duration_ms > 0 else 0
