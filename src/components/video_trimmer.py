@@ -744,7 +744,7 @@ class VideoTrimmer(ctk.CTkFrame):
     if self._media_file is None: 
       return
     
-    basename, _ = os.path.basename(self._file_path)
+    basename, _ = os.path.basename(self._media_file)
     name, _ = basename.split(".")
     
     # Open file dialog to let user specify file name and location
