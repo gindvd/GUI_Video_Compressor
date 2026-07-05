@@ -62,20 +62,29 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _set_video_control_icons(self) -> None:
     """ Creates icons for the control buttons """
+    icon_size: tupe[int] = (20, 20)
+
     self._play_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("play_button.png")),
-                                                  dark_image=Image.open(get_button_image_path("play_button.png")))
+                                                  dark_image=Image.open(get_button_image_path("play_button.png")),
+                                                    size=icon_size)
     self._pause_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("pause_button.png")),
-                                                   dark_image=Image.open(get_button_image_path("pause_button.png")))
+                                                   dark_image=Image.open(get_button_image_path("pause_button.png")),
+                                                    size=icon_size)
     self._reverse_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("reverse.png")),
-                                                     dark_image=Image.open(get_button_image_path("reverse.png")))
+                                                     dark_image=Image.open(get_button_image_path("reverse.png")),
+                                                    size=icon_size)
     self._forward_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("forward.png")),
-                                                     dark_image=Image.open(get_button_image_path("forward.png")))
+                                                     dark_image=Image.open(get_button_image_path("forward.png")),
+                                                    size=icon_size)
     self._mute_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("muted_volume.png")),
-                                                  dark_image=Image.open(get_button_image_path("muted_volume.png")))
+                                                  dark_image=Image.open(get_button_image_path("muted_volume.png")),
+                                                    size=icon_size)
     self._unmute_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("unmuted_volume.png")),
-                                                    dark_image=Image.open(get_button_image_path("unmuted_volume.png")))
+                                                    dark_image=Image.open(get_button_image_path("unmuted_volume.png")),
+                                                    size=icon_size)
     self._camera_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("camera.png")),
-                                                    dark_image=Image.open(get_button_image_path("camera.png")))
+                                                    dark_image=Image.open(get_button_image_path("camera.png")),
+                                                    size=icon_size)
 
   def _platform_specific_instance(self) -> vlc.Instance:
     """ Initializes the VLC instance with platform specific settings """
@@ -99,15 +108,9 @@ class VideoTrimmer(ctk.CTkFrame):
     self._media_viewer.pack(padx=(10, 5), pady=10, fill='both', expand=True)
 
     # Control panel: Media playback / trimming controls
-    self._control_panel = ctk.CTkFrame(self, width=750, height=40, fg_color=("gray75", "gray25"), corner_radius=10)
-    self._control_panel.pack(padx=(10, 5), pady=0, fill='x')
-    self._control_panel.grid_propagate(False)
+    self._control_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=10)
+    self._control_panel.pack(padx=(10, 5), pady=(0, 10), fill='x')
     self._build_video_controls()
-    
-    # Timestamp panels: Displays timestamps
-    self._time_panel = ctk.CTkFrame(self, width=750, fg_color=("gray75", "gray25"), corner_radius=10)
-    self._time_panel.pack(padx=(10, 5), pady=10, fill='x')
-    self._build_time_labels()
   
   def _build_video_controls(self) -> None:
     """ Builds the controller buttons for video playback and trimming """
@@ -115,28 +118,28 @@ class VideoTrimmer(ctk.CTkFrame):
 
     self._play_pause_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                         width=35,
-                                                        height=30,
+                                                        height=35,
                                                         fg_color="transparent",
                                                         image=self._play_btn_icon,
                                                         text="",
                                                         state="disabled",
                                                         command=self._play_pause)
 
-    self._play_pause_btn.grid(row=0, column=0, padx=(10, 5), pady=5)
+    self._play_pause_btn.grid(row=0, column=0, padx=(10, 5), pady=(5, 0))
 
     self._reverse_10s_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                         width=35,
-                                                        height=30,
+                                                        height=35,
                                                         fg_color="transparent",
                                                         image=self._reverse_btn_icon,
                                                         text="",
                                                         state="disabled",
                                                         command=self._reverse_10_seconds)
 
-    self._reverse_10s_btn.grid(row=0, column=1, padx=5, pady=5)
+    self._reverse_10s_btn.grid(row=0, column=1, padx=5, pady=(5, 0))
 
     self._forward_10s_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
-                                                        width=30,
+                                                        width=35,
                                                         height=35,
                                                         fg_color="transparent",
                                                         image=self._forward_btn_icon,
@@ -144,7 +147,7 @@ class VideoTrimmer(ctk.CTkFrame):
                                                         state="disabled",
                                                         command=self._forward_10_seconds)
 
-    self._forward_10s_btn.grid(row=0, column=2, padx=5, pady=5)
+    self._forward_10s_btn.grid(row=0, column=2, padx=5, pady=(5, 0))
     
     """
     Trim slider for adjusting start and end time values so FFmpeg has trim video
@@ -159,21 +162,21 @@ class VideoTrimmer(ctk.CTkFrame):
                                       left_button_var=self._start_time, 
                                       right_button_var=self._end_time,
                                       center_button_var=self._current_time)
-    self._trim_slider.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
+    self._trim_slider.grid(row=0, column=3, columnspan=9, padx=5, pady=(5, 0), sticky="ew")
 
     self._curtime_lbl: ctk.CTkLabel = ctk.CTkLabel(self._control_panel, text="00:00:00.000")
-    self._curtime_lbl.grid(row=0, column=4, padx=5, pady=5,)
+    self._curtime_lbl.grid(row=0, column=12, padx=5, pady=(5, 0))
 
     self._volume_btn: ctk.CTkButton = ctk.CTkButton(self._control_panel,
                                                     width=35,
-                                                    height=30,
+                                                    height=35,
                                                     fg_color="transparent",
                                                     image=self._unmute_btn_icon,
                                                     text="",
                                                     state="disabled",
                                                     command=self._toggle_mute)
 
-    self._volume_btn.grid(row=0, column=5, padx=5, pady=5)
+    self._volume_btn.grid(row=0, column=13, padx=5, pady=(5, 0))
 
     self._vol_popup = ctk.CTkFrame(self, corner_radius=0)
 
@@ -199,7 +202,7 @@ class VideoTrimmer(ctk.CTkFrame):
     self._volume_slider.bind("<Leave>", self._schedule_hide_vol_popup)
 
     self._screenshot_btn = ctk.CTkButton(self._control_panel,
-                                         width=30,
+                                         width=35,
                                          height=35,
                                          fg_color="transparent",
                                          image=self._camera_btn_icon,
@@ -208,11 +211,16 @@ class VideoTrimmer(ctk.CTkFrame):
                                          anchor="center",
                                          command=self._take_screenshot)
     
-    self._screenshot_btn.grid(row=0, column=6, padx=(5, 10), pady=5, sticky="nswe")
+    self._screenshot_btn.grid(row=0, column=14, padx=(5, 10), pady=(5, 0), sticky="nswe")
 
-  def _build_time_labels(self) -> None:
+    self._time_panel = ctk.CTkFrame(self._control_panel, fg_color=("gray75", "gray25"), corner_radius=10)
+    self._time_panel.grid(row=1, column=0, columnspan=15, padx=0, pady=5, sticky="nswe")
+
+    self._build_timestamp_labels()
+
+  def _build_timestamp_labels(self) -> None:
     """ Creates and places timestamp labels """
-    ctk.CTkLabel(self._time_panel, text="New Duration:").grid(row=0, column=0, padx=(10, 5), pady=5, sticky="w")
+    ctk.CTkLabel(self._time_panel, text="New Duration:").grid(row=0, column=0, padx=(15, 5), pady=5, sticky="w")
 
     self._current_duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
     self._current_duration_lbl.grid(row=0, column=1, padx=(5, 10), pady=5, sticky="nswe")
@@ -230,7 +238,7 @@ class VideoTrimmer(ctk.CTkFrame):
     ctk.CTkLabel(self._time_panel, text="Duration:").grid(row=0, column=6,padx=(10, 5), pady=5, sticky="w")
 
     self._duration_lbl: ctk.CTkLabel = ctk.CTkLabel(self._time_panel, text="00:00:00.000")
-    self._duration_lbl.grid(row=0, column=7, padx=(5, 10), pady=5, sticky="nswe")
+    self._duration_lbl.grid(row=0, column=7, padx=5, pady=5, sticky="nswe")
 
   def _play_pause(self, event: Event | None = None) -> None:
     """ Toggles between play and pause states depending on the current state """
