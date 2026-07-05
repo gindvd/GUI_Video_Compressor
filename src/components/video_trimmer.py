@@ -51,14 +51,19 @@ class VideoTrimmer(ctk.CTkFrame):
     self._set_video_control_icons()
     self._build_ui_widgets()
 
+    self._vlc_loading = False
+
     Thread(target=self._create_vlc_instance, daemon=True).start()
 
   def _create_vlc_instance(self) -> None:
     """ Creates a VLC instance if none instance exists """
+    self._vlc_loading = True
 
     self._instance = self._platform_specific_instance()
     self._instance.log_unset() # Supresses VLC logs
     self._media_player = self._instance.media_player_new()
+
+    self._vlc_loading = False
   
   def _set_video_control_icons(self) -> None:
     """ Creates icons for the control buttons """
@@ -479,8 +484,8 @@ class VideoTrimmer(ctk.CTkFrame):
   def load_media(self, vid_file: str) -> None:
     """ Loads new media in to VLC instance to allow playback and trimming """
 
-    # Creates a VLC instance if one doesn't exist
-    if self._instance is not None:
+    # Creates a VLC instance if one doesn't exist and vlc instance isn't being creted
+    if self._instance is None and self._vlc_loading is False:
       self._create_vlc_instance()
 
     self._media_file = vid_file
