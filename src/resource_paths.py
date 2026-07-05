@@ -26,6 +26,8 @@ def setup_vlc_environment() -> None:
 
   os.environ['PATH'] = str(vlc_dir) + os.pathsep + os.environ.get('PATH', '')
 
+setup_vlc_environment()
+
 def get_dependencies(device_os: str) -> list[str]:
   """ Gets absolute path for VLC, FFmpeg, and FFprobe """
   if device_os == "Windows":
