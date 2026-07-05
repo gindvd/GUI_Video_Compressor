@@ -62,7 +62,7 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _set_video_control_icons(self) -> None:
     """ Creates icons for the control buttons """
-    icon_size: tupe[int] = (20, 20)
+    icon_size: tuple[int] = (20, 20)
 
     self._play_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("play_button.png")),
                                                   dark_image=Image.open(get_button_image_path("play_button.png")),
