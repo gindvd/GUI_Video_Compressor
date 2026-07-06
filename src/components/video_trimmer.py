@@ -67,7 +67,7 @@ class VideoTrimmer(ctk.CTkFrame):
   
   def _set_video_control_icons(self) -> None:
     """ Creates icons for the control buttons """
-    icon_size: tuple[int] = (20, 20)
+    icon_size: tuple[int, int] = (20, 20)
 
     self._play_btn_icon: ctk.CTkImage = ctk.CTkImage(light_image=Image.open(get_button_image_path("play_button.png")),
                                                   dark_image=Image.open(get_button_image_path("play_button.png")),
@@ -751,7 +751,7 @@ class VideoTrimmer(ctk.CTkFrame):
     if self._media_file is None: 
       return
     
-    basename, _ = os.path.basename(self._media_file)
+    basename = os.path.basename(self._media_file)
     name, _ = basename.split(".")
     
     # Open file dialog to let user specify file name and location
