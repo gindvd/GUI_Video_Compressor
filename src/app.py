@@ -80,7 +80,7 @@ class App(ctk.CTk):
         self._audio_bitrate: str = "128k"
 
         self.title("Media Optimization Tool")
-        self.minsize(1040, 640)
+        self.minsize(1040, 648)
         self.resizable(True, True)
 
         ctk.set_appearance_mode("System")
@@ -772,8 +772,6 @@ class App(ctk.CTk):
             return
 
         self._progressbar_popup = ProgressbarPopup(self, cmd=self.cancel_compression)
-        self._progressbar_popup.resizable(True, True)
-        self._progressbar_popup.transient(self)
         self._progressbar_popup.run_progressbar()
 
         # Run FFmpeg executable/binary in separate thread
