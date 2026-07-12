@@ -12,9 +12,9 @@ def resource_path(relative_path: str = "") -> str:
 
 
 def setup_vlc_environment() -> None:
-    """Set up VLC paths for the python-vlc library to use bundled VLC dlls / plugins in the lib folder"""
+    """Set up VLC paths for the python-vlc library to use bundled VLC dlls / plugins in the bin folder"""
 
-    vlc_dir = resource_path(os.path.join("lib", "vlc"))
+    vlc_dir = resource_path(os.path.join("bin", "vlc"))
 
     if not os.path.isdir(vlc_dir):
         return
@@ -49,7 +49,7 @@ def get_win_dependencies() -> list[str]:
     for proc in ("ffmpeg", "ffprobe", "vlc"):
         # gets path of the vlc plugins folder
         if proc == "vlc":
-            abs_path = resource_path(os.path.join("lib", "vlc", "plugins"))
+            abs_path = resource_path(os.path.join("bin", "vlc", "plugins"))
 
             if not os.path.isdir(abs_path):
                 raise SystemExit(f"Missing dependency: {proc} missing from lib folder!")
@@ -58,7 +58,7 @@ def get_win_dependencies() -> list[str]:
                 proc_paths.append(abs_path)
 
         else:
-            abs_path = resource_path(os.path.join("lib", f"{proc}.exe"))
+            abs_path = resource_path(os.path.join("bin", f"{proc}.exe"))
 
             if not os.path.isfile(abs_path):
                 raise SystemExit(f"Missing dependency: {proc} missing from lib folder!")
