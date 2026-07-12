@@ -554,6 +554,9 @@ class VideoTrimmer(ctk.CTkFrame):
         # Creates a VLC instance if one doesn't exist and vlc instance isn't being creted
         if self._instance is None and self._vlc_loading is False:
             self._create_vlc_instance()
+        
+        if  self._vlc_loading:
+            self.after(50, self.load_media, vid_file)
 
         self._media_file = vid_file
 
