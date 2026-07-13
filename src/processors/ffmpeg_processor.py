@@ -94,7 +94,7 @@ class FFmpegProcessHandler:
     ) -> tuple[bool, str | None]:
         """Creates FFmpeg command with all args and executes it to compress video files"""
 
-        fullname, _ = os.path.splitext(self._file_path)
+        fullname, _ = os.path.splitext(self._input_file)
         name = os.path.basename(fullname)
         new_name = name + "_compressed." + file_format
 

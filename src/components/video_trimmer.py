@@ -58,7 +58,7 @@ class VideoTrimmer(ctk.CTkFrame):
         self._set_video_control_icons()
         self._build_ui_widgets()
 
-        self._vlc_loading = False
+        self._vlc_loading: bool = False
 
         Thread(target=self._create_vlc_instance, daemon=True).start()
 
@@ -554,9 +554,6 @@ class VideoTrimmer(ctk.CTkFrame):
         # Creates a VLC instance if one doesn't exist and vlc instance isn't being creted
         if self._instance is None and self._vlc_loading is False:
             self._create_vlc_instance()
-        
-        if  self._vlc_loading:
-            self.after(50, self.load_media, vid_file)
 
         self._media_file = vid_file
 
@@ -624,6 +621,7 @@ class VideoTrimmer(ctk.CTkFrame):
     def _finish_loading(self, request: int) -> None:
         """Updates GUI after old media is unlodaed and new media set"""
         # Checks again if another request to load new media was sent before media could finish loading
+
         if request != self._load_request:
             return
 
