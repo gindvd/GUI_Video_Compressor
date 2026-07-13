@@ -119,27 +119,26 @@ class FFmpegProcessHandler:
         _, __, hw_id = codec.partition("_")
 
         # Matches hardware codec and changes the quality args that work with the codec
-        match hw_id:
-            case "nvenc":
-                quality_args = ["-rc", "vbr", "-cq", str(crf), "-b:v", "0"]
+        if hw_id == "nvenc":
+            quality_args = ["-rc", "vbr", "-cq", str(crf), "-b:v", "0"]
 
-            case "amf":
-                quality_args = ["-rc", "qvbr", "-qvbr_quality_level", str(crf)]
+        elif hw_id == "amf":
+            quality_args = ["-rc", "qvbr", "-qvbr_quality_level", str(crf)]
 
-            case "qsv":
-                hwaccel_args = ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw"]
-                quality_args = ["-global_quality", str(crf), "-look_ahead", "1"]
+        elif hw_id == "qsv":
+            hwaccel_args = ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw"]
+            quality_args = ["-global_quality", str(crf), "-look_ahead", "1"]
 
-            case "vaapi":
-                hwaccel_args = ["-vaapi_device", "/dev/dri/renderD128"]
-                scale_args = [
-                    "-vf",
-                    f"format=nv12,fps={fps},hwupload,scale_vaapi=w={width}:h={height}",
-                ]
-                quality_args = ["-qp", str(crf)]
+        elif hw_id == "vaapi":
+            hwaccel_args = ["-vaapi_device", "/dev/dri/renderD128"]
+            scale_args = [
+                "-vf",
+                f"format=nv12,fps={fps},hwupload,scale_vaapi=w={width}:h={height}",
+            ]
+            quality_args = ["-qp", str(crf)]
 
-            case _:
-                quality_args = ["-crf", str(crf)]
+        else:
+            quality_args = ["-crf", str(crf)]
 
         if codec == "libvpx-vp9":
             quality_args.extend(["-b:v", "0"])
@@ -168,6 +167,13 @@ class FFmpegProcessHandler:
             cmd.extend(["-preset", preset])
 
         cmd.extend([*quality_args, *aud_opts, output_file])
+
+        return self._run_compression(cmd, output_file)
+
+    def _run_compression(
+        self, cmd: list[str], output_file: str
+    ) -> tuple[bool, str | None]:
+        """Runs the command to compress videos"""
 
         # Try compressing the video file and cleaning log / display any errors that occur
         try:

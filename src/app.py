@@ -776,9 +776,10 @@ class App(ctk.CTk):
 
         # Run FFmpeg executable/binary in separate thread
         # Keeps the process from blocking progress bar animation from rendering
-        Thread(
+        self._compress_thread = Thread(
             target=self._run_compression_cmd, args=(output_directory,), daemon=True
-        ).start()
+        )
+        self._compress_thread.start()
 
     def _run_compression_cmd(self, output_directory: str) -> None:
         """Calls the FFmpeg process handler to start video compression"""
@@ -809,6 +810,10 @@ class App(ctk.CTk):
 
     def _compression_finished(self, completed: bool, err_msg: str | None) -> None:
         """Tells the user if FFmpeg successfully finished compressing"""
+
+        # Destropy the Thread object
+        self._compress_thread.join()
+
         self._compress_btn.configure(state="normal")
         self._browse_btn.configure(state="normal")
 
