@@ -58,19 +58,15 @@ class VideoTrimmer(ctk.CTkFrame):
         self._set_video_control_icons()
         self._build_ui_widgets()
 
-        self._vlc_loading: bool = False
-
-        Thread(target=self._create_vlc_instance, daemon=True).start()
+        self._loading_thread: Thread | None = None
+        self._teardown_thread: Thread | None = None
 
     def _create_vlc_instance(self) -> None:
         """Creates a VLC instance if none instance exists"""
-        self._vlc_loading = True
 
         self._instance = self._platform_specific_instance()
         self._instance.log_unset()  # Supresses VLC logs
         self._media_player = self._instance.media_player_new()
-
-        self._vlc_loading = False
 
     def _set_video_control_icons(self) -> None:
         """Creates icons for the control buttons"""
@@ -552,7 +548,7 @@ class VideoTrimmer(ctk.CTkFrame):
         """Loads new media in to VLC instance to allow playback and trimming"""
 
         # Creates a VLC instance if one doesn't exist and vlc instance isn't being creted
-        if self._instance is None and self._vlc_loading is False:
+        if self._instance is None:
             self._create_vlc_instance()
 
         self._media_file = vid_file
@@ -566,14 +562,15 @@ class VideoTrimmer(ctk.CTkFrame):
         request = self._load_request
 
         # Runs stop and load function in new thread to keep VLC from blocking main thread and causing app to stop responding
-        Thread(
+        self._loading_thread = Thread(
             target=self._stop_and_load_media,
             args=(
                 vid_file,
                 request,
             ),
             daemon=True,
-        ).start()
+        )
+        self._loading_thread.start()
 
     def _stop_and_load_media(self, vid_file: str, request: int) -> None:
         """Stops already loaded meia, before loading new media"""
@@ -621,6 +618,8 @@ class VideoTrimmer(ctk.CTkFrame):
     def _finish_loading(self, request: int) -> None:
         """Updates GUI after old media is unlodaed and new media set"""
         # Checks again if another request to load new media was sent before media could finish loading
+        if self._loading_thread is not None:
+            self._loading_thread.join()
 
         if request != self._load_request:
             return
@@ -677,10 +676,14 @@ class VideoTrimmer(ctk.CTkFrame):
             self.after(0, self._rebuild_instance, reload_file)
 
         # Stopping and releasing media and instance is not instant, put on new thread to keep from blocking main thread
-        Thread(target=_teardown_vlc, daemon=True).start()
+        self._teardown_thread = Thread(target=_teardown_vlc, daemon=True)
+        self._teardown_thread.start()
 
     def _rebuild_instance(self, reload_file: str | None = None) -> None:
         """Rebuilds VLC instance and media player if previous instance and player were released"""
+        if self._teardown_thread is not None:
+            self._teardown_thread.join()
+
         self._media = None
         self._instance = self._platform_specific_instance()
         self._media_player = self._instance.media_player_new()
