@@ -1,17 +1,16 @@
                             
-                          FFmpeg
+                               FFmpeg
 https://www.ffmpeg.org
 https://github.com/ffmpeg/ffmpeg
 
-                    GNU GENERAL PUBLIC LICENSE
-                       Version 2, June 1991
+                      GNU GENERAL PUBLIC LICENSE
+                        Version 2, June 1991
 
- Copyright (C) 1989, 1991 Free Software Foundation, Inc.,
- <https://fsf.org/>
+ Copyright (C) 1989, 1991 Free Software Foundation, Inc., <https://fsf.org/>
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
-                            Preamble
+                              Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -61,8 +60,8 @@ patent must be licensed for everyone's free use or not licensed at all.
   The precise terms and conditions for copying, distribution and
 modification follow.
 
-                    GNU GENERAL PUBLIC LICENSE
-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+                     GNU GENERAL PUBLIC LICENSE
+     TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. This License applies to any program or other work which contains
 a notice placed by the copyright holder saying it may be distributed
@@ -360,7 +359,7 @@ https://github.com/videolan/vlc
  as the successor of the GNU Library Public License, version 2, hence
  the version number 2.1.]
 
-                            Preamble
+                              Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -853,7 +852,7 @@ That's all there is to it!
 
 ----------------------------------------------------------------------------------
 
-                                CustomTkinter
+                            CustomTkinter
 https://customtkinter.tomschimansky.com/
 https://github.com/TomSchimansky/CustomTkinter
 
@@ -1008,7 +1007,7 @@ express Statement of Purpose.
 
 ----------------------------------------------------------------------------------
 
-                            CTkMenubar
+                             CTkMenubar
 https://github.com/Akascape/CTkMenuBar
 
 Creative Commons Legal Code

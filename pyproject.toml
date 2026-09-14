@@ -4,23 +4,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MediaOptimizationTool"
-version = "2.1.0"
-description = "A GUI interface to select options and trim videos to compress and convert video files with FFmpeg"
+version = "4.0.0"
+description = "Optimization tool for compression, converting, and trimming media files with FFmpeg"
 authors = [
   {name = "David Gingerich", email = "gingerichdvd@gmail.com"}
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 license = { file = "LICENSE" }
 
 dependencies = [
-  "CTkMenuBar>=0.9",
-  "CTkMessagebox>=2.7",
-  "CTkTrimSlider>=2.0.0",
-  "customtkinter>=5.2.2",
-  "darkdetect>=0.8.0",
-  "packaging>=26.0",
-  "pillow>=12.1.1",
-  "python-vlc>=3.0.21203"
+  "CTkMenuBar==0.9",
+  "CTkMessagebox==2.7",
+  "CTkTrimSlider==2.0.0",
+  "customtkinter==5.2.2",
+  "darkdetect=0.8.0",
+  "packaging==26.0",
+  "pillow==12.1.1",
+  "python-vlc==3.0.21203"
 ]
 
 [project.optional-dependencies]
@@ -37,6 +37,8 @@ module = [
   "CTkMenuBar.*",
   "CTkMessagebox",
   "CTkMessagebox.*",
+  "CTkTrimSlider",
+  "CTkTrimSlider.*",
   "customtkinter",
   "customtkinter.*",
   "vlc",
