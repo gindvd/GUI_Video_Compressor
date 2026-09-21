@@ -31,7 +31,7 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("Media Optimization Tool")
-        self.minsize(1040, 660)
+        self.minsize(1040, 635)
         self.resizable(True, True)
 
         ctk.set_appearance_mode("System")

@@ -106,8 +106,8 @@ class MediaPlayerFrame(ctk.CTkFrame):
         # Container for the entire media player area.
         self._content_frame = ctk.CTkFrame(
             self,
-            fg_color="transparent",
-            corner_radius=0,
+            fg_color="black",
+            corner_radius=10,
         )
         self._content_frame.pack(
             fill="both",
@@ -128,8 +128,8 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self.media_viewer.grid(
             row=0,
             column=0,
-            padx=0,
-            pady=0,
+            padx=10,
+            pady=(10, 0),
             sticky="nsew",
         )
 
@@ -143,24 +143,22 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self._control_panel.grid(
             row=1,
             column=0,
-            padx=0,
-            pady=0,
+            padx=10,
+            pady=(0, 10),
             sticky="ew",
         )
 
         # Timestamp viewer
         self._timestamp_viewer = ctk.CTkFrame(
-            self._content_frame,
+            self,
             height=48,
             fg_color=("gray75", "gray25"),
             corner_radius=10,
         )
-        self._timestamp_viewer.grid(
-            row=2,
-            column=0,
+        self._timestamp_viewer.pack(
             padx=0,
             pady=(10, 0),
-            sticky="ew",
+            fill="x",
         )
 
         self._build_video_controls()
@@ -219,6 +217,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
             self._control_panel,
             textvariable=self._playback_range_timestamp,
             width=125,
+            text_color="white",
         )
         self._time_range_lbl.grid(
             row=1,
@@ -229,6 +228,9 @@ class MediaPlayerFrame(ctk.CTkFrame):
 
         self._trim_slider = CTkTrimSlider(
             self._control_panel,
+            button_color="#1F538D",
+            progress_color="#AAB0B5",
+            button_hover_color="#14375E",
             state="disabled",
             left_button_command=self._handle_start_time_change,
             right_button_command=self._handle_end_time_change,
@@ -318,7 +320,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
             self._timestamp_viewer,
             fg_color="transparent",
         )
-        self._trim_info_frame.pack(anchor="center", expand=True)
+        self._trim_info_frame.pack(padx=1, pady=1, anchor="center", expand=True)
 
         trim_info_font = ctk.CTkFont(size=11)
         trim_duration_font = ctk.CTkFont(size=11, weight="bold")
