@@ -35,12 +35,17 @@ class FrameViewer(ctk.CTkToplevel):
         fg_color = ("gray75", "gray25")
         font = ctk.CTkFont(size=20)
 
+        self._container = ctk.CTkFrame(
+            self, fg_color="black", corner_radius=10,
+        )
+        self._container.pack(padx=10, pady=(10, 5), fill="both", expand=True)
+
         # Image canvas
         self._frame_canvas = ctk.CTkCanvas(
-            self, bg="black", highlightthickness=0, borderwidth=0
+            self._container, bg="black", highlightthickness=0, borderwidth=0
         )
 
-        self._frame_canvas.pack(padx=10, pady=(10, 5), fill="both", expand=True)
+        self._frame_canvas.pack(padx=10, pady=10, fill="both", expand=True)
 
         # Resize the fame image when the window is resized
         self._frame_canvas.bind("<Configure>", self._handle_canvas_resize)

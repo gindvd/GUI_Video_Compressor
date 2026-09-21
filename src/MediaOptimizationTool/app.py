@@ -36,8 +36,13 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("Media Optimization Tool")
-        self.minsize(1040, 635)
         self.resizable(True, True)
+
+        width = 1040
+        height = 655
+
+        self.geometry(f"{width}x{height}")
+        self.minsize(width, height)
 
         ctk.set_appearance_mode("System")
         ctk.set_default_color_theme("blue")
@@ -47,7 +52,6 @@ class App(ctk.CTk):
         self._vlc_service = None
 
         if platform.startswith("win"):
-
             self._win_app_setup()
         elif platform.startswith("linux"):
             self._linux_app_setup()
@@ -63,8 +67,6 @@ class App(ctk.CTk):
         self._main_frame = MainFrame(master=self, corner_radius=0)
 
         self._main_frame.pack(fill="both", expand=True)
-        self._main_frame.columnconfigure(0, weight=1)
-        self._main_frame.rowconfigure(1, weight=1)
 
         self._main_presenter = MainPresenter(
             app_state=self._app_state,

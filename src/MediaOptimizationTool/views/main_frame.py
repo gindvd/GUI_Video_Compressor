@@ -102,12 +102,12 @@ class MainFrame(ctk.CTkFrame):
         self._compress_btn = ctk.CTkButton(
             self._compress_btn_frame,
             width=150,
-            height=35,
+            height=30,
             text="Compress",
             state="disabled",
             command=self._handle_compress,
         )
-        self._compress_btn.pack(padx=10, pady=10)
+        self._compress_btn.pack(padx=10, pady=10, anchor="s")
 
     def _handle_open_file(self) -> None:
         if self.on_open_file:
