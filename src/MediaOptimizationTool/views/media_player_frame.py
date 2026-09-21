@@ -228,9 +228,9 @@ class MediaPlayerFrame(ctk.CTkFrame):
 
         self._trim_slider = CTkTrimSlider(
             self._control_panel,
-            button_color="#1F538D",
             progress_color="#AAB0B5",
-            button_hover_color="#14375E",
+            button_color="#1F6AA5",
+            button_hover_color="#144870",
             state="disabled",
             left_button_command=self._handle_start_time_change,
             right_button_command=self._handle_end_time_change,

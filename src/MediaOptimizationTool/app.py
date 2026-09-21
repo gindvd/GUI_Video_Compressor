@@ -1,9 +1,14 @@
-import customtkinter as ctk
-from tkinter import PhotoImage
-
 from os import path
 from shutil import which
 from sys import platform
+
+if platform.startswith("win"):
+    from ctypes import windll
+
+    windll.shcore.SetProcessDpiAwareness(2)
+
+import customtkinter as ctk
+from tkinter import PhotoImage
 
 from utils.resource_paths import resource_path, setup_vlc_environment
 
@@ -42,9 +47,6 @@ class App(ctk.CTk):
         self._vlc_service = None
 
         if platform.startswith("win"):
-            from ctypes import windll
-
-            windll.shcore.SetProcessDpiAwareness(2)
 
             self._win_app_setup()
         elif platform.startswith("linux"):
