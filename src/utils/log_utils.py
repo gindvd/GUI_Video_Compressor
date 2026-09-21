@@ -3,7 +3,7 @@ import os
 
 from datetime import datetime
 
-from resource_paths import resource_path
+from utils.resource_paths import resource_path
 
 logger = logging.getLogger("app_logger")
 logger.setLevel(logging.DEBUG)

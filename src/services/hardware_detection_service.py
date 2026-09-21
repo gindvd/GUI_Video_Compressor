@@ -1,6 +1,7 @@
 import platform
 import subprocess
 import re
+
 from collections.abc import Sequence
 from typing import Any
 
@@ -35,7 +36,7 @@ system_commands: SystemCommands = {
 }
 
 
-def get_device_output() -> str:
+def _get_device_output() -> str:
     """Calls system to get string of connected GPUs"""
     device_os: str = platform.system()
 
@@ -69,15 +70,15 @@ def get_device_output() -> str:
     else:
         flags["start_new_session"] = True
 
-    output = run_cmd(cmd, flags)
+    output = _run_cmd(cmd, flags)
 
     return output
 
 
-def run_cmd(cmd: Sequence[str], flags: dict[str, Any]) -> str:
-    """Run parent command, returns undecode bytes to be piped into child commands"""
+def _run_cmd(cmd: Sequence[str], flags: dict[str, Any]) -> str:
+    """Runs command to get output containing all connected device names"""
     try:
-        output = subprocess.run(
+        proc = subprocess.run(
             cmd, capture_output=True, check=True, shell=False, text=True, **flags
         )
 
@@ -95,10 +96,10 @@ def run_cmd(cmd: Sequence[str], flags: dict[str, Any]) -> str:
         raise OSError("OS error while running subprocess") from e
 
     else:
-        return output.stdout
+        return proc.stdout
 
 
-def parse_linux_output(output: str) -> list[str]:
+def _parse_linux_output(output: str) -> list[str]:
     gpus = []
 
     for line in output.splitlines():
@@ -108,7 +109,7 @@ def parse_linux_output(output: str) -> list[str]:
     return gpus
 
 
-def parse_mac_output(output: str) -> list[str]:
+def _parse_mac_output(output: str) -> list[str]:
     gpus = []
 
     for line in output.splitlines():
@@ -118,7 +119,7 @@ def parse_mac_output(output: str) -> list[str]:
     return gpus
 
 
-def parse_win_output(output: str) -> list[str]:
+def _parse_win_output(output: str) -> list[str]:
     gpus = []
 
     for line in output.splitlines():
@@ -128,7 +129,7 @@ def parse_win_output(output: str) -> list[str]:
     return gpus
 
 
-def gpu_splitter(name: str) -> list[str]:
+def _gpu_splitter(name: str) -> list[str]:
     """Remove characters and symbols added to GPU names and returns clean names for better comparison"""
     split_name = []
 
@@ -141,7 +142,7 @@ def gpu_splitter(name: str) -> list[str]:
     return split_name
 
 
-def manufacturers() -> list[str]:
+def gpu_manufacturers() -> list[str]:
     """
     Returns manufacturer names of all connected GPUs
 
@@ -153,21 +154,21 @@ def manufacturers() -> list[str]:
     Adapter - possible returns on Virtual Machines and Container hosted OS
     """
 
-    output: str = get_device_output()
+    output: str = _get_device_output()
 
     device_os: str = platform.system()
 
     if device_os == "Windows":
-        gpus = parse_win_output(output)
+        gpus = _parse_win_output(output)
     elif device_os == "Linux":
-        gpus = parse_linux_output(output)
+        gpus = _parse_linux_output(output)
     elif device_os == "Darwin":
-        gpus = parse_mac_output(output)
+        gpus = _parse_mac_output(output)
 
     gpu_manufacturers: list[str] = []
 
     for gpu in gpus:
-        name = gpu_splitter(gpu)
+        name = _gpu_splitter(gpu)
 
         # Linux devices may use Advanced Micro Devices, Inc instead on AMD
         if name[0] == "Advanced":
@@ -176,7 +177,7 @@ def manufacturers() -> list[str]:
 
         # possible options for OS run on virtual machines, and containers
         elif name[0] in ["Microsoft", "VMware", "VirtualBox"]:
-            name[0] = "Adpter"
+            name[0] = "Adapter"
 
         gpu_manufacturers.append(name[0])
 

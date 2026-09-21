@@ -1,4 +1,4 @@
-def get_list_of_smaller_res(vid_res: str) -> list[str]:
+def get_list_of_smaller_resolutions(vid_res: str) -> list[str]:
     """
     Creates list of resolutions that are smaler than the inputted resolution
     Maintains the same aspect ratio
@@ -46,14 +46,14 @@ def get_list_of_smaller_res(vid_res: str) -> list[str]:
 
     for size in std_width:
         if size <= width:
-            h = round_to_even(size / aspect_ratio)
+            h = _round_to_even(size / aspect_ratio)
             new = str(size) + "x" + str(h)
 
             temp_res.extend([new])
 
     for size in std_height:
         if size <= height:
-            w = round_to_even(size * aspect_ratio)
+            w = _round_to_even(size * aspect_ratio)
             new = str(w) + "x" + str(size)
 
             temp_res.extend([new])
@@ -88,6 +88,6 @@ def get_list_of_smaller_res(vid_res: str) -> list[str]:
     return resolutions
 
 
-def round_to_even(f: float) -> int:
+def _round_to_even(f: float) -> int:
     """Rounds number to closest even number for proper resolution sizes"""
     return int(round(f / 2.0) * 2)

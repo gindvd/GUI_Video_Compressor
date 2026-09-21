@@ -1,24 +1,26 @@
-import os
 import subprocess
+
 from typing import Any
-from pathlib import Path
 
 from utils.log_utils import logger
 
+from services.exit_status import ExitStatus
 
-class FFmpegProcessHandler:
+
+class FFmpegService:
     """Handler class for running FFmpeg to compress media file"""
 
-    def __init__(self, ffmpeg: str, device_os: str) -> None:
-        self._ffmpeg: str = ffmpeg
+    def __init__(self, path: str) -> None:
+        self._path: str = path
         self._proc: subprocess.Popen | None = None
         self._terminated: bool = False
-        self._device_os: str = device_os
 
         self._flags: dict[str, Any] = {}
 
         # flags to hide console window
-        if self._device_os == "Windows":
+        from sys import platform
+
+        if platform.startswith("win"):
             self._flags["creationflags"] = (
                 subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
             )
@@ -28,13 +30,11 @@ class FFmpegProcessHandler:
         else:
             self._flags["start_new_session"] = True
 
-    def extract_frame(
-        self, input_file: str, timestamp: str
-    ) -> tuple[bool, bytes | None]:
+    def extract_frame(self, input_file: str, timestamp: str) -> bytes | None:
         """Ectracts frame of media file at the given timestamp"""
         # Command to have FFmpeg extract the frame at the specied timestamp
         cmd = [
-            self._ffmpeg,
+            self._path,
             "-ss",
             timestamp,
             "-i",
@@ -53,8 +53,7 @@ class FFmpegProcessHandler:
         try:
             proc = subprocess.run(
                 cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 shell=False,
                 check=True,
                 timeout=10,
@@ -63,20 +62,20 @@ class FFmpegProcessHandler:
 
         except subprocess.CalledProcessError as e:
             logger.exception(f"ffmpeg frame extraction failed: {str(e)}")
-            return False, None
+            return None
 
         except subprocess.TimeoutExpired:
             logger.exception("ffmpeg frame extraction timed out")
-            return False, None
+            return None
 
         except Exception as e:
             logger.exception(f"Frame extraction error: {str(e)}")
-            return False, None
+            return None
 
         else:
-            return True, proc.stdout
+            return proc.stdout
 
-    def compress(
+    def optimize(
         self,
         input_file: str,
         file_format: str,
@@ -85,31 +84,22 @@ class FFmpegProcessHandler:
         fps: str,
         preset: str | None,
         quality: int,
-        audio: bool,
-        audio_codec: str,
-        audio_bitrate: str,
+        include_audio: bool,
+        audio_codec: str | None,
+        audio_bitrate: str | None,
         start_time: str,
         duration: str,
-        output_directory: str,
-    ) -> tuple[bool, str | None]:
+        output_file: str,
+    ) -> ExitStatus:
         """Creates FFmpeg command with all args and executes it to compress video files"""
-
-        fullname, _ = os.path.splitext(input_file)
-        name = os.path.basename(fullname)
-        new_name = name + "_compressed." + file_format
-
-        output_file = os.path.join(output_directory, new_name)
-
-        if os.path.exists(output_file):
-            output_file = self._uniquify(output_file)
 
         width, height = resolution.split("x")
 
         crf = self._quality_converter(quality)
 
-        if not audio:
+        if include_audio is None or audio_codec is None or audio_bitrate is None:
             aud_opts = ["-an"]
-        elif audio:
+        else:
             aud_opts = ["-c:a", audio_codec, "-b:a", audio_bitrate]
 
         # Base hardware and scale args that might change based on hardware codecs
@@ -144,7 +134,7 @@ class FFmpegProcessHandler:
             quality_args.extend(["-b:v", "0"])
 
         # Begin assembling the command list in order
-        cmd: list[str] = [self._ffmpeg]
+        cmd: list[str] = [self._path]
 
         if hwaccel_args is not None:
             cmd.extend(hwaccel_args)
@@ -163,16 +153,14 @@ class FFmpegProcessHandler:
             ]
         )
 
-        if preset is not None:
+        if preset:
             cmd.extend(["-preset", preset])
 
         cmd.extend([*quality_args, *aud_opts, output_file])
 
-        return self._run_compression(cmd, output_file)
+        return self._run_compression(cmd)
 
-    def _run_compression(
-        self, cmd: list[str], output_file: str
-    ) -> tuple[bool, str | None]:
+    def _run_compression(self, cmd: list[str]) -> ExitStatus:
         """Runs the command to compress videos"""
 
         # Try compressing the video file and cleaning log / display any errors that occur
@@ -186,68 +174,62 @@ class FFmpegProcessHandler:
                 **self._flags,
             )
 
-            out, err = self._proc.communicate()
-            self._proc.wait()
-
+            out = self._proc.communicate()
             rc = self._proc.returncode
 
         # AttributeError sometimes raised when cancelling video compression due to _proc being set to None which has no wait
         # Must be a timing thing
         # Addding except to ignore and treat like normal termination as it still properly kills the process
         except AttributeError:
-            if os.path.exists(output_file):
-                os.remove(output_file)
+            return ExitStatus.TERMINATED
 
-            return False, None
-
-        except FileNotFoundError:
-            return False, "FFmpeg could not be found!"
+        except FileNotFoundError as e:
+            logger.exception(str(e))
+            return ExitStatus.ERROR
 
         except PermissionError as e:
             logger.exception(str(e))
-            return False, "Permission Error Occured!\nCheck logs for details!"
+            return ExitStatus.ERROR
 
         except subprocess.SubprocessError as e:
             logger.exception(str(e))
-            return False, "Subprocess Error Occured!\nCheck logs for details!"
+            return ExitStatus.ERROR
 
         except OSError as e:
             logger.exception(str(e))
-            return False, "OS Error Occured!\nCheck logs for details!"
+            return ExitStatus.ERROR
 
         else:
-            # Log / display error when return code is non-zero and process was not terminated by user
-            if rc != 0 and self._terminated == False:
-                if os.path.exists(output_file):
-                    os.remove(output_file)
+            # Log / display error when return code is non-zero
+            # and process was not terminated by user
+            if rc != 0 and not self._terminated:
 
                 logger.error(
-                    "FFmpeg failed with exit code %d\n" "Command: %s\n" "Output:\n%s",
+                    "FFmpeg failed with exit code %d\n\n"
+                    "Command: %s\n\n"
+                    "Output:\n%s",
                     rc,
                     " ".join(str(arg) for arg in cmd),
                     out,
                 )
 
-                return False, "Compression Failed\nCheck logs for details!"
+                return ExitStatus.ERROR
 
             # Handles user terminating the process and supresses error messages
-            elif rc != 0 and self._terminated == True:
-                if os.path.exists(output_file):
-                    os.remove(output_file)
-
-                return False, None
+            elif rc != 0 and self._terminated:
+                return ExitStatus.TERMINATED
 
             else:
-                return True, None
+                return ExitStatus.SUCCESS
 
         finally:
             # Resets values
             self._proc = None
             self._terminated = False
 
-    def terminate_compression(self) -> tuple[bool, str]:
-        """Terminates compression process running at users request"""
-        # _proc_poll will only be None when process is running
+    def terminate_process(self) -> None:
+        """Terminates running ffmpeg binaries"""
+        # poll will return None if process is running
         if self._proc and self._proc.poll() is None:
 
             # Send termination command to the process
@@ -260,30 +242,11 @@ class FFmpegProcessHandler:
             except subprocess.TimeoutExpired:
                 # Send harsher kill command if timeout expires
                 self._proc.kill()
-                return True, "Video compression killed"
-
-            else:
-                return True, "Video compression terminated"
-
-        else:
-            return False, ""
 
     @staticmethod
     def _quality_converter(quality: int) -> int:
-        """Converts quality percentage into inerted CRF number to specify bitrate"""
+        """Converts quality percentage into inverted CRF number to specify bitrate"""
         # Quality needs be inverted as the lower the CRF number, the better the quality
         quality_inverted = abs(quality / 100 - 1)
         crf = quality_inverted * 33 + 18  # Range 18 to 51
         return int(crf)
-
-    @staticmethod
-    def _uniquify(file_path: str) -> str:
-        """Adds unique number to filename, if file already exists"""
-        filename, extension = os.path.splitext(file_path)
-        counter = 1
-
-        while os.path.exists(file_path):
-            file_path = filename + " (" + str(counter) + ")" + extension
-            counter += 1
-
-        return file_path
