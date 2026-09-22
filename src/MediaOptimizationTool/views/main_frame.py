@@ -61,7 +61,7 @@ class MainFrame(ctk.CTkFrame):
         self._file_frame.pack(padx=0, pady=0, fill="x", anchor="n")
         self._file_frame.columnconfigure(0, weight=1)
 
-        self._file_entry = ctk.CTkEntry(self._file_frame, height=30)
+        self._file_entry = ctk.CTkEntry(self._file_frame,)
         self._file_entry.bind("<Return>", self._handle_file_entry_submit)
         self._file_entry.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
 
@@ -101,8 +101,6 @@ class MainFrame(ctk.CTkFrame):
 
         self._compress_btn = ctk.CTkButton(
             self._compress_btn_frame,
-            width=150,
-            height=30,
             text="Compress",
             state="disabled",
             command=self._handle_compress,

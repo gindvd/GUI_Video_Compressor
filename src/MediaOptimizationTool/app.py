@@ -38,11 +38,12 @@ class App(ctk.CTk):
         self.title("Media Optimization Tool")
         self.resizable(True, True)
 
-        width = 1040
-        height = 655
+        self.minsize(1000, 625)
 
-        self.geometry(f"{width}x{height}")
-        self.minsize(width, height)
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        self.maxsize(screen_width, screen_height)
 
         ctk.set_appearance_mode("System")
         ctk.set_default_color_theme("blue")
