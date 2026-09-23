@@ -161,27 +161,23 @@ class SettingsFrame(ctk.CTkFrame):
         )
         self._frames_dropdown.grid(row=4, column=1, padx=10, pady=6, sticky="ew")
 
-        quality_row = ctk.CTkFrame(self._video_section, fg_color="transparent")
-        quality_row.grid(
+        ctk.CTkLabel(self._video_section, text="Quality:").grid(
             row=5,
             column=0,
-            columnspan=2,
             padx=10,
-            pady=(6, 10),
-            sticky="ew",
-        )
-        quality_row.columnconfigure(1, weight=1)
-
-        ctk.CTkLabel(quality_row, text="Quality:").grid(
-            row=0,
-            column=0,
-            padx=(0, 8),
+            pady=6,
             sticky="w",
         )
 
+        self._quality_perc_lbl = ctk.CTkLabel(
+            self._video_section,
+            textvariable=self._quality_text,
+        )
+        self._quality_perc_lbl.grid(row=5, column=1, padx=10, pady=6, sticky="w")
+
+
         self._quality_slider = ctk.CTkSlider(
-            quality_row,
-            width=175,
+            self._video_section,
             button_corner_radius=4,
             from_=0,
             to=100,
@@ -189,14 +185,7 @@ class SettingsFrame(ctk.CTkFrame):
             command=self._handle_quality_change,
             variable=self._quality,
         )
-        self._quality_slider.grid(row=0, column=1, padx=(0, 8), sticky="ew")
-
-        self._quality_perc_lbl = ctk.CTkLabel(
-            quality_row,
-            textvariable=self._quality_text,
-            width=40,
-        )
-        self._quality_perc_lbl.grid(row=0, column=2, sticky="e")
+        self._quality_slider.grid(row=6, column=0, columnspan=2, padx=10, pady=(0, 6), sticky="ew")
 
     def _build_audio_section(self) -> None:
         ctk.CTkLabel(self._audio_section, text="Codec:").grid(
