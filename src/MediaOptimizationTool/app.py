@@ -38,13 +38,6 @@ class App(ctk.CTk):
         self.title("Media Optimization Tool")
         self.resizable(True, True)
 
-        self.minsize(1000, 625)
-
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-
-        self.maxsize(screen_width, screen_height)
-
         ctk.set_appearance_mode("System")
         ctk.set_default_color_theme("blue")
 
@@ -77,6 +70,14 @@ class App(ctk.CTk):
             vlc_playback_service=self._vlc_service,
             on_exit_command=self.quit,
         )
+
+        self.update_idletasks()
+        self.after(200, lambda: self.minsize(self.winfo_width(), self.winfo_height()))
+
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        self.maxsize(screen_width, screen_height)
 
         self.protocol("WM_DELETE_WINDOW", self._main_presenter.on_exit)
 
