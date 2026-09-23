@@ -1,0 +1,252 @@
+import subprocess
+
+from typing import Any
+
+from utils.log_utils import logger
+
+from services.exit_status import ExitStatus
+
+
+class FFmpegService:
+    """Handler class for running FFmpeg to compress media file"""
+
+    def __init__(self, path: str) -> None:
+        self._path: str = path
+        self._proc: subprocess.Popen | None = None
+        self._terminated: bool = False
+
+        self._flags: dict[str, Any] = {}
+
+        # flags to hide console window
+        from sys import platform
+
+        if platform.startswith("win"):
+            self._flags["creationflags"] = (
+                subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+            )
+            si = subprocess.STARTUPINFO()
+            si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            self._flags["startupinfo"] = si
+        else:
+            self._flags["start_new_session"] = True
+
+    def extract_frame(self, input_file: str, timestamp: str) -> bytes | None:
+        """Ectracts frame of media file at the given timestamp"""
+        # Command to have FFmpeg extract the frame at the specied timestamp
+        cmd = [
+            self._path,
+            "-ss",
+            timestamp,
+            "-i",
+            input_file,
+            "-frames:v",
+            "1",
+            "-f",
+            "image2pipe",
+            "-vcodec",
+            "png",
+            "-loglevel",
+            "error",
+            "pipe:1",
+        ]
+
+        try:
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                shell=False,
+                check=True,
+                timeout=10,
+                **self._flags,
+            )
+
+        except subprocess.CalledProcessError as e:
+            logger.exception(f"ffmpeg frame extraction failed: {str(e)}")
+            return None
+
+        except subprocess.TimeoutExpired:
+            logger.exception("ffmpeg frame extraction timed out")
+            return None
+
+        except Exception as e:
+            logger.exception(f"Frame extraction error: {str(e)}")
+            return None
+
+        else:
+            return proc.stdout
+
+    def optimize(
+        self,
+        input_file: str,
+        file_format: str,
+        resolution: str,
+        codec: str,
+        fps: str,
+        preset: str | None,
+        quality: int,
+        include_audio: bool,
+        audio_codec: str | None,
+        audio_bitrate: str | None,
+        start_time: str,
+        duration: str,
+        output_file: str,
+    ) -> ExitStatus:
+        """Creates FFmpeg command with all args and executes it to compress video files"""
+
+        width, height = resolution.split("x")
+
+        crf = self._quality_converter(quality)
+
+        if include_audio is None or audio_codec is None or audio_bitrate is None:
+            aud_opts = ["-an"]
+        else:
+            aud_opts = ["-c:a", audio_codec, "-b:a", audio_bitrate]
+
+        # Base hardware and scale args that might change based on hardware codecs
+        hwaccel_args = None
+        scale_args = ["-vf", f"scale={width}:{height},fps={fps}"]
+
+        _, __, hw_id = codec.partition("_")
+
+        # Matches hardware codec and changes the quality args that work with the codec
+        if hw_id == "nvenc":
+            quality_args = ["-rc", "vbr", "-cq", str(crf), "-b:v", "0"]
+
+        elif hw_id == "amf":
+            quality_args = ["-rc", "qvbr", "-qvbr_quality_level", str(crf)]
+
+        elif hw_id == "qsv":
+            hwaccel_args = ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw"]
+            quality_args = ["-global_quality", str(crf), "-look_ahead", "1"]
+
+        elif hw_id == "vaapi":
+            hwaccel_args = ["-vaapi_device", "/dev/dri/renderD128"]
+            scale_args = [
+                "-vf",
+                f"format=nv12,fps={fps},hwupload,scale_vaapi=w={width}:h={height}",
+            ]
+            quality_args = ["-qp", str(crf)]
+
+        else:
+            quality_args = ["-crf", str(crf)]
+
+        if codec == "libvpx-vp9":
+            quality_args.extend(["-b:v", "0"])
+
+        # Begin assembling the command list in order
+        cmd: list[str] = [self._path]
+
+        if hwaccel_args is not None:
+            cmd.extend(hwaccel_args)
+
+        cmd.extend(
+            [
+                "-ss",
+                start_time,
+                "-t",
+                duration,
+                "-i",
+                input_file,
+                "-c:v",
+                codec,
+                *scale_args,
+            ]
+        )
+
+        if preset:
+            cmd.extend(["-preset", preset])
+
+        cmd.extend([*quality_args, *aud_opts, output_file])
+
+        return self._run_compression(cmd)
+
+    def _run_compression(self, cmd: list[str]) -> ExitStatus:
+        """Runs the command to compress videos"""
+
+        # Try compressing the video file and cleaning log / display any errors that occur
+        try:
+            self._proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                shell=False,
+                text=True,
+                **self._flags,
+            )
+
+            out = self._proc.communicate()
+            rc = self._proc.returncode
+
+        # AttributeError sometimes raised when cancelling video compression due to _proc being set to None which has no wait
+        # Must be a timing thing
+        # Addding except to ignore and treat like normal termination as it still properly kills the process
+        except AttributeError:
+            return ExitStatus.TERMINATED
+
+        except FileNotFoundError as e:
+            logger.exception(str(e))
+            return ExitStatus.ERROR
+
+        except PermissionError as e:
+            logger.exception(str(e))
+            return ExitStatus.ERROR
+
+        except subprocess.SubprocessError as e:
+            logger.exception(str(e))
+            return ExitStatus.ERROR
+
+        except OSError as e:
+            logger.exception(str(e))
+            return ExitStatus.ERROR
+
+        else:
+            # Log / display error when return code is non-zero
+            # and process was not terminated by user
+            if rc != 0 and not self._terminated:
+
+                logger.error(
+                    "FFmpeg failed with exit code %d\n\n"
+                    "Command: %s\n\n"
+                    "Output:\n%s",
+                    rc,
+                    " ".join(str(arg) for arg in cmd),
+                    out,
+                )
+
+                return ExitStatus.ERROR
+
+            # Handles user terminating the process and supresses error messages
+            elif rc != 0 and self._terminated:
+                return ExitStatus.TERMINATED
+
+            else:
+                return ExitStatus.SUCCESS
+
+        finally:
+            # Resets values
+            self._proc = None
+            self._terminated = False
+
+    def terminate_process(self) -> None:
+        """Terminates running ffmpeg binaries"""
+        # poll will return None if process is running
+        if self._proc and self._proc.poll() is None:
+
+            # Send termination command to the process
+            self._proc.terminate()
+            self._terminated = True
+
+            try:
+                self._proc.wait(timeout=5)
+
+            except subprocess.TimeoutExpired:
+                # Send harsher kill command if timeout expires
+                self._proc.kill()
+
+    @staticmethod
+    def _quality_converter(quality: int) -> int:
+        """Converts quality percentage into inverted CRF number to specify bitrate"""
+        # Quality needs be inverted as the lower the CRF number, the better the quality
+        quality_inverted = abs(quality / 100 - 1)
+        crf = quality_inverted * 33 + 18  # Range 18 to 51
+        return int(crf)
