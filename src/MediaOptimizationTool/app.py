@@ -72,10 +72,16 @@ class App(ctk.CTk):
         )
 
         self.update_idletasks()
-        self.after(200, lambda: self.minsize(self.winfo_width(), self.winfo_height()))
 
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
+
+        self.after(
+            200, self.minsize(
+                min(self.winfo_width(), screen_width),
+                min(self.winfo_height(), screen_height),
+            )
+        )
 
         self.maxsize(screen_width, screen_height)
 

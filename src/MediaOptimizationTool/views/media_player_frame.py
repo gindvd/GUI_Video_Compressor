@@ -357,7 +357,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self._end_time_info_lbl.grid(padx=(5, 20), pady=0, row=0, column=5, sticky="e")
 
     def _show_volume_popup(self, event: Event | None = None) -> None:
-        """Displays volume slider using absolute screen coordinates via CTkToplevel"""
+        """ Displays the volume slider above the volume button """
 
         if self._volume_hide_id is not None:
             self.after_cancel(self._volume_hide_id)
@@ -366,21 +366,27 @@ class MediaPlayerFrame(ctk.CTkFrame):
         if self._volume_popup_visible:
             return
 
-        self._volume_container.update_idletasks()
-        btn_x = self._volume_container.winfo_rootx()
-        btn_y = self._volume_container.winfo_rooty()
-        btn_w = self._volume_container.winfo_width()
+        self._volume_btn.update_idletasks()
 
+        btn_x = self._volume_btn.winfo_rootx()
+        btn_y = self._volume_btn.winfo_rooty()
+        btn_w = self._volume_btn.winfo_width()
+
+        self._volume_popup.deiconify()
         self._volume_popup.update_idletasks()
-        popup_w = self._volume_popup.winfo_reqwidth()
-        popup_h = self._volume_popup.winfo_reqheight()
 
+        popup_w = self._volume_popup.winfo_width()
+        popup_h = self._volume_popup.winfo_height()
+
+        # Center the popup horizontally over the volume button
         x = btn_x + (btn_w - popup_w) // 2
+
+        # Place the popup directly above the volume button
         y = btn_y - popup_h - 4
 
         self._volume_popup.geometry(f"+{x}+{y}")
-        self._volume_popup.deiconify()
         self._volume_popup.lift()
+
         self._volume_popup_visible = True
 
     def _schedule_hide_volume_popup(self, event: Event | None = None) -> None:
