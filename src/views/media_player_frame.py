@@ -247,14 +247,8 @@ class MediaPlayerFrame(ctk.CTkFrame):
             sticky="ew",
         )
 
-        # Volume container frame for stable hover events
-        self._volume_container = ctk.CTkFrame(
-            self._control_panel, fg_color="transparent"
-        )
-        self._volume_container.grid(row=1, column=5, padx=5, pady=5)
-
         self._volume_btn = ctk.CTkButton(
-            self._volume_container,
+            self._control_panel,
             width=36,
             height=36,
             fg_color="transparent",
@@ -263,18 +257,22 @@ class MediaPlayerFrame(ctk.CTkFrame):
             state="disabled",
             command=self._handle_mute_toggle,
         )
-        self._volume_btn.pack()
+        self._volume_btn.grid(
+            row=1,
+            column=5,
+            padx=5,
+            pady=5,
+            sticky="ew",
+        )
 
-        # Convert volume popup to a CTkToplevel window to float properly over everything on Windows & Linux
         self._volume_popup = ctk.CTkToplevel(self)
-        self._volume_popup.withdraw()  # Hidden by default
-        self._volume_popup.overrideredirect(True)  # Remove window borders/title bar
-        self._volume_popup.attributes("-topmost", True)  # Keep above main window
+        self._volume_popup.withdraw()
+        self._volume_popup.overrideredirect(True)
+        self._volume_popup.resizable(False, False)
 
         self._volume_slider = ctk.CTkSlider(
             self._volume_popup,
             height=100,
-            width=20,
             button_corner_radius=4,
             from_=0,
             to=100,
@@ -284,12 +282,10 @@ class MediaPlayerFrame(ctk.CTkFrame):
             command=self._handle_volume_change,
             variable=self._volume,
         )
-        self._volume_slider.set(100)
-        self._volume_slider.pack(padx=6, pady=8)
 
-        # Hover bindings
-        self._volume_container.bind("<Enter>", self._show_volume_popup)
-        self._volume_container.bind("<Leave>", self._schedule_hide_volume_popup)
+        self._volume_slider.set(100)
+        self._volume_slider.pack(padx=10, pady=10,)
+
         self._volume_btn.bind("<Enter>", self._show_volume_popup)
         self._volume_btn.bind("<Leave>", self._schedule_hide_volume_popup)
         self._volume_popup.bind("<Enter>", self._cancel_hide_volume_popup)
@@ -356,38 +352,33 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
         self._end_time_info_lbl.grid(padx=(5, 20), pady=0, row=0, column=5, sticky="e")
 
-    def _show_volume_popup(self, event: Event | None = None) -> None:
-        """ Displays the volume slider above the volume button """
-
-        if self._volume_hide_id is not None:
-            self.after_cancel(self._volume_hide_id)
-            self._volume_hide_id = None
-
-        if self._volume_popup_visible:
+    def _show_volume_popup(self, event=None) -> None:
+        if (
+            self._volume_slider.cget("state") == "disabled"
+            or self._volume_btn.cget("state") == "disabled"
+        ):
             return
 
-        self._volume_btn.update_idletasks()
-
+        # Get the button's position on the screen.
         btn_x = self._volume_btn.winfo_rootx()
         btn_y = self._volume_btn.winfo_rooty()
-        btn_w = self._volume_btn.winfo_width()
 
-        self._volume_popup.deiconify()
+        # Make sure the popup has calculated its requested size.
         self._volume_popup.update_idletasks()
 
-        popup_w = self._volume_popup.winfo_width()
-        popup_h = self._volume_popup.winfo_height()
+        popup_width = self._volume_popup.winfo_reqwidth()
+        popup_height = self._volume_popup.winfo_reqheight()
 
-        # Center the popup horizontally over the volume button
-        x = btn_x + (btn_w - popup_w) // 2
+        # Center the popup horizontally above the volume button.
+        popup_x = btn_x + (self._volume_btn.winfo_width() - popup_width) // 2
+        popup_y = btn_y - popup_height - 5
 
-        # Place the popup directly above the volume button
-        y = btn_y - popup_h - 4
-
-        self._volume_popup.geometry(f"+{x}+{y}")
+        self._volume_popup.geometry(f"+{popup_x}+{popup_y}")
+        self._volume_popup.deiconify()
         self._volume_popup.lift()
 
         self._volume_popup_visible = True
+        self._cancel_hide_volume_popup()
 
     def _schedule_hide_volume_popup(self, event: Event | None = None) -> None:
         """Waits a few milliseconds to hide volume slider"""

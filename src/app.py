@@ -5,7 +5,10 @@ from sys import platform
 if platform.startswith("win"):
     from ctypes import windll
 
-    windll.shcore.SetProcessDpiAwareness(2)
+    try:
+        windll.user32.SetProcessDpiAwarenessContext(-4)
+    except AttributeError:
+        windll.shcore.SetProcessDpiAwareness(2)
 
 import customtkinter as ctk
 from tkinter import PhotoImage
@@ -71,12 +74,9 @@ class App(ctk.CTk):
             on_exit_command=self.quit,
         )
 
-        self.after(200, lambda: self.minsize(self.winfo_width(), self.winfo_height()))
+        self.update_idletasks()
 
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-
-        self.maxsize(screen_width, screen_height)
+        self.minsize(1198, 651)
 
         self.protocol("WM_DELETE_WINDOW", self._main_presenter.on_exit)
 
