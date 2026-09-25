@@ -57,61 +57,174 @@ class MainFrame(ctk.CTkFrame):
     def _build(self) -> None:
         frame_color = ("gray78", "gray22")
 
-        self._file_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=frame_color)
-        self._file_frame.pack(padx=0, pady=0, fill="x", anchor="n")
+        # Application layout container
+
+        self._layout_frame = ctk.CTkFrame(
+            self,
+            corner_radius=0,
+            fg_color="transparent",
+        )
+
+        self._layout_frame.pack(
+            fill="both",
+            expand=True,
+        )
+
+        # File frame
+
+        self._file_frame = ctk.CTkFrame(
+            self._layout_frame,
+            corner_radius=0,
+            fg_color=frame_color,
+        )
+
+        self._file_frame.pack(
+            fill="x",
+            side="top",
+        )
+
         self._file_frame.columnconfigure(0, weight=1)
 
-        self._file_entry = ctk.CTkEntry(self._file_frame,)
-        self._file_entry.bind("<Return>", self._handle_file_entry_submit)
-        self._file_entry.grid(row=0, column=0, padx=8, pady=5, sticky="ew")
+        self._file_entry = ctk.CTkEntry(
+            self._file_frame,
+        )
+
+        self._file_entry.bind(
+            "<Return>",
+            self._handle_file_entry_submit,
+        )
+
+        self._file_entry.grid(
+            row=0,
+            column=0,
+            padx=8,
+            pady=5,
+            sticky="ew",
+        )
 
         self._browse_btn = ctk.CTkButton(
             self._file_frame,
             text="Browse",
             command=self._handle_open_file,
         )
-        self._browse_btn.grid(row=0, column=1, padx=8, pady=5)
 
-        # Content Area - Video Preview left, Settings right
-        self._content_frame = ctk.CTkFrame(
-            self, corner_radius=0, fg_color="transparent"
+        self._browse_btn.grid(
+            row=0,
+            column=1,
+            padx=8,
+            pady=5,
         )
-        self._content_frame.pack(padx=0, pady=0, fill="both", anchor="center", expand=True)
+
+        # Bottom frame
+
+        self._bottom_frame = ctk.CTkFrame(
+            self._layout_frame,
+            height=20,
+            corner_radius=0,
+            fg_color=frame_color,
+        )
+
+        self._bottom_frame.pack(
+            fill="x",
+            side="bottom",
+        )
+
+        self._bottom_frame.pack_propagate(False)
+
+        self._status_label = ctk.CTkLabel(
+            self._bottom_frame,
+            text="© David Gingerich",
+            anchor="e",
+        )
+
+        self._status_label.pack(
+            fill="both",
+            expand=True,
+            padx=10,
+        )
+
+        # Content frame
+
+        self._content_frame = ctk.CTkFrame(
+            self._layout_frame,
+            corner_radius=0,
+            fg_color="transparent",
+        )
+
+        self._content_frame.pack(
+            fill="both",
+            expand=True,
+        )
+
         self._content_frame.columnconfigure(0, weight=1)
         self._content_frame.rowconfigure(0, weight=1)
 
-        # Media player frame
+        # Media player
+
         self._media_player_frame = MediaPlayerFrame(
             master=self._content_frame,
             corner_radius=0,
             fg_color="transparent",
         )
-        self._media_player_frame.grid(row=0, column=0, padx=8, pady=8, sticky="nsew")
+
+        self._media_player_frame.grid(
+            row=0,
+            column=0,
+            padx=8,
+            pady=8,
+            sticky="nsew",
+        )
+
+        # Settings
 
         tabview = ctk.CTkTabview(
-            master=self._content_frame, 
-            corner_radius=8, 
-            border_color=frame_color, 
+            master=self._content_frame,
+            corner_radius=8,
+            border_color=frame_color,
             border_width=2,
-            segmented_button_font=ctk.CTkFont(size=14, weight="bold")
+            segmented_button_font=ctk.CTkFont(
+                size=14,
+                weight="bold",
+            ),
         )
-        tabview.grid(row=0, column=1, padx=8, pady=(0, 8), sticky="nsew")
+
+        tabview.grid(
+            row=0,
+            column=1,
+            padx=8,
+            pady=(0, 8),
+            sticky="nsew",
+        )
 
         tabview.add("Video")
         tabview.add("  GIF  ")
         tabview.set("Video")
 
-        # Video compression settings frame
         self._settings_frame = SettingsFrame(
-            tabview.tab("Video"), corner_radius=0, fg_color="transparent"
+            tabview.tab("Video"),
+            corner_radius=0,
+            fg_color="transparent",
         )
-        self._settings_frame.pack(padx=0, pady=0, expand=True, fill="both")
 
-        # Gif creation settings frame
-        self._gif_frame = GifSettingsFrame(
-            tabview.tab("  GIF  "), corner_radius=0, fg_color="transparent"
+        self._settings_frame.pack(
+            padx=0,
+            pady=0,
+            expand=True,
+            fill="both",
         )
-        self._gif_frame.pack(padx=0, pady=0, expand=True, fill="both")
+
+        self._gif_frame = GifSettingsFrame(
+            tabview.tab("  GIF  "),
+            corner_radius=0,
+            fg_color="transparent",
+        )
+
+        self._gif_frame.pack(
+            padx=0,
+            pady=0,
+            expand=True,
+            fill="both",
+        )
 
     def _handle_open_file(self) -> None:
         if self.on_open_file:
