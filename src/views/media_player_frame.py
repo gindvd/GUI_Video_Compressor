@@ -107,7 +107,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self._content_frame = ctk.CTkFrame(
             self,
             fg_color="black",
-            corner_radius=10,
+            corner_radius=8,
         )
         self._content_frame.pack(
             fill="both",
@@ -128,8 +128,8 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self.media_viewer.grid(
             row=0,
             column=0,
-            padx=10,
-            pady=(10, 0),
+            padx=8,
+            pady=(8, 0),
             sticky="nsew",
         )
 
@@ -143,8 +143,8 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self._control_panel.grid(
             row=1,
             column=0,
-            padx=10,
-            pady=(0, 10),
+            padx=8,
+            pady=(0, 8),
             sticky="ew",
         )
 
@@ -153,11 +153,11 @@ class MediaPlayerFrame(ctk.CTkFrame):
             self,
             height=48,
             fg_color=("gray75", "gray25"),
-            corner_radius=10,
+            corner_radius=8,
         )
         self._timestamp_viewer.pack(
             padx=0,
-            pady=(10, 0),
+            pady=(8, 0),
             fill="x",
         )
 
@@ -284,7 +284,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
 
         self._volume_slider.set(100)
-        self._volume_slider.pack(padx=10, pady=10,)
+        self._volume_slider.pack(padx=8, pady=8,)
 
         self._volume_btn.bind("<Enter>", self._show_volume_popup)
         self._volume_btn.bind("<Leave>", self._schedule_hide_volume_popup)

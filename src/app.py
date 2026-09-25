@@ -19,6 +19,7 @@ from models.app_state import AppState
 from models.media_attrs import MediaAttrs
 from models.optimize_settings import OptimizeSettings
 from models.media_timestamps import MediaTimestamps
+from models.gif_settings import GifSettings
 
 from services.ffmpeg_service import FFmpegService
 from services.ffprobe_service import FFprobeService
@@ -59,6 +60,7 @@ class App(ctk.CTk):
             media=MediaAttrs(),
             settings=OptimizeSettings(),
             timestamps=MediaTimestamps(),
+            gif_settings=GifSettings()
         )
 
         self._main_frame = MainFrame(master=self, corner_radius=0)
@@ -76,7 +78,7 @@ class App(ctk.CTk):
 
         self.update_idletasks()
 
-        self.minsize(1198, 651)
+        self.minsize(840, 500)
 
         self.protocol("WM_DELETE_WINDOW", self._main_presenter.on_exit)
 

@@ -5,3 +5,4 @@ class ExitStatus(Enum):
     SUCCESS = auto()
     ERROR = auto()
     TERMINATED = auto()
+    BUSY = auto()

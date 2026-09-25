@@ -1,8 +1,12 @@
 from sys import platform
+from os import path
+from collections.abc import Callable
 
 from models.optimize_settings import OptimizeSettings
 
 from views.settings_frame import SettingsFrame
+
+from controllers.ffmpeg_controller import FFmpegController
 
 from services.hardware_detection_service import (
     gpu_manufacturers,
@@ -20,13 +24,31 @@ class SettingsPresenter:
     _BASE_VIDEO_CODECS = ["libx264", "libx265", "libvpx-vp9", "libsvtav1"]
 
     def __init__(
-        self, optimize_settings: OptimizeSettings, settings_view: SettingsFrame
+        self, 
+        optimize_settings: OptimizeSettings, 
+        settings_view: SettingsFrame,
+        ffmpeg_controller: FFmpegController,
+        disable_ui_command: Callable[[], None],
+        restore_ui_command: Callable[[], None]
     ):
         self._optimize_settings: OptimizeSettings = optimize_settings
         self._settings_view: SettingsFrame = settings_view
+        self._ffmpeg_controller = ffmpeg_controller
+
+        self._disable_ui : Callable[[], None] = disable_ui_command
+        self._restore_ui : Callable[[], None] = restore_ui_command
 
         self._initialize_video_codec_values()
         self._bind_settings_view()
+    
+    def on_compress(self) -> None:
+        self._disable_ui()
+
+        if not self._get_output_directory():
+            self._restore_ui()
+            return
+        
+        self._ffmpeg_controller.optimize_media()
 
     def on_video_codec_change(self, value: str) -> None:
         self._optimize_settings.video_codec = value
@@ -126,6 +148,22 @@ class SettingsPresenter:
         self._settings_view.video_codec = video_codecs[0]
 
         self.on_video_codec_change(video_codecs[0])
+    
+    def _get_output_directory(self) -> bool:
+        from tkinter import filedialog
+
+        output_directory: str = filedialog.askdirectory(
+            parent=self._settings_view,
+            title="File Output Selection",
+            initialdir=path.expanduser("~"),
+        )
+
+        if output_directory == "":
+            return False
+
+        self._ffmpeg_controller.create_output_file(output_directory)
+
+        return True
 
     def _bind_settings_view(self) -> None:
         self._settings_view.on_video_codec_change = self.on_video_codec_change
@@ -137,3 +175,5 @@ class SettingsPresenter:
         self._settings_view.on_audio_bitrate_change = self.on_audio_bitrate_change
         self._settings_view.on_remove_audio_toggle = self.on_remove_audio_toggle
         self._settings_view.on_preset_speed_change = self.on_preset_speed_change
+
+        self._settings_view.on_compress = self.on_compress

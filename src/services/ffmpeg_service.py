@@ -75,6 +75,60 @@ class FFmpegService:
         else:
             return proc.stdout
 
+    def create_gif(
+        self, 
+        input_file: str,
+        output_file: str,
+        start_time: str,
+        duration: str,
+        fps: str,
+        resolution: str,
+        loops: int
+    ) -> ExitStatus:
+        """ 
+        Converts video file to gif 
+        
+        Args:
+        Input file: Video file to be converted to a gif
+        Ouput file: Name of gif file to be outputed to
+
+        Start time: Starting time of input file where conversion will begin
+        Duration: Gifs full duration
+
+        Frame rate: Desired frame rate of the gif
+        Resolution: Desired Resolution of the gif
+
+        Loops: how many times the gif should loop:
+        0 = infinite loops, -1 = Play Once, 1 = Play twice
+        """
+        
+        width, height = resolution.split("x")
+
+        palettegen = "palettegen=stats_mode=diff"
+        pallateuse = "pallateuse=dither=sierra2_4a"
+
+        scale_args = [
+            "-vf", 
+            f"fps={fps}, scale={height}:-1:lanczos,split[s0][s1];[s0]{palettegen}[p];[s1][p]{paletteuse}"
+        ]
+
+        cmd = [
+            self._path,
+            "-ss",
+            start_time,
+            "-t",
+            duration,
+            "-i",
+            input_file,
+            "-vf",
+            scale_args,
+            "-loop",
+            str(loops),
+            output_file
+        ]
+
+        return self._run_command(cmd)
+
     def optimize(
         self,
         input_file: str,
@@ -158,10 +212,13 @@ class FFmpegService:
 
         cmd.extend([*quality_args, *aud_opts, output_file])
 
-        return self._run_compression(cmd)
+        return self._run_command(cmd)
 
-    def _run_compression(self, cmd: list[str]) -> ExitStatus:
+    def _run_command(self, cmd: list[str]) -> ExitStatus:
         """Runs the command to compress videos"""
+
+        if self._proc:
+            return ExitStatus.Busy
 
         # Try compressing the video file and cleaning log / display any errors that occur
         try:

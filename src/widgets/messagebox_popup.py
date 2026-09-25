@@ -23,3 +23,5 @@ class MessageboxPopup(ctk.CTkToplevel):
         self._close_btn = ctk.CTkButton(self, text="Close", command=self.destroy)
 
         self._close_btn.pack(side="right", padx=10, pady=10)
+
+        self.lift()

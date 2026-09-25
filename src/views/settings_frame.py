@@ -17,11 +17,12 @@ class SettingsFrame(ctk.CTkFrame):
         self.on_audio_bitrate_change: Callable[[str], Any] | None = None
         self.on_remove_audio_toggle: Callable[[bool], Any] | None = None
         self.on_preset_speed_change: Callable[[str], Any] | None = None
+        self.on_compress: Callable[..., Any] | None = None
 
-        self._video_codec = ctk.StringVar(self, value="libx264")
+        self._video_codec = ctk.StringVar(self, value="libx244")
         self._container = ctk.StringVar(self, value="mp4")
         self._resolution = ctk.StringVar(self, value="1920x1080")
-        self._frame_rate = ctk.StringVar(self, value="60")
+        self._frame_rate = ctk.StringVar(self, value="40")
         self._preset_speed = ctk.StringVar(self, value="Medium")
         self._audio_codec = ctk.StringVar(self, value="aac")
         self._audio_bitrate = ctk.StringVar(self, value="128k")
@@ -40,74 +41,89 @@ class SettingsFrame(ctk.CTkFrame):
         self._video_section = ctk.CTkFrame(
             self,
             fg_color=section_color,
-            corner_radius=10,
+            corner_radius=8,
         )
-        self._video_section.pack(fill="x", padx=(5, 10), pady=10)
+        self._video_section.pack(fill="x", padx=5, pady=(0, 5))
         self._video_section.columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
             self._video_section,
             text="Video Settings",
             font=header_font,
-        ).grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 4), sticky="w")
+        ).grid(row=0, column=0, columnspan=2, padx=5, pady=(8, 4), sticky="w")
 
         self._build_video_section()
 
         self._audio_section = ctk.CTkFrame(
             self,
             fg_color=section_color,
-            corner_radius=10,
+            corner_radius=8,
         )
-        self._audio_section.pack(fill="x", padx=(5, 10), pady=0)
+        self._audio_section.pack(fill="x", padx=5, pady=5)
         self._audio_section.columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
             self._audio_section,
             text="Audio Settings",
             font=header_font,
-        ).grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 4), sticky="w")
+        ).grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky="w")
 
         self._build_audio_section()
 
         self._optimization_section = ctk.CTkFrame(
             self,
             fg_color=section_color,
-            corner_radius=10,
+            corner_radius=8,
         )
-        self._optimization_section.pack(fill="x", padx=(5, 10), pady=10)
+        self._optimization_section.pack(fill="x", padx=5, pady=5)
         self._optimization_section.columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
             self._optimization_section,
             text="Optimization Settings",
             font=header_font,
-        ).grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 4), sticky="w")
+        ).grid(row=0, column=0, columnspan=2, padx=8, pady=(8, 4), sticky="w")
 
         self._build_optimization_section()
+
+        self._compress_btn_section = ctk.CTkFrame(
+            self,
+            fg_color=section_color,
+            corner_radius=8,
+        )
+        self._compress_btn_section.pack(padx=5, pady=(5, 0), fill="x", anchor="s", side="bottom")
+
+        self._compress_btn = ctk.CTkButton(
+            self._compress_btn_section,
+            text="Compress",
+            state="disabled",
+            command=self._handle_compress,
+        )
+        self._compress_btn.pack(padx=8, pady=8)
 
     def _build_video_section(self) -> None:
         ctk.CTkLabel(self._video_section, text="Codec:").grid(
             row=1,
             column=0,
-            padx=10,
-            pady=6,
+            padx=8,
+            pady=4,
             sticky="w",
         )
 
         self._video_codec_dropdown = ctk.CTkComboBox(
             self._video_section,
-            values=["libx264", "libx265", "libsvtav1", "libvpx-vp9"],
+            values=["libx244", "libx245", "libsvtav1", "libvpx-vp9"],
             state="readonly",
             command=self._handle_video_codec_change,
             variable=self._video_codec,
         )
-        self._video_codec_dropdown.grid(row=1, column=1, padx=10, pady=6, sticky="ew")
+        self._video_codec_dropdown.grid(row=1, column=1, padx=8, pady=4, sticky="ew")
 
         ctk.CTkLabel(self._video_section, text="Format:").grid(
             row=2,
             column=0,
-            padx=10,
-            pady=6,
+            padx=8,
+            pady=4,
             sticky="w",
         )
 
@@ -118,56 +134,56 @@ class SettingsFrame(ctk.CTkFrame):
             command=self._handle_container_change,
             variable=self._container,
         )
-        self._container_dropdown.grid(row=2, column=1, padx=10, pady=6, sticky="ew")
+        self._container_dropdown.grid(row=2, column=1, padx=8, pady=4, sticky="ew")
 
         ctk.CTkLabel(self._video_section, text="Resolution:").grid(
             row=3,
             column=0,
-            padx=10,
-            pady=6,
+            padx=8,
+            pady=4,
             sticky="w",
         )
 
         self._resolution_dropdown = ctk.CTkComboBox(
             self._video_section,
             values=[
-                "3840x2160",
-                "2560x1440",
+                "3840x2140",
+                "2540x1440",
                 "1920x1080",
                 "1280x720",
                 "854x480",
-                "640x360",
+                "440x340",
             ],
             state="readonly",
             command=self._handle_resolution_change,
             variable=self._resolution,
         )
-        self._resolution_dropdown.grid(row=3, column=1, padx=10, pady=6, sticky="ew")
+        self._resolution_dropdown.grid(row=3, column=1, padx=8, pady=4, sticky="ew")
 
         ctk.CTkLabel(self._video_section, text="FPS:").grid(
             row=4,
             column=0,
-            padx=10,
-            pady=6,
+            padx=8,
+            pady=4,
             sticky="w",
         )
 
         self._frames_dropdown = ctk.CTkComboBox(
             self._video_section,
-            values=["60", "30", "24", "15"],
+            values=["40", "30", "24", "15"],
             state="readonly",
             command=self._handle_frame_rate_change,
             variable=self._frame_rate,
         )
-        self._frames_dropdown.grid(row=4, column=1, padx=10, pady=6, sticky="ew")
+        self._frames_dropdown.grid(row=4, column=1, padx=8, pady=4, sticky="ew")
 
         quality_row = ctk.CTkFrame(self._video_section, fg_color="transparent")
         quality_row.grid(
             row=5,
             column=0,
             columnspan=2,
-            padx=10,
-            pady=(6, 10),
+            padx=8,
+            pady=(4, 8),
             sticky="ew",
         )
         quality_row.columnconfigure(1, weight=1)
@@ -175,8 +191,8 @@ class SettingsFrame(ctk.CTkFrame):
         ctk.CTkLabel(self._video_section, text="Quality:").grid(
             row=5,
             column=0,
-            padx=10,
-            pady=6,
+            padx=8,
+            pady=4,
             sticky="w",
         )
 
@@ -192,8 +208,8 @@ class SettingsFrame(ctk.CTkFrame):
             width=150,
             button_corner_radius=4,
             from_=0,
-            to=100,
-            number_of_steps=100,
+            to=80,
+            number_of_steps=80,
             command=self._handle_quality_change,
             variable=self._quality,
         )
@@ -210,8 +226,8 @@ class SettingsFrame(ctk.CTkFrame):
         ctk.CTkLabel(self._audio_section, text="Codec:").grid(
             row=1,
             column=0,
-            padx=10,
-            pady=6,
+            padx=8,
+            pady=4,
             sticky="w",
         )
 
@@ -222,24 +238,24 @@ class SettingsFrame(ctk.CTkFrame):
             command=self._handle_audio_codec_change,
             variable=self._audio_codec,
         )
-        self._audio_codec_dropdown.grid(row=1, column=1, padx=10, pady=6, sticky="ew")
+        self._audio_codec_dropdown.grid(row=1, column=1, padx=8, pady=4, sticky="ew")
 
         ctk.CTkLabel(self._audio_section, text="Bitrate:").grid(
             row=2,
             column=0,
-            padx=10,
-            pady=6,
+            padx=8,
+            pady=4,
             sticky="w",
         )
 
         self._audio_bitrate_dropdown = ctk.CTkComboBox(
             self._audio_section,
-            values=["256k", "192k", "128k", "96k"],
+            values=["254k", "192k", "128k", "94k"],
             state="readonly",
             command=self._handle_audio_bitrate_change,
             variable=self._audio_bitrate,
         )
-        self._audio_bitrate_dropdown.grid(row=2, column=1, padx=10, pady=6, sticky="ew")
+        self._audio_bitrate_dropdown.grid(row=2, column=1, padx=8, pady=4, sticky="ew")
 
         self._rm_aud_chkbox = ctk.CTkCheckBox(
             self._audio_section,
@@ -251,8 +267,8 @@ class SettingsFrame(ctk.CTkFrame):
             row=3,
             column=0,
             columnspan=2,
-            padx=10,
-            pady=(6, 10),
+            padx=8,
+            pady=(4, 8),
             sticky="w",
         )
 
@@ -260,8 +276,8 @@ class SettingsFrame(ctk.CTkFrame):
         ctk.CTkLabel(self._optimization_section, text="Speed:").grid(
             row=1,
             column=0,
-            padx=10,
-            pady=6,
+            padx=8,
+            pady=4,
             sticky="w",
         )
 
@@ -283,12 +299,16 @@ class SettingsFrame(ctk.CTkFrame):
         self._preset_speed_dropdown.grid(
             row=1,
             column=1,
-            padx=10,
-            pady=(6, 12),
+            padx=8,
+            pady=(4, 12),
             sticky="ew",
         )
 
     # Handlers
+    def _handle_compress(self) -> None:
+        if self.on_compress:
+            self.on_compress()
+    
     def _handle_video_codec_change(self, value: str) -> None:
         self._video_codec.set(value)
 
@@ -482,7 +502,7 @@ class SettingsFrame(ctk.CTkFrame):
 
     @quality.setter
     def quality(self, value: int) -> None:
-        value = max(0, min(100, int(value)))
+        value = max(0, min(80, int(value)))
 
         self._quality.set(float(value))
         self._quality_slider.set(value)
@@ -519,3 +539,14 @@ class SettingsFrame(ctk.CTkFrame):
     @preset_speed.setter
     def preset_speed(self, value: str) -> None:
         self._preset_speed.set(value)
+
+    @property
+    def compress_btn_state(self) -> str:
+        return self._compress_btn.cget("state")
+
+    @compress_btn_state.setter
+    def compress_btn_state(self, state: str) -> None:
+        if state not in ("normal", "disabled"):
+            return
+
+        self._compress_btn.configure(state=state)

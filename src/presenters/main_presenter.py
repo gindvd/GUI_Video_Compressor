@@ -8,7 +8,7 @@ from presenters.settings_presenter import SettingsPresenter
 from presenters.media_player_presenter import MediaPlayerPresenter
 from presenters.frame_viewer_presenter import FrameViewerPresenter
 
-from controllers.optimize_controller import OptimizeController
+from controllers.ffmpeg_controller import FFmpegController
 from controllers.extraction_controller import ExtractionController
 
 from views import dialogs
@@ -40,19 +40,7 @@ class MainPresenter:
         self._ffprobe_service: FFprobeService = ffprobe_service
         self._vlc_service: VLCService = vlc_playback_service
 
-        self._settings_presenter: SettingsPresenter = SettingsPresenter(
-            optimize_settings=self._app_state.settings,
-            settings_view=self._view.settings_frame,
-        )
-
-        self._media_player_presenter: MediaPlayerPresenter = MediaPlayerPresenter(
-            media_attrs=self._app_state.media,
-            timestamps=self._app_state.timestamps,
-            media_player_view=self._view.media_player_frame,
-            vlc_service=self._vlc_service,
-        )
-
-        self._optimize_controller: OptimizeController = OptimizeController(
+        self.ffmpeg_controller: FFmpegController = FFmpegController(
             parent_view=self._view,
             ffmpeg_service=self._ffmpeg_service,
             app_state=self._app_state,
@@ -67,6 +55,21 @@ class MainPresenter:
             after_extraction_command=lambda: self._view.after(
                 0, self.update_settings_and_load_media
             ),
+        )
+
+        self._settings_presenter: SettingsPresenter = SettingsPresenter(
+            optimize_settings=self._app_state.settings,
+            settings_view=self._view.settings_frame,
+            ffmpeg_controller=self.ffmpeg_controller,
+            disable_ui_command=self.disable_ui,
+            restore_ui_command=self.restore_ui
+        )
+
+        self._media_player_presenter: MediaPlayerPresenter = MediaPlayerPresenter(
+            media_attrs=self._app_state.media,
+            timestamps=self._app_state.timestamps,
+            media_player_view=self._view.media_player_frame,
+            vlc_service=self._vlc_service,
         )
 
         self._frame_viewer: FrameViewer | None = None
@@ -122,35 +125,10 @@ class MainPresenter:
 
     def on_exit(self) -> None:
         """Closes all background processes before destroying the app"""
-        self._optimize_controller.shutdown()
+        self.ffmpeg_controller.shutdown()
         self._vlc_service.shutdown()
 
         self._view.after(1, self._on_exit_command)
-
-    def on_compress(self) -> None:
-        if self._app_state.media.input_file is None:
-            dialogs.show_warning(
-                master=self._view,
-                title="File not found!",
-                message="No file to optimize!",
-            )
-            return
-
-        self.disable_ui()
-
-        if not self._get_output_directory():
-            self.restore_ui()
-            return
-
-        self._optimize_controller.optimize_media()
-
-    def disable_ui(self) -> None:
-        self._view.compress_btn_state = "disabled"
-        self._view.browse_btn_state = "disabled"
-
-    def restore_ui(self) -> None:
-        self._view.compress_btn_state = "normal"
-        self._view.browse_btn_state = "normal"
 
     def update_settings_and_load_media(self) -> None:
         self._calculate_base_fps()
@@ -159,6 +137,14 @@ class MainPresenter:
         self._load_media()
 
         self.restore_ui()
+    
+    def disable_ui(self) -> None:
+        self._view.settings_frame.compress_btn_state = "disabled"
+        self._view.browse_btn_state = "disabled"
+
+    def restore_ui(self) -> None:
+        self._view.settings_frame.compress_btn_state = "normal"
+        self._view.browse_btn_state = "normal"
 
     def _calculate_base_fps(self) -> None:
         try:
@@ -263,22 +249,6 @@ class MainPresenter:
 
         return True
 
-    def _get_output_directory(self) -> bool:
-        from tkinter import filedialog
-
-        output_directory: str = filedialog.askdirectory(
-            parent=self._view,
-            title="File Output Selection",
-            initialdir=path.expanduser("~"),
-        )
-
-        if output_directory == "":
-            return False
-
-        self._optimize_controller.create_output_file(output_directory)
-
-        return True
-
     def _bind_view(self):
         self._view.on_open_file = self.on_open_file
         self._view.on_file_entry_submitted = self.on_file_entry_submit
@@ -286,5 +256,4 @@ class MainPresenter:
         self._view.on_show_license = self.on_show_license
         self._view.on_show_third_party_licenses = self.on_show_third_party_licenses
         self._view.on_open_frame_viewer = self.open_frame_viewer
-        self._view.on_compress = self.on_compress
         self._view.on_exit = self.on_exit

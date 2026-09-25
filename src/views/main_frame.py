@@ -8,6 +8,7 @@ from CTkMenuBar import CTkMenuBar, CustomDropdownMenu
 
 from views.media_player_frame import MediaPlayerFrame
 from views.settings_frame import SettingsFrame
+from views.gif_settings_frame import GifSettingsFrame
 
 
 class MainFrame(ctk.CTkFrame):
@@ -22,8 +23,7 @@ class MainFrame(ctk.CTkFrame):
         self.on_show_license: Callable[..., Any] | None = None
         self.on_show_third_party_licenses: Callable[..., Any] | None = None
         self.on_file_entry_submitted: Callable[..., Any] | None = None
-        self.on_compress: Callable[..., Any] | None = None
-
+        
         self._build_menubar()
         self._build()
 
@@ -63,14 +63,14 @@ class MainFrame(ctk.CTkFrame):
 
         self._file_entry = ctk.CTkEntry(self._file_frame,)
         self._file_entry.bind("<Return>", self._handle_file_entry_submit)
-        self._file_entry.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
+        self._file_entry.grid(row=0, column=0, padx=8, pady=5, sticky="ew")
 
         self._browse_btn = ctk.CTkButton(
             self._file_frame,
             text="Browse",
             command=self._handle_open_file,
         )
-        self._browse_btn.grid(row=0, column=1, padx=10, pady=5)
+        self._browse_btn.grid(row=0, column=1, padx=8, pady=5)
 
         # Content Area - Video Preview left, Settings right
         self._content_frame = ctk.CTkFrame(
@@ -86,26 +86,32 @@ class MainFrame(ctk.CTkFrame):
             corner_radius=0,
             fg_color="transparent",
         )
-        self._media_player_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        self._media_player_frame.grid(row=0, column=0, padx=8, pady=8, sticky="nsew")
 
-        # Settings frame
+        tabview = ctk.CTkTabview(
+            master=self._content_frame, 
+            corner_radius=8, 
+            border_color=frame_color, 
+            border_width=2,
+            segmented_button_font=ctk.CTkFont(size=14, weight="bold")
+        )
+        tabview.grid(row=0, column=1, padx=8, pady=(0, 8), sticky="nsew")
+
+        tabview.add("Video")
+        tabview.add("  GIF  ")
+        tabview.set("Video")
+
+        # Video compression settings frame
         self._settings_frame = SettingsFrame(
-            self._content_frame, corner_radius=0, fg_color="transparent"
+            tabview.tab("Video"), corner_radius=0, fg_color="transparent"
         )
-        self._settings_frame.grid(row=0, column=1, padx=0, pady=0, sticky="nsew")
+        self._settings_frame.pack(padx=0, pady=0, expand=True, fill="both")
 
-        self._compress_btn_frame = ctk.CTkFrame(
-            self, corner_radius=0, fg_color=frame_color
+        # Gif creation settings frame
+        self._gif_frame = GifSettingsFrame(
+            tabview.tab("  GIF  "), corner_radius=0, fg_color="transparent"
         )
-        self._compress_btn_frame.pack(padx=0, pady=0, fill="x", anchor="s")
-
-        self._compress_btn = ctk.CTkButton(
-            self._compress_btn_frame,
-            text="Compress",
-            state="disabled",
-            command=self._handle_compress,
-        )
-        self._compress_btn.pack(padx=10, pady=10, anchor="s")
+        self._gif_frame.pack(padx=0, pady=0, expand=True, fill="both")
 
     def _handle_open_file(self) -> None:
         if self.on_open_file:
@@ -114,10 +120,6 @@ class MainFrame(ctk.CTkFrame):
     def _handle_exit(self) -> None:
         if self.on_exit:
             self.on_exit()
-
-    def _handle_compress(self) -> None:
-        if self.on_compress:
-            self.on_compress()
 
     def _handle_file_entry_submit(self, event: Event) -> None:
         if self.on_file_entry_submitted:
@@ -151,17 +153,6 @@ class MainFrame(ctk.CTkFrame):
         self._file_entry.insert(0, filepath)
 
     @property
-    def compress_btn_state(self) -> str:
-        return self._compress_btn.cget("state")
-
-    @compress_btn_state.setter
-    def compress_btn_state(self, state: str) -> None:
-        if state not in ("normal", "disabled"):
-            return
-
-        self._compress_btn.configure(state=state)
-
-    @property
     def browse_btn_state(self) -> str:
         return self._browse_btn.cget("state")
 
@@ -179,3 +170,7 @@ class MainFrame(ctk.CTkFrame):
     @property
     def media_player_frame(self) -> Any:
         return self._media_player_frame
+    
+    @property
+    def gif_frame(self) -> Any:
+        return self._gif_frame
