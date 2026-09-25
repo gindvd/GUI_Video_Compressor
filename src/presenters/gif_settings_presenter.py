@@ -1,15 +1,29 @@
+from os import path
+
 from models.gif_settings import GifSettings
 
-from viems.gif_settings_frame import GifSettingsFrame
+from views.gif_settings_frame import GifSettingsFrame
+
+from controllers.ffmpeg_controller import FFmpegController
 
 
 class GifSettingsPresenter():
     def __init__(
-        self, gif_settings: GifSettings, settings_frame: GifSettingsFrame
+        self, 
+        gif_settings: GifSettings, 
+        gif_view: GifSettingsFrame,
+        ffmpeg_controller: FFmpegController,
+        disable_ui_command: Callable[[], None],
+        restore_ui_command: Callable[[], None]
     ) -> None: 
 
         self._gif_settings: GifSettings = gif_settings
-        self._settings_frame: GifSettingsFrame = settings_frame
+        self._gif_view: GifSettingsFrame = gif_view
+
+        self._ffmpeg_controller: FFmpegController = ffmpeg_controller
+
+        self._disable_ui : Callable[[], None] = disable_ui_command
+        self._restore_ui : Callable[[], None] = restore_ui_command
 
         self._bind_view()
     
@@ -36,11 +50,35 @@ class GifSettingsPresenter():
         self._gif_settings.loop = loop_num
     
     def on_create(self) -> None:
-        pass
+        self._disable_ui()
+
+        if not self._get_output_directory():
+            self._restore_ui()
+            return
+        
+        self._ffmpeg_controller.create_gif()
+
+        self._restore_ui()
+
+    def _get_output_directory(self) -> bool:
+        from tkinter import filedialog
+
+        output_directory: str = filedialog.askdirectory(
+            parent=self._gif_view,
+            title="GIF Output Selection",
+            initialdir=path.expanduser("~"),
+        )
+
+        if output_directory == "":
+            return False
+
+        self._ffmpeg_controller.create_gif_output_file(output_directory)
+
+        return True
     
     def _bind_view(self) -> None:
-        self._settings_frame.on_resolution_change = self.on_resolution_change
-        self._settings_frame.on_frame_rate_change = self.on_frame_rate_change
-        self._settings_frame.on_loop_change = on_loop_change
+        self._gif_view.on_resolution_change = self.on_resolution_change
+        self._gif_view.on_frame_rate_change = self.on_frame_rate_change
+        self._gif_view.on_loop_change = self.on_loop_change
 
-        self._settings_frame.on_create = self.on_create
+        self._gif_view.on_create = self.on_create

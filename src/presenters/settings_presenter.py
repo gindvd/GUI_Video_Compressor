@@ -50,6 +50,8 @@ class SettingsPresenter:
         
         self._ffmpeg_controller.optimize_media()
 
+        self._restore_ui()
+
     def on_video_codec_change(self, value: str) -> None:
         self._optimize_settings.video_codec = value
 

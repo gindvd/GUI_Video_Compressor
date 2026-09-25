@@ -5,6 +5,7 @@ from collections.abc import Callable
 from models.app_state import AppState
 
 from presenters.settings_presenter import SettingsPresenter
+from presenters.gif_settings_presenter import GifSettingsPresenter
 from presenters.media_player_presenter import MediaPlayerPresenter
 from presenters.frame_viewer_presenter import FrameViewerPresenter
 
@@ -60,6 +61,14 @@ class MainPresenter:
         self._settings_presenter: SettingsPresenter = SettingsPresenter(
             optimize_settings=self._app_state.settings,
             settings_view=self._view.settings_frame,
+            ffmpeg_controller=self.ffmpeg_controller,
+            disable_ui_command=self.disable_ui,
+            restore_ui_command=self.restore_ui
+        )
+
+        self._gif_presenter: GifSettingsPresenter = GifSettingsPresenter(
+            gif_settings=self._app_state.gif_settings,
+            gif_view=self._view.gif_frame,
             ffmpeg_controller=self.ffmpeg_controller,
             disable_ui_command=self.disable_ui,
             restore_ui_command=self.restore_ui
@@ -140,10 +149,12 @@ class MainPresenter:
     
     def disable_ui(self) -> None:
         self._view.settings_frame.compress_btn_state = "disabled"
+        self._view.gif_frame.create_button_state = "disabled"
         self._view.browse_btn_state = "disabled"
 
     def restore_ui(self) -> None:
         self._view.settings_frame.compress_btn_state = "normal"
+        self._view.gif_frame.create_button_state = "normal"
         self._view.browse_btn_state = "normal"
 
     def _calculate_base_fps(self) -> None:

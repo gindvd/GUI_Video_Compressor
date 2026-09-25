@@ -196,6 +196,21 @@ class FFmpegController:
             output_file = self._uniquify(output_file)
 
         self._app_state.media.output_file = output_file
+    
+    def create_gif_output_file(self, directory: str) -> None:
+        if self._app_state.media.input_file is None:
+            return
+
+        fullname, _ = path.splitext(self._app_state.media.input_file)
+        name = path.basename(fullname)
+        new_name = f"{name}_compressed.gif"
+
+        output_file = path.join(directory, new_name)
+
+        if path.exists(output_file):
+            output_file = self._uniquify(output_file)
+
+        self._app_state.gif_settings.output_file = output_file
 
     @staticmethod
     def _uniquify(file_path: str) -> str:

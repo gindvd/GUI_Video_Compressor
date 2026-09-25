@@ -169,9 +169,9 @@ class GifSettingsFrame(ctk.CTkFrame):
         return self._create_btn.cget("state")
 
     @create_button_state.setter
-    def create_button_state(self, value: str) -> None:
+    def create_button_state(self, state: str) -> None:
         if state not in ("normal", "disabled"):
             return
         
-        self._create_btn.set(value)
+        self._create_btn.configure(state=state)
     

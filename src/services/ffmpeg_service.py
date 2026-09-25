@@ -76,41 +76,40 @@ class FFmpegService:
             return proc.stdout
 
     def create_gif(
-        self, 
+        self,
         input_file: str,
         output_file: str,
         start_time: str,
         duration: str,
         fps: str,
         resolution: str,
-        loops: int
+        loops: int,
     ) -> ExitStatus:
-        """ 
-        Converts video file to gif 
-        
-        Args:
-        Input file: Video file to be converted to a gif
-        Ouput file: Name of gif file to be outputed to
-
-        Start time: Starting time of input file where conversion will begin
-        Duration: Gifs full duration
-
-        Frame rate: Desired frame rate of the gif
-        Resolution: Desired Resolution of the gif
-
-        Loops: how many times the gif should loop:
-        0 = infinite loops, -1 = Play Once, 1 = Play twice
         """
-        
-        width, height = resolution.split("x")
+        Converts video file to GIF.
 
-        palettegen = "palettegen=stats_mode=diff"
-        pallateuse = "pallateuse=dither=sierra2_4a"
+        Args:
+            input_file: Video file to convert.
+            output_file: Destination GIF file.
+            start_time: Starting timestamp.
+            duration: Duration of GIF.
+            fps: Desired frame rate.
+            resolution: Desired resolution, e.g. "480x270".
+            loops:
+                0 = infinite loop
+                -1 = play once
+                1 = play twice
+        """
 
-        scale_args = [
-            "-vf", 
-            f"fps={fps}, scale={height}:-1:lanczos,split[s0][s1];[s0]{palettegen}[p];[s1][p]{paletteuse}"
-        ]
+        width, _ = resolution.split("x")
+
+        filter_complex = (
+            f"fps={fps},"
+            f"scale={width}:-1:flags=lanczos,"
+            "split[s0][s1];"
+            "[s0]palettegen=stats_mode=diff[p];"
+            "[s1][p]paletteuse=dither=sierra2_4a"
+        )
 
         cmd = [
             self._path,
@@ -120,11 +119,11 @@ class FFmpegService:
             duration,
             "-i",
             input_file,
-            "-vf",
-            scale_args,
+            "-filter_complex",
+            filter_complex,
             "-loop",
             str(loops),
-            output_file
+            output_file,
         ]
 
         return self._run_command(cmd)
