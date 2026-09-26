@@ -90,10 +90,10 @@ class MainPresenter:
 
     def on_open_file(self) -> None:
         item = self._browse_files()
-        self._handle_files(item)
+        self.scan_and_load_files(item)
 
     def on_file_entry_submit(self, item) -> None:
-        self._handle_files(item)
+        self.scan_and_load_files(item)
 
     def on_show_about(self) -> None:
         dialogs.show_about(master=self._view)
@@ -219,7 +219,7 @@ class MainPresenter:
             ],
         )
 
-    def _handle_files(self, filepath: str | tuple | None) -> None:
+    def scan_and_load_files(self, filepath: str | tuple | None) -> None:
         if filepath is None or filepath == "" or filepath == ():
             return
 
