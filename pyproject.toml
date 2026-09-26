@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MediaOptimizationTool"
-version = "4.0.0"
+version = "5.0.0"
 description = "Optimization tool for compression, converting, and trimming media files with FFmpeg"
 authors = [
   {name = "David Gingerich", email = "gingerichdvd@gmail.com"}
@@ -45,3 +45,6 @@ module = [
   "vlc.*"
 ]
 ignore_missing_imports = true
+
+[tool.black]
+target-version = ["py314"]
