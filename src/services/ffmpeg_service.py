@@ -1,40 +1,80 @@
+import os
+import shutil
+import signal
 import subprocess
+import sys
 
+from pathlib import Path
 from typing import Any
 
 from utils.log_utils import logger
-
 from services.exit_status import ExitStatus
 
 
 class FFmpegService:
-    """Handler class for running FFmpeg to compress media file"""
+    """Handler class for running FFmpeg and yt-dlp processes"""
 
-    def __init__(self, path: str) -> None:
-        self._path: str = path
+    def __init__(self, ffmpeg_path: str, ytdlp_path: list[str]) -> None:
+        self._ffmpeg_path: str = ffmpeg_path
+        self._ytdlp_path: list[str] = ytdlp_path
+
         self._proc: subprocess.Popen | None = None
         self._terminated: bool = False
 
         self._flags: dict[str, Any] = {}
 
-        # flags to hide console window
-        from sys import platform
+        # Flags to hide console window and create a process group
 
-        if platform.startswith("win"):
+        if sys.platform.startswith("win"):
             self._flags["creationflags"] = (
-                subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+                subprocess.CREATE_NEW_PROCESS_GROUP
+                | subprocess.CREATE_NO_WINDOW
             )
+
             si = subprocess.STARTUPINFO()
             si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             self._flags["startupinfo"] = si
+
         else:
+            # Create process that can be terminated on Linux / MacOS
             self._flags["start_new_session"] = True
 
-    def extract_frame(self, input_file: str, timestamp: str) -> bytes | None:
-        """Ectracts frame of media file at the given timestamp"""
-        # Command to have FFmpeg extract the frame at the specied timestamp
+    def download_video(
+        self,
+        url: str,
+        format: str,
+        output_folder: str,
+    ) -> ExitStatus:
+        """Downloads a video using yt-dlp"""
+
+        if self._proc:
+            return ExitStatus.BUSY
+
         cmd = [
-            self._path,
+            *self._ytdlp_path,
+            "--format",
+            "bestvideo+bestaudio/best",
+            "--merge-output-format",
+            format,
+            "--output",
+            os.path.join(output_folder, "%(title)s.%(ext)s"),
+            "--no-playlist",
+            "--ffmpeg-location",
+            self._ffmpeg_path,
+            url,
+        ]
+
+        return self._run_command(cmd)
+
+    def extract_frame(
+        self,
+        input_file: str,
+        timestamp: str,
+    ) -> bytes | None:
+        """Extracts frame of media file at the given timestamp"""
+
+        cmd = [
+            self._ffmpeg_path,
             "-ss",
             timestamp,
             "-i",
@@ -61,11 +101,11 @@ class FFmpegService:
             )
 
         except subprocess.CalledProcessError as e:
-            logger.exception(f"ffmpeg frame extraction failed: {str(e)}")
+            logger.exception(f"FFmpeg frame extraction failed: {str(e)}")
             return None
 
         except subprocess.TimeoutExpired:
-            logger.exception("ffmpeg frame extraction timed out")
+            logger.exception("FFmpeg frame extraction timed out")
             return None
 
         except Exception as e:
@@ -85,21 +125,7 @@ class FFmpegService:
         resolution: str,
         loops: int,
     ) -> ExitStatus:
-        """
-        Converts video file to GIF.
-
-        Args:
-            input_file: Video file to convert.
-            output_file: Destination GIF file.
-            start_time: Starting timestamp.
-            duration: Duration of GIF.
-            fps: Desired frame rate.
-            resolution: Desired resolution, e.g. "480x270".
-            loops:
-                0 = infinite loop
-                -1 = play once
-                1 = play twice
-        """
+        """Converts video file to GIF"""
 
         width, _ = resolution.split("x")
 
@@ -112,7 +138,7 @@ class FFmpegService:
         )
 
         cmd = [
-            self._path,
+            self._ffmpeg_path,
             "-ss",
             start_time,
             "-t",
@@ -144,82 +170,139 @@ class FFmpegService:
         duration: str,
         output_file: str,
     ) -> ExitStatus:
-        """Creates FFmpeg command with all args and executes it to compress video files"""
+        """Creates FFmpeg command and executes it"""
 
         width, height = resolution.split("x")
 
         crf = self._quality_converter(quality)
 
-        if include_audio is None or audio_codec is None or audio_bitrate is None:
+        if (
+            include_audio is None
+            or audio_codec is None
+            or audio_bitrate is None
+        ):
             aud_opts = ["-an"]
+
         else:
-            aud_opts = ["-c:a", audio_codec, "-b:a", audio_bitrate]
+            aud_opts = [
+                "-c:a",
+                audio_codec,
+                "-b:a",
+                audio_bitrate,
+            ]
 
-        # Base hardware and scale args that might change based on hardware codecs
         hwaccel_args = None
-        scale_args = ["-vf", f"scale={width}:{height},fps={fps}"]
+        scale_args = [
+            "-vf",
+            f"scale={width}:{height},fps={fps}",
+        ]
 
+        # Splits codec to check for hardware specific args
         _, __, hw_id = codec.partition("_")
 
-        # Matches hardware codec and changes the quality args that work with the codec
         if hw_id == "nvenc":
-            quality_args = ["-rc", "vbr", "-cq", str(crf), "-b:v", "0"]
+            quality_args = [
+                "-rc",
+                "vbr",
+                "-cq",
+                str(crf),
+                "-b:v",
+                "0",
+            ]
 
         elif hw_id == "amf":
-            quality_args = ["-rc", "qvbr", "-qvbr_quality_level", str(crf)]
+            quality_args = [
+                "-rc",
+                "qvbr",
+                "-qvbr_quality_level",
+                str(crf),
+            ]
 
         elif hw_id == "qsv":
-            hwaccel_args = ["-init_hw_device", "qsv=hw", "-filter_hw_device", "hw"]
-            quality_args = ["-global_quality", str(crf), "-look_ahead", "1"]
+            hwaccel_args = [
+                "-init_hw_device",
+                "qsv=hw",
+                "-filter_hw_device",
+                "hw",
+            ]
+
+            quality_args = [
+                "-global_quality",
+                str(crf),
+                "-look_ahead",
+                "1",
+            ]
 
         elif hw_id == "vaapi":
-            hwaccel_args = ["-vaapi_device", "/dev/dri/renderD128"]
+            hwaccel_args = [
+                "-vaapi_device",
+                "/dev/dri/renderD128",
+            ]
+
             scale_args = [
                 "-vf",
-                f"format=nv12,fps={fps},hwupload,scale_vaapi=w={width}:h={height}",
+                (
+                    f"format=nv12,fps={fps},hwupload,"
+                    f"scale_vaapi=w={width}:h={height}"
+                ),
             ]
-            quality_args = ["-qp", str(crf)]
+
+            quality_args = [
+                "-qp",
+                str(crf),
+            ]
 
         else:
-            quality_args = ["-crf", str(crf)]
+            quality_args = [
+                "-crf",
+                str(crf),
+            ]
 
         if codec == "libvpx-vp9":
-            quality_args.extend(["-b:v", "0"])
+            quality_args.extend([
+                "-b:v",
+                "0",
+            ])
 
-        # Begin assembling the command list in order
-        cmd: list[str] = [self._path]
+        cmd: list[str] = [
+            self._ffmpeg_path,
+        ]
 
         if hwaccel_args is not None:
             cmd.extend(hwaccel_args)
 
-        cmd.extend(
-            [
-                "-ss",
-                start_time,
-                "-t",
-                duration,
-                "-i",
-                input_file,
-                "-c:v",
-                codec,
-                *scale_args,
-            ]
-        )
+        cmd.extend([
+            "-ss",
+            start_time,
+            "-t",
+            duration,
+            "-i",
+            input_file,
+            "-c:v",
+            codec,
+            *scale_args,
+        ])
 
         if preset:
-            cmd.extend(["-preset", preset])
+            cmd.extend([
+                "-preset",
+                preset,
+            ])
 
-        cmd.extend([*quality_args, *aud_opts, output_file])
+        cmd.extend([
+            *quality_args,
+            *aud_opts,
+            output_file,
+        ])
 
         return self._run_command(cmd)
 
     def _run_command(self, cmd: list[str]) -> ExitStatus:
-        """Runs the command to compress videos"""
+        """Runs an external process and waits for it to finish"""
 
         if self._proc:
             return ExitStatus.BUSY
 
-        # Try compressing the video file and cleaning log / display any errors that occur
         try:
             self._proc = subprocess.Popen(
                 cmd,
@@ -233,10 +316,9 @@ class FFmpegService:
             out = self._proc.communicate()
             rc = self._proc.returncode
 
-        # AttributeError sometimes raised when cancelling video compression due to _proc being set to None which has no wait
-        # Must be a timing thing
-        # Addding except to ignore and treat like normal termination as it still properly kills the process
         except AttributeError:
+            # Can occur during cancellation if another thread has
+            # already cleared/replaced the process reference.
             return ExitStatus.TERMINATED
 
         except FileNotFoundError as e:
@@ -259,9 +341,8 @@ class FFmpegService:
             # Log / display error when return code is non-zero
             # and process was not terminated by user
             if rc != 0 and not self._terminated:
-
                 logger.error(
-                    "FFmpeg failed with exit code %d\n\n"
+                    "Process failed with exit code %d\n\n"
                     "Command: %s\n\n"
                     "Output:\n%s",
                     rc,
@@ -270,8 +351,7 @@ class FFmpegService:
                 )
 
                 return ExitStatus.ERROR
-
-            # Handles user terminating the process and supresses error messages
+            
             elif rc != 0 and self._terminated:
                 return ExitStatus.TERMINATED
 
@@ -284,25 +364,69 @@ class FFmpegService:
             self._terminated = False
 
     def terminate_process(self) -> None:
-        """Terminates running ffmpeg binaries"""
-        # poll will return None if process is running
-        if self._proc and self._proc.poll() is None:
+        """Terminates the current process and its child processes."""
 
-            # Send termination command to the process
-            self._proc.terminate()
-            self._terminated = True
+        proc = self._proc
+
+        if proc is None or proc.poll() is not None:
+            return
+
+        self._terminated = True
+
+        try:
+            if sys.platform.startswith("win"):
+                proc.send_signal(signal.CTRL_BREAK_EVENT)
+            else:
+                self._terminate_unix_process_group(proc)
+
+            proc.wait(timeout=5)
+
+        except subprocess.TimeoutExpired:
 
             try:
-                self._proc.wait(timeout=5)
+                if sys.platform.startswith("win"):
+                    proc.kill()
+                else:
+                    self._kill_unix_process_group(proc)
 
-            except subprocess.TimeoutExpired:
-                # Send harsher kill command if timeout expires
-                self._proc.kill()
+            except ProcessLookupError:
+                pass
+
+        except ProcessLookupError:
+            pass
+
+        except OSError as e:
+            logger.exception(
+                "Failed to terminate process: %s",
+                e,
+            )
+    
+    @staticmethod
+    def _terminate_unix_process_group(
+        proc: subprocess.Popen,
+    ) -> None:
+        """Send terminate signal to parent and child processes on Linux/MacOS"""
+
+        os.killpg(
+            os.getpgid(proc.pid),
+            signal.SIGTERM,
+        )
+
+    @staticmethod
+    def _kill_unix_process_group(
+        proc: subprocess.Popen,
+    ) -> None:
+        """Send kill signal to parent and child processes on Linux/MacOS"""
+
+        os.killpg(
+            os.getpgid(proc.pid),
+            signal.SIGKILL,
+        )
 
     @staticmethod
     def _quality_converter(quality: int) -> int:
-        """Converts quality percentage into inverted CRF number to specify bitrate"""
-        # Quality needs be inverted as the lower the CRF number, the better the quality
+        """Converts quality percentage into inverted CRF number"""
         quality_inverted = abs(quality / 100 - 1)
-        crf = quality_inverted * 33 + 18  # Range 18 to 51
+        crf = quality_inverted * 33 + 18 # Range 18 to 51
+
         return int(crf)

@@ -1,6 +1,6 @@
 from os import path
 from shutil import which
-from sys import platform
+from sys import platform, executable
 
 if platform.startswith("win"):
     from ctypes import windll
@@ -35,6 +35,7 @@ class App(ctk.CTk):
     _FFMPEG: str = "ffmpeg"
     _FFPROBE: str = "ffprobe"
     _VLC: str = "vlc"
+    _YTDLP: str = "yt-dlp"
 
     def __init__(self):
         super().__init__()
@@ -86,7 +87,11 @@ class App(ctk.CTk):
         # Set dpi awareness for Windows PCs with high dpi monitors
         ffmpeg_path: str = resource_path(path.join("bin", f"{self._FFMPEG}.exe"))
         self._check_file(ffmpeg_path)
-        self._ffmpeg_service = FFmpegService(path=ffmpeg_path)
+
+        ytdlp_path: str = resource_path(path.join("bin", f"{self._YTDLP}.exe"))
+        self._check_file(ytdlp_path)
+
+        self._ffmpeg_service = FFmpegService(ffmpeg_path=ffmpeg_path, ytdlp_path=[ytdlp_path])
 
         ffprobe_path: str = resource_path(path.join("bin", f"{self._FFPROBE}.exe"))
         self._check_file(ffprobe_path)
@@ -113,8 +118,13 @@ class App(ctk.CTk):
 
         if missing:
             raise SystemExit(f"Missing dependency: {', '.join(missing)}")
+        
+        ytdlp_path = self._get_ytdlp()
 
-        self._ffmpeg_service = FFmpegService(path=self._FFMPEG)
+        self._ffmpeg_service = FFmpegService(
+            ffmpeg_path=self._FFMPEG, ytdlp_path=ytdlp_path
+        )
+
         self._ffprobe_service = FFprobeService(path=self._FFPROBE)
         self._vlc_service = VLCService(path=self._VLC)
 
@@ -127,6 +137,14 @@ class App(ctk.CTk):
         icon = PhotoImage(file=icon_path)
         # Sets app icon for Linux
         self.iconphoto(True, icon)
+    
+    def _get_ytdlp(self) -> list[str]:
+        ytdlp_path = which(self._YTDLP)
+
+        if ytdlp_path:
+            return [ytdlp_path]
+        
+        return [executable, "-m", self._YTDLP]
 
     @staticmethod
     def _check_file(abs_path: str) -> None:
