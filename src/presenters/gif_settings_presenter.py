@@ -1,4 +1,5 @@
 from os import path
+from collections.abc import Callable
 
 from models.gif_settings import GifSettings
 
@@ -47,7 +48,7 @@ class GifSettingsPresenter():
         else:
             return
 
-        self._gif_settings.loop = loop_num
+        self._gif_settings.loops = loop_num
     
     def on_create(self) -> None:
         self._disable_ui()

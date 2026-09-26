@@ -191,7 +191,7 @@ class MediaPlayerPresenter:
                 message=f"Screenshot taken!\n{screenshot_filename}",
             )
 
-    def load_media(self, media_file: str) -> None:
+    def load_media(self, media_file: str | None) -> None:
         """
         Asynchronously loads media into VLC.
 

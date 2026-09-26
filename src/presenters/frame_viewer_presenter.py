@@ -174,7 +174,7 @@ class FrameViewerPresenter:
             self.load_media()
             return
 
-        self._current_ms = max(0.0, min(value, self._media_attrs.full_duration_ms))
+        self._current_ms = max(0, min(int(value), self._media_attrs.full_duration_ms))
         self._update_ui()
         self._extract_frame(ms=self._current_ms)
 
@@ -249,13 +249,15 @@ class FrameViewerPresenter:
             input_file=input_file, timestamp=timestamp
         )
 
-        try:
-            # Creates a copy image to display
-            # convert forces loading before BytesIO is discarded.
-            frame_img = Image.open(BytesIO(frame_bytes)).convert("RGB")
+        if frame_bytes:
+            try:
+                # Creates a copy image to display
+                # convert forces loading before BytesIO is discarded.
+                frame_img = Image.open(BytesIO(frame_bytes)).convert("RGB")
 
-        except Exception:
-            frame_img = None
+            except Exception:
+                frame_img = None
+        
 
         # Tk widgets and ImageTk objects dealt with on the main thread
         self._frame_viewer.after(0, self._finish_frame_extract, request_id, frame_img)

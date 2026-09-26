@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from tkinter import Event
 
 from collections.abc import Callable
 from typing import Any
@@ -11,7 +12,7 @@ class GifSettingsFrame(ctk.CTkFrame):
         self.on_resolution_change: Callable[[str], Any] | None = None
         self.on_frame_rate_change: Callable[[str], Any] | None = None
         self.on_loop_change: Callable[[str], Any] | None = None
-        self.on_create: Callable[[str], Any] | None = None
+        self.on_create: Callable[[], Any] | None = None
 
         self._resolution = ctk.StringVar(self, value="854x480")
         self._frame_rate = ctk.StringVar(self, value="24")
@@ -136,7 +137,7 @@ class GifSettingsFrame(ctk.CTkFrame):
         if self.on_loop_change:
             self.on_loop_change(value)
     
-    def _handle_gif_creation(self, event = None) -> None:
+    def _handle_gif_creation(self, event: Event | None = None) -> None:
         if self.on_create:
             self.on_create()
     
@@ -160,7 +161,7 @@ class GifSettingsFrame(ctk.CTkFrame):
     def loop(self) -> str:
         return self._loops.get()
 
-    @resolution.setter
+    @loop.setter
     def loop(self, value: str) -> None:
         self._loops.set(value)
     

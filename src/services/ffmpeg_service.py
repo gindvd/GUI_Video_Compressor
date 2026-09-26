@@ -217,7 +217,7 @@ class FFmpegService:
         """Runs the command to compress videos"""
 
         if self._proc:
-            return ExitStatus.Busy
+            return ExitStatus.BUSY
 
         # Try compressing the video file and cleaning log / display any errors that occur
         try:

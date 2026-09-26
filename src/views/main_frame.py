@@ -236,7 +236,7 @@ class MainFrame(ctk.CTkFrame):
 
     def _handle_file_entry_submit(self, event: Event) -> None:
         if self.on_file_entry_submitted:
-            item = event.widget.get().strip()
+            item = self._file_entry.get().strip()
 
             self.on_file_entry_submitted(item)
 
