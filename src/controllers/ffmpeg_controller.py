@@ -1,3 +1,4 @@
+from glob import glob
 from os import path, remove
 from threading import Thread
 from collections.abc import Callable
@@ -28,46 +29,71 @@ class FFmpegController:
         self._on_restore_ui: Callable[[], None] = on_restore_ui
 
         self._progressbar_popup: ProgressbarPopup | None = None
-        self._ffmpeg_thread: Thread | None = None
+        self._process_thread: Thread | None = None
+    
+    def download_video(
+        self,
+        url: str,
+        ext: str,
+        output_folder: str,
+    ) -> None:
+        """Downloads YouTube Video in background on separate thread"""
+
+        if (
+            self._process_thread is not None
+            and self._process_thread.is_alive()
+        ):
+            return
+
+        self._progressbar_popup = ProgressbarPopup(
+            master=self._parent_view,
+            command=self.cancel_process,
+        )
+        self._progressbar_popup.run_progressbar()
+
+        self._process_thread = Thread(
+            target=self._download_video_worker,
+            args=(url, ext, output_folder),
+            daemon=True,
+        )
+
+        self._process_thread.start()
+        
+    def _download_video_worker(
+        self,
+        url: str,
+        ext: str,
+        output_folder: str,
+    ) -> None:
+        """Worker for yt-dlp video download"""
+
+        status: ExitStatus = self._ffmpeg_service.download_video(
+            url=url,
+            ext=ext,
+            output_folder=output_folder,
+        )
+
+        self._parent_view.after(0, self._download_cleanup, status, output_folder)
     
     def create_gif(self) -> None:
         if (
-            self._ffmpeg_thread is not None
-            and self._ffmpeg_thread.is_alive()
+            self._process_thread is not None
+            and self._process_thread.is_alive()
         ):
             return
         
         self._progressbar_popup = ProgressbarPopup(
             master=self._parent_view,
-            command=self.cancel_optimization,
+            command=self.cancel_process,
         )
         self._progressbar_popup.run_progressbar()
 
-        self._ffmpeg_thread = Thread(
+        self._process_thread = Thread(
             target=self._create_gif_worker,
             daemon=True,
         )
-        self._ffmpeg_thread.start()
-
-    def optimize_media(self) -> None:
-        if (
-            self._ffmpeg_thread is not None
-            and self._ffmpeg_thread.is_alive()
-        ):
-            return
-
-        self._progressbar_popup = ProgressbarPopup(
-            master=self._parent_view,
-            command=self.cancel_optimization,
-        )
-        self._progressbar_popup.run_progressbar()
-
-        self._ffmpeg_thread = Thread(
-            target=self._optimize_media_worker,
-            daemon=True,
-        )
-        self._ffmpeg_thread.start()
-
+        self._process_thread.start()
+    
     def _create_gif_worker(self) -> None:
         if self._app_state.media.input_file is None:
             dialogs.show_warning(
@@ -93,6 +119,25 @@ class FFmpegController:
         self._parent_view.after(
             0, self._cleanup, status, self._app_state.gif_settings.output_file
         )
+
+    def optimize_media(self) -> None:
+        if (
+            self._process_thread is not None
+            and self._process_thread.is_alive()
+        ):
+            return
+
+        self._progressbar_popup = ProgressbarPopup(
+            master=self._parent_view,
+            command=self.cancel_process,
+        )
+        self._progressbar_popup.run_progressbar()
+
+        self._process_thread = Thread(
+            target=self._optimize_media_worker,
+            daemon=True,
+        )
+        self._process_thread.start()
 
     def _optimize_media_worker(self) -> None:
         if self._app_state.media.input_file is None:
@@ -127,7 +172,7 @@ class FFmpegController:
         )
 
     def _cleanup(self, status: ExitStatus, output_file: str) -> None:
-        self._ffmpeg_thread = None
+        self._process_thread = None
 
         if self._progressbar_popup is not None:
             self._progressbar_popup.destroy()
@@ -166,21 +211,79 @@ class FFmpegController:
 
         self._on_restore_ui()
 
+    def _download_cleanup(self, status: ExitStatus, output_folder: str) -> None:
+        self._process_thread = None
+
+        if self._progressbar_popup is not None:
+            self._progressbar_popup.destroy()
+            self._progressbar_popup = None
+
+        # Clean up unfinished/temp files on error or cancellation
+        if status in (ExitStatus.ERROR, ExitStatus.TERMINATED):
+            self._remove_download_partials(output_folder)
+
+        # Show dialogs matching your standard status handling...
+        if status == ExitStatus.ERROR:
+            dialogs.show_error(
+                master=self._parent_view,
+                title="Download Error",
+                message="yt-dlp encountered an error!\nCheck logs!",
+            )
+        elif status == ExitStatus.TERMINATED:
+            dialogs.show_info(
+                master=self._parent_view,
+                title="Process Terminated",
+                message="Download cancelled!",
+            )
+        elif status == ExitStatus.SUCCESS:
+            dialogs.show_success(
+                master=self._parent_view,
+                title="Download Complete",
+                message="Video download complete!",
+            )
+
+        self._on_restore_ui()
+
+    def _remove_download_partials(self, output_folder: str) -> None:
+        """Removes yt-dlp temporary and partial files from the output directory."""
+        if not path.exists(output_folder):
+            return
+
+        # Typical yt-dlp temporary extensions and stream patterns
+        temp_patterns = [
+            "*.part",
+            "*.ytdl",
+            "*.f[0-9]*.mp4",
+            "*.f[0-9]*.m4a",
+            "*.f[0-9]*.webm",
+            "*.temp",
+        ]
+
+        for pattern in temp_patterns:
+            search_path = path.join(output_folder, pattern)
+            for temp_file in glob(search_path):
+                try:
+                    if path.exists(temp_file):
+                        remove(temp_file)
+                except OSError as e:
+                    # Handle permissions or locked file exceptions
+                    pass
+    
     def _remove_partial_output(self, output_file: str) -> None:
         if output_file and path.exists(output_file):
             remove(output_file)
 
-    def cancel_optimization(self) -> None:
+    def cancel_process(self) -> None:
         self._ffmpeg_service.terminate_process()
     
     def shutdown(self) -> None:
-        self.cancel_optimization()
+        self.cancel_process()
 
         if (
-            self._ffmpeg_thread is not None
-            and self._ffmpeg_thread.is_alive()
+            self._process_thread is not None
+            and self._process_thread.is_alive()
         ):
-            self._ffmpeg_thread.join(timeout=1)
+            self._process_thread.join(timeout=1)
 
     def create_output_file(self, directory: str) -> None:
         if self._app_state.media.input_file is None:

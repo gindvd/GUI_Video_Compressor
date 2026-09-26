@@ -42,7 +42,7 @@ class FFmpegService:
     def download_video(
         self,
         url: str,
-        format: str,
+        ext: str,
         output_folder: str,
     ) -> ExitStatus:
         """Downloads a video using yt-dlp"""
@@ -55,7 +55,7 @@ class FFmpegService:
             "--format",
             "bestvideo+bestaudio/best",
             "--merge-output-format",
-            format,
+            ext,
             "--output",
             os.path.join(output_folder, "%(title)s.%(ext)s"),
             "--no-playlist",
