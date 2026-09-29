@@ -42,6 +42,7 @@ class App(ctk.CTk):
 
         self.title("Media Optimization Tool")
         self.resizable(True, True)
+        self.minsize(840, 500)
 
         ctk.set_appearance_mode("System")
         ctk.set_default_color_theme("blue")
@@ -64,9 +65,14 @@ class App(ctk.CTk):
             gif_settings=GifSettings()
         )
 
-        self._main_frame = MainFrame(master=self, corner_radius=0)
-
-        self._main_frame.pack(fill="both", expand=True)
+        self._main_frame = MainFrame(
+            master=self, 
+            corner_radius=0
+        )
+        self._main_frame.pack(
+            fill="both", 
+            expand=True
+        )
 
         self._main_presenter = MainPresenter(
             app_state=self._app_state,
@@ -77,21 +83,19 @@ class App(ctk.CTk):
             on_exit_command=self.quit,
         )
 
-        self.update_idletasks()
-
-        self.minsize(840, 500)
-
         self.protocol("WM_DELETE_WINDOW", self._main_presenter.on_exit)
 
     def _win_app_setup(self) -> None:
-        # Set dpi awareness for Windows PCs with high dpi monitors
+        """Sets the Window's executable paths for all dependencies """
         ffmpeg_path: str = resource_path(path.join("bin", f"{self._FFMPEG}.exe"))
         self._check_file(ffmpeg_path)
 
         ytdlp_path: str = resource_path(path.join("bin", f"{self._YTDLP}.exe"))
         self._check_file(ytdlp_path)
 
-        self._ffmpeg_service = FFmpegService(ffmpeg_path=ffmpeg_path, ytdlp_path=[ytdlp_path])
+        self._ffmpeg_service = FFmpegService(
+            ffmpeg_path=ffmpeg_path, ytdlp_path=[ytdlp_path]
+        )
 
         ffprobe_path: str = resource_path(path.join("bin", f"{self._FFPROBE}.exe"))
         self._check_file(ffprobe_path)
@@ -111,7 +115,7 @@ class App(ctk.CTk):
         self.iconbitmap(icon_path)
 
     def _linux_app_setup(self) -> None:
-
+        """Sets the Linux binaries paths for all dependencies """
         missing = [
             x for x in (self._FFMPEG, self._FFPROBE, self._VLC) if which(x) is None
         ]
@@ -144,6 +148,7 @@ class App(ctk.CTk):
         if ytdlp_path:
             return [ytdlp_path]
         
+        # Gets yt-dlp binaries from venv 
         return [executable, "-m", self._YTDLP]
 
     @staticmethod

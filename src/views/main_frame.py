@@ -16,39 +16,57 @@ class MainFrame(ctk.CTkFrame):
     def __init__(self, master: Any, **kwargs):
         super().__init__(master=master, **kwargs)
 
-        self.on_open_file: Callable[..., Any] | None = None
-        self.on_exit: Callable[..., Any] | None = None
-        self.on_open_frame_viewer: Callable[..., Any] | None = None
-        self.on_show_about: Callable[..., Any] | None = None
-        self.on_show_license: Callable[..., Any] | None = None
-        self.on_show_third_party_licenses: Callable[..., Any] | None = None
-        self.on_file_entry_submitted: Callable[..., Any] | None = None
+        self.on_open_file: Callable[[], None] | None = None
+        self.on_exit: Callable[[], None] | None = None
+        self.on_open_frame_viewer: Callable[[], None] | None = None
+        self.on_show_about: Callable[[], None] | None = None
+        self.on_show_license: Callable[[], None] | None = None
+        self.on_show_third_party_licenses: Callable[[], None] | None = None
+        self.on_file_entry_submitted: Callable[[str], None] | None = None
+        self.on_open_downloader: Callable[[], None] | None = None
         
         self._build_menubar()
         self._build()
+        self._bind_main()
 
     def _build_menubar(self) -> None:
-        menubar = CTkMenuBar(self)
+        menubar = CTkMenuBar(master=self)
 
         file_btn = menubar.add_cascade("File")
         tools_btn = menubar.add_cascade("Tools")
         help_btn = menubar.add_cascade("Help")
 
         file_drop = CustomDropdownMenu(widget=file_btn)
-        file_drop.add_option(option="Open", command=self._handle_open_file)
+        file_drop.add_option(
+            option="Open", 
+            command=self._handle_open_file
+        )
         file_drop.add_separator()
-        file_drop.add_option(option="Exit", command=self._handle_exit)
+        file_drop.add_option(
+            option="Exit", 
+            command=self._handle_exit
+        )
 
         tools_drop = CustomDropdownMenu(widget=tools_btn)
         tools_drop.add_option(
             option="Frame Viewer",
             command=self._handle_open_frame_viewer,
         )
+        tools_drop.add_option(
+            option="YouTube Downloader",
+            command=self._handle_open_downloder,
+        )
 
         help_drop = CustomDropdownMenu(widget=help_btn)
-        help_drop.add_option(option="About", command=self._handle_show_about)
+        help_drop.add_option(
+            option="About", 
+            command=self._handle_show_about
+        )
         help_drop.add_separator()
-        help_drop.add_option(option="License", command=self._handle_show_license)
+        help_drop.add_option(
+            option="License", 
+            command=self._handle_show_license
+        )
         help_drop.add_option(
             option="3rd Party Licenses",
             command=self._handle_show_third_party_licenses,
@@ -73,7 +91,7 @@ class MainFrame(ctk.CTkFrame):
         # File frame
 
         self._file_frame = ctk.CTkFrame(
-            self._layout_frame,
+            master=self._layout_frame,
             corner_radius=0,
             fg_color=frame_color,
         )
@@ -86,7 +104,7 @@ class MainFrame(ctk.CTkFrame):
         self._file_frame.columnconfigure(0, weight=1)
 
         self._file_entry = ctk.CTkEntry(
-            self._file_frame,
+            master=self._file_frame,
         )
 
         self._file_entry.bind(
@@ -103,7 +121,7 @@ class MainFrame(ctk.CTkFrame):
         )
 
         self._browse_btn = ctk.CTkButton(
-            self._file_frame,
+            master=self._file_frame,
             text="Browse",
             command=self._handle_open_file,
         )
@@ -118,7 +136,7 @@ class MainFrame(ctk.CTkFrame):
         # Bottom frame
 
         self._bottom_frame = ctk.CTkFrame(
-            self._layout_frame,
+            master=self._layout_frame,
             height=20,
             corner_radius=0,
             fg_color=frame_color,
@@ -146,7 +164,7 @@ class MainFrame(ctk.CTkFrame):
         # Content frame
 
         self._content_frame = ctk.CTkFrame(
-            self._layout_frame,
+            master=self._layout_frame,
             corner_radius=0,
             fg_color="transparent",
         )
@@ -176,7 +194,6 @@ class MainFrame(ctk.CTkFrame):
         )
 
         # Settings
-
         tabview = ctk.CTkTabview(
             master=self._content_frame,
             corner_radius=8,
@@ -187,7 +204,6 @@ class MainFrame(ctk.CTkFrame):
                 weight="bold",
             ),
         )
-
         tabview.grid(
             row=0,
             column=1,
@@ -201,7 +217,7 @@ class MainFrame(ctk.CTkFrame):
         tabview.set("Video")
 
         self._settings_frame = SettingsFrame(
-            tabview.tab("Video"),
+            master=tabview.tab("Video"),
             corner_radius=0,
             fg_color="transparent",
         )
@@ -214,7 +230,7 @@ class MainFrame(ctk.CTkFrame):
         )
 
         self._gif_frame = GifSettingsFrame(
-            tabview.tab("  GIF  "),
+            master=tabview.tab("  GIF  "),
             corner_radius=0,
             fg_color="transparent",
         )
@@ -225,6 +241,18 @@ class MainFrame(ctk.CTkFrame):
             expand=True,
             fill="both",
         )
+    
+    def _bind_main(self) -> None:
+        self.bind(
+            sequence="<Control-o>",
+            command=lambda: self.after(10, self._handle_open_file),
+            add="+"
+        )
+        self.bind(
+            sequence="<Alt-z>",
+            command=lambda: self.after(10, self._handle_exit),
+            add="+"
+        )
 
     def _handle_open_file(self) -> None:
         if self.on_open_file:
@@ -234,7 +262,7 @@ class MainFrame(ctk.CTkFrame):
         if self.on_exit:
             self.on_exit()
 
-    def _handle_file_entry_submit(self, event: Event) -> None:
+    def _handle_file_entry_submit(self, event: Event | None = None) -> None:
         if self.on_file_entry_submitted:
             item = self._file_entry.get().strip()
 
@@ -255,6 +283,10 @@ class MainFrame(ctk.CTkFrame):
     def _handle_show_third_party_licenses(self) -> None:
         if self.on_show_third_party_licenses:
             self.on_show_third_party_licenses()
+    
+    def _handle_open_downloder(self) -> None:
+        if self.on_open_downloader:
+            self.on_open_downloader()
 
     @property
     def file_entry(self) -> str:

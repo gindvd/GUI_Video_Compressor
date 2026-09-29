@@ -7,8 +7,19 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from models.app_state import AppState
+
 from utils.log_utils import logger
+
 from services.exit_status import ExitStatus
+
+from rules.optimization_command_rules import (
+    hwaccel_args_for,
+    quality_args_for,
+    scale_args_for,
+    get_audio_args,
+    quality_converter
+)
 
 
 class FFmpegService:
@@ -24,11 +35,9 @@ class FFmpegService:
         self._flags: dict[str, Any] = {}
 
         # Flags to hide console window and create a process group
-
         if sys.platform.startswith("win"):
             self._flags["creationflags"] = (
-                subprocess.CREATE_NEW_PROCESS_GROUP
-                | subprocess.CREATE_NO_WINDOW
+                subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
             )
 
             si = subprocess.STARTUPINFO()
@@ -38,39 +47,8 @@ class FFmpegService:
         else:
             # Create process that can be terminated on Linux / MacOS
             self._flags["start_new_session"] = True
-
-    def download_video(
-        self,
-        url: str,
-        ext: str,
-        output_folder: str,
-    ) -> ExitStatus:
-        """Downloads a video using yt-dlp"""
-
-        if self._proc:
-            return ExitStatus.BUSY
-
-        cmd = [
-            *self._ytdlp_path,
-            "--format",
-            "bestvideo+bestaudio/best",
-            "--merge-output-format",
-            ext,
-            "--output",
-            os.path.join(output_folder, "%(title)s.%(ext)s"),
-            "--no-playlist",
-            "--ffmpeg-location",
-            self._ffmpeg_path,
-            url,
-        ]
-
-        return self._run_command(cmd)
-
-    def extract_frame(
-        self,
-        input_file: str,
-        timestamp: str,
-    ) -> bytes | None:
+    
+    def extract_frame(self, input_file: str, timestamp: str) -> bytes | None:
         """Extracts frame of media file at the given timestamp"""
 
         cmd = [
@@ -115,22 +93,42 @@ class FFmpegService:
         else:
             return proc.stdout
 
-    def create_gif(
-        self,
-        input_file: str,
-        output_file: str,
-        start_time: str,
-        duration: str,
-        fps: str,
-        resolution: str,
-        loops: int,
-    ) -> ExitStatus:
+    def download_video(self, url: str, ext: str, output_file: str) -> ExitStatus:
+        """Downloads a video using yt-dlp"""
+
+        if self._proc:
+            return ExitStatus.BUSY
+        
+        output_path = Path(output_file)
+
+        # Let yt-dlp control the extension during postprocessing
+        output_template = str(output_path.with_suffix("")) + ".%(ext)s"
+
+        cmd = [
+            *self._ytdlp_path,
+            "--no-keep-fragments",
+            "--no-playlist",
+            "--format",
+            "bestvideo+bestaudio/best",
+            # Convert the merged result to the format selected in DownloaderView
+            "--recode-video",
+            ext,
+            "--output",
+            output_template,
+            "--ffmpeg-location",
+            self._ffmpeg_path,
+            url,
+        ]
+
+        return self._run_command(cmd)
+
+    def create_gif(self, app_state: AppState) -> ExitStatus:
         """Converts video file to GIF"""
 
-        width, _ = resolution.split("x")
+        width, _ = app_state.gif_settings.resolution.split("x")
 
         filter_complex = (
-            f"fps={fps},"
+            f"fps={app_state.gif_settings.fps},"
             f"scale={width}:-1:flags=lanczos,"
             "split[s0][s1];"
             "[s0]palettegen=stats_mode=diff[p];"
@@ -140,129 +138,46 @@ class FFmpegService:
         cmd = [
             self._ffmpeg_path,
             "-ss",
-            start_time,
+            app_state.timestamps.start_time,
             "-t",
-            duration,
+            app_state.timestamps.duration,
             "-i",
-            input_file,
+            app_state.media.input_file,
             "-filter_complex",
             filter_complex,
             "-loop",
-            str(loops),
-            output_file,
+            app_state.gif_settings.loops,
+            app_state.gif_settings.output_file,
         ]
 
         return self._run_command(cmd)
 
-    def optimize(
-        self,
-        input_file: str,
-        file_format: str,
-        resolution: str,
-        codec: str,
-        fps: str,
-        preset: str | None,
-        quality: int,
-        include_audio: bool,
-        audio_codec: str | None,
-        audio_bitrate: str | None,
-        start_time: str,
-        duration: str,
-        output_file: str,
-    ) -> ExitStatus:
+    def optimize(self, app_state: AppState) -> ExitStatus:
         """Creates FFmpeg command and executes it"""
 
-        width, height = resolution.split("x")
+        width, height = app_state.settings.resolution.split("x")
+        crf: str = quality_converter(app_state.settings.quality)
 
-        crf = self._quality_converter(quality)
+        aud_opts: list[str] = get_audio_args(
+            app_state.settings.include_audio, 
+            app_state.settings.audio_codec, 
+            app_state.settings.audio_bitrate
+        )
 
-        if (
-            include_audio is None
-            or audio_codec is None
-            or audio_bitrate is None
-        ):
-            aud_opts = ["-an"]
+        hwaccel_args: list[str] | None = hwaccel_args_for(
+            app_state.settings.video_codec
+        )
 
-        else:
-            aud_opts = [
-                "-c:a",
-                audio_codec,
-                "-b:a",
-                audio_bitrate,
-            ]
+        scale_args: list[str] = scale_args_for(
+            app_state.settings.video_codec, 
+            app_state.settings.frame_rate, 
+            width, 
+            height
+        )
 
-        hwaccel_args = None
-        scale_args = [
-            "-vf",
-            f"scale={width}:{height},fps={fps}",
-        ]
-
-        # Splits codec to check for hardware specific args
-        _, __, hw_id = codec.partition("_")
-
-        if hw_id == "nvenc":
-            quality_args = [
-                "-rc",
-                "vbr",
-                "-cq",
-                str(crf),
-                "-b:v",
-                "0",
-            ]
-
-        elif hw_id == "amf":
-            quality_args = [
-                "-rc",
-                "qvbr",
-                "-qvbr_quality_level",
-                str(crf),
-            ]
-
-        elif hw_id == "qsv":
-            hwaccel_args = [
-                "-init_hw_device",
-                "qsv=hw",
-                "-filter_hw_device",
-                "hw",
-            ]
-
-            quality_args = [
-                "-global_quality",
-                str(crf),
-                "-look_ahead",
-                "1",
-            ]
-
-        elif hw_id == "vaapi":
-            hwaccel_args = [
-                "-vaapi_device",
-                "/dev/dri/renderD128",
-            ]
-
-            scale_args = [
-                "-vf",
-                (
-                    f"format=nv12,fps={fps},hwupload,"
-                    f"scale_vaapi=w={width}:h={height}"
-                ),
-            ]
-
-            quality_args = [
-                "-qp",
-                str(crf),
-            ]
-
-        else:
-            quality_args = [
-                "-crf",
-                str(crf),
-            ]
-
-        if codec == "libvpx-vp9":
-            quality_args.extend([
-                "-b:v",
-                "0",
-            ])
+        quality_args: list[str] = quality_args_for(
+            app_state.settings.video_codec, crf
+        )
 
         cmd: list[str] = [
             self._ffmpeg_path,
@@ -273,26 +188,26 @@ class FFmpegService:
 
         cmd.extend([
             "-ss",
-            start_time,
+            app_state.timestamps.start_time,
             "-t",
-            duration,
+            app_state.timestamps.duration,
             "-i",
-            input_file,
+            app_state.media.input_file,
             "-c:v",
-            codec,
+            app_state.settings.video_codec,
             *scale_args,
         ])
 
-        if preset:
+        if app_state.settings.preset:
             cmd.extend([
                 "-preset",
-                preset,
+                app_state.settings.preset,
             ])
 
         cmd.extend([
             *quality_args,
             *aud_opts,
-            output_file,
+            app_state.media.output_file,
         ])
 
         return self._run_command(cmd)
@@ -364,7 +279,7 @@ class FFmpegService:
             self._terminated = False
 
     def terminate_process(self) -> None:
-        """Terminates the current process and its child processes."""
+        """Terminates the current process and its child processes"""
 
         proc = self._proc
 
@@ -422,11 +337,4 @@ class FFmpegService:
             os.getpgid(proc.pid),
             signal.SIGKILL,
         )
-
-    @staticmethod
-    def _quality_converter(quality: int) -> int:
-        """Converts quality percentage into inverted CRF number"""
-        quality_inverted = abs(quality / 100 - 1)
-        crf = quality_inverted * 33 + 18 # Range 18 to 51
-
-        return int(crf)
+ 

@@ -16,15 +16,15 @@ class MediaPlayerFrame(ctk.CTkFrame):
     def __init__(self, master: Any, **kwargs):
         super().__init__(master=master, **kwargs)
 
-        self.on_play_pause_toggle: Callable[..., Any] | None = None
-        self.on_reverse_click: Callable[..., Any] | None = None
-        self.on_forward_click: Callable[..., Any] | None = None
-        self.on_start_time_change: Callable[..., Any] | None = None
-        self.on_current_time_change: Callable[..., Any] | None = None
-        self.on_end_time_change: Callable[..., Any] | None = None
-        self.on_volume_change: Callable[..., Any] | None = None
-        self.on_mute_toggle: Callable[..., Any] | None = None
-        self.on_screenshot_click: Callable[..., Any] | None = None
+        self.on_play_pause_toggle: Callable[[], None] | None = None
+        self.on_reverse_click: Callable[[], None] | None = None
+        self.on_forward_click: Callable[[], None] | None = None
+        self.on_start_time_change: Callable[[int], None] | None = None
+        self.on_current_time_change: Callable[[int], None] | None = None
+        self.on_end_time_change: Callable[[int], None] | None = None
+        self.on_volume_change: Callable[[int], None] | None = None
+        self.on_mute_toggle: Callable[[], None] | None = None
+        self.on_screenshot_click: Callable[[], None] | None = None
 
         self._start_time: ctk.DoubleVar = ctk.DoubleVar(self, value=0)
         self._current_time: ctk.DoubleVar = ctk.DoubleVar(self, value=0.5)
@@ -52,6 +52,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self._set_video_control_icons()
 
         self._build()
+        self._bind_player()
 
     def _set_video_control_icons(self) -> None:
         """Creates icons for the control buttons"""
@@ -121,7 +122,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
 
         # Video viewer
         self.media_viewer = ctk.CTkFrame(
-            self._content_frame,
+            master=self._content_frame,
             fg_color="black",
             corner_radius=0,
         )
@@ -135,7 +136,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
 
         # Video controls background
         self._control_panel = ctk.CTkFrame(
-            self._content_frame,
+            master=self._content_frame,
             height=48,
             fg_color="black",
             corner_radius=0,
@@ -168,7 +169,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self._control_panel.columnconfigure(4, weight=4)
 
         self._play_pause_btn = ctk.CTkButton(
-            self._control_panel,
+            master=self._control_panel,
             width=36,
             height=36,
             fg_color="transparent",
@@ -177,10 +178,15 @@ class MediaPlayerFrame(ctk.CTkFrame):
             state="disabled",
             command=self._handle_play_pause_toggle,
         )
-        self._play_pause_btn.grid(row=1, column=0, padx=5, pady=5)
+        self._play_pause_btn.grid(
+            row=1, 
+            column=0, 
+            padx=5, 
+            pady=5
+        )
 
         self._reverse_btn = ctk.CTkButton(
-            self._control_panel,
+            master=self._control_panel,
             width=36,
             height=36,
             fg_color="transparent",
@@ -197,7 +203,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
 
         self._forward_btn = ctk.CTkButton(
-            self._control_panel,
+            master=self._control_panel,
             width=36,
             height=36,
             fg_color="transparent",
@@ -214,7 +220,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
 
         self._time_range_lbl = ctk.CTkLabel(
-            self._control_panel,
+            master=self._control_panel,
             textvariable=self._playback_range_timestamp,
             width=125,
             text_color="white",
@@ -227,7 +233,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
 
         self._trim_slider = CTkTrimSlider(
-            self._control_panel,
+            master=self._control_panel,
             progress_color="#AAB0B5",
             button_color="#1F6AA5",
             button_hover_color="#144870",
@@ -248,7 +254,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
 
         self._volume_btn = ctk.CTkButton(
-            self._control_panel,
+            master=self._control_panel,
             width=36,
             height=36,
             fg_color="transparent",
@@ -271,7 +277,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self._volume_popup.resizable(False, False)
 
         self._volume_slider = ctk.CTkSlider(
-            self._volume_popup,
+            master=self._volume_popup,
             height=100,
             button_corner_radius=4,
             from_=0,
@@ -294,7 +300,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         self._volume_slider.bind("<Leave>", self._schedule_hide_volume_popup)
 
         self._screenshot_btn = ctk.CTkButton(
-            self._control_panel,
+            master=self._control_panel,
             width=36,
             height=36,
             fg_color="transparent",
@@ -312,45 +318,112 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
     
     def _build_timestamp_viewer(self) -> None:
-        self._trim_info_frame = ctk.CTkFrame(
-            self._timestamp_viewer,
-            fg_color="transparent",
-        )
-        self._trim_info_frame.pack(padx=1, pady=1, anchor="center", expand=True)
-
         trim_info_font = ctk.CTkFont(size=11)
         trim_duration_font = ctk.CTkFont(size=11, weight="bold")
 
+        self._trim_info_frame = ctk.CTkFrame(
+            master=self._timestamp_viewer,
+            fg_color="transparent",
+        )
+        self._trim_info_frame.pack(
+            padx=1, 
+            pady=1, 
+            anchor="center", 
+            expand=True
+        )
+
         self._start_time_info_lbl = ctk.CTkLabel(
-            self._trim_info_frame,
+            master=self._trim_info_frame,
             textvariable=self._start_timestamp,
             font=trim_info_font,
         )
         self._trim_duration_info_lbl = ctk.CTkLabel(
-            self._trim_info_frame,
+            master=self._trim_info_frame,
             textvariable=self._trim_duration_timestamp,
             font=trim_duration_font,
         )
         self._end_time_info_lbl = ctk.CTkLabel(
-            self._trim_info_frame,
+            master=self._trim_info_frame,
             textvariable=self._end_timestamp,
             font=trim_info_font,
         )
         
-        ctk.CTkLabel(self._trim_info_frame, text="Start Time:", font=trim_info_font,).grid(
-            padx=(20,5), pady=0, row=0, column=0, sticky="w"
+        ctk.CTkLabel(
+            master=self._trim_info_frame, 
+            text="Start Time:", 
+            font=trim_info_font,
+        ).grid(
+            padx=(20,5), 
+            pady=0, 
+            row=0, 
+            column=0, 
+            sticky="w"
         )
-        self._start_time_info_lbl.grid(padx=(5, 20), pady=0, row=0, column=1, sticky="w")
+        self._start_time_info_lbl.grid(
+            padx=(5, 20), 
+            pady=0, 
+            row=0, 
+            column=1, 
+            sticky="w"
+        )
 
-        ctk.CTkLabel(self._trim_info_frame, text="Trim Duration:", font=trim_duration_font).grid(
-            padx=(20,5), pady=0, row=0, column=2
+        ctk.CTkLabel(
+            master=self._trim_info_frame, 
+            text="Trim Duration:", 
+            font=trim_duration_font
+        ).grid(
+            padx=(20,5), 
+            pady=0, 
+            row=0, 
+            column=2
         )
-        self._trim_duration_info_lbl.grid(padx=(5, 20), pady=0, row=0, column=3)
+        self._trim_duration_info_lbl.grid(
+            padx=(5, 20), 
+            pady=0, 
+            row=0, 
+            column=3
+        )
 
-        ctk.CTkLabel(self._trim_info_frame, text="End Time:", font=trim_info_font,).grid(
-            padx=(20,5), pady=0, row=0, column=4, sticky="e"
+        ctk.CTkLabel(
+            master=self._trim_info_frame, 
+            text="End Time:", 
+            font=trim_info_font,
+        ).grid(
+            padx=(20,5), 
+            pady=0, row=0, 
+            column=4, 
+            sticky="e"
         )
-        self._end_time_info_lbl.grid(padx=(5, 20), pady=0, row=0, column=5, sticky="e")
+        self._end_time_info_lbl.grid(
+            padx=(5, 20), 
+            pady=0, 
+            row=0, 
+            column=5, 
+            sticky="e"
+        )
+    
+    def _bind_player(self) -> None:
+        self.bind(
+            sequence="<space>",
+            command=lambda x: self.after(10, self._handle_play_pause_toggle, x),
+            add="+"
+        )
+        self.bind(
+            sequence="<k>",
+            command=lambda x: self.after(10, self._handle_play_pause_toggle, x),
+            add="+"
+        )
+
+        self.bind(
+            sequence="<j>",
+            command=lambda x: self.after(10, self._handle_reverse_click, x),
+            add="+"
+        )
+        self.bind(
+            sequence="<l>",
+            command=lambda x: self.after(10, self._handle_forward_click, x),
+            add="+"
+        )
 
     def _show_volume_popup(self, event=None) -> None:
         if (
@@ -586,8 +659,16 @@ class MediaPlayerFrame(ctk.CTkFrame):
         if self._loading_label is not None: 
             return 
         
-        self._loading_label = ctk.CTkLabel( self.media_viewer, text="Loading...", font=ctk.CTkFont(size=16), ) 
-        self._loading_label.place( relx=0.5, rely=0.5, anchor="center", )
+        self._loading_label = ctk.CTkLabel( 
+            master=self.media_viewer, 
+            text="Loading...", 
+            font=ctk.CTkFont(size=16), 
+        ) 
+        self._loading_label.place(
+            relx=0.5,
+            rely=0.5, 
+            anchor="center", 
+        )
 
         self._loading_label.lift() 
         self.update_idletasks() 

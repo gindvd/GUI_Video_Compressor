@@ -9,10 +9,10 @@ class GifSettingsFrame(ctk.CTkFrame):
     def __init__(self, master: Any, **kwargs) -> None:
         super().__init__(master=master, **kwargs)
 
-        self.on_resolution_change: Callable[[str], Any] | None = None
-        self.on_frame_rate_change: Callable[[str], Any] | None = None
-        self.on_loop_change: Callable[[str], Any] | None = None
-        self.on_create: Callable[[], Any] | None = None
+        self.on_resolution_change: Callable[[str], None] | None = None
+        self.on_frame_rate_change: Callable[[str], None] | None = None
+        self.on_loop_change: Callable[[str], None] | None = None
+        self.on_create: Callable[[], None] | None = None
 
         self._resolution = ctk.StringVar(self, value="854x480")
         self._frame_rate = ctk.StringVar(self, value="24")
@@ -29,16 +29,20 @@ class GifSettingsFrame(ctk.CTkFrame):
             fg_color=frame_color,
             corner_radius=8,
         )
-        self._setting_section.pack(fill="x", padx=5, pady=(0, 5))
+        self._setting_section.pack(
+            fill="x", 
+            padx=5, 
+            pady=(0, 5)
+        )
         self._setting_section.columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
-            self._setting_section,
+            master=self._setting_section,
             text="GIF Settings",
             font=section_font,
         ).grid(row=0, column=0, columnspan=2, padx=8, pady=(8, 4), sticky="w")
 
-        ctk.CTkLabel(self._setting_section, text="Resolution:").grid(
+        ctk.CTkLabel(master=self._setting_section, text="Resolution:").grid(
             row=1,
             column=0,
             padx=8,
@@ -47,7 +51,7 @@ class GifSettingsFrame(ctk.CTkFrame):
         )
 
         self._resolution_dropdown = ctk.CTkComboBox(
-            self._setting_section,
+            master=self._setting_section,
             values=[
                 "1280x720",
                 "854x480",
@@ -57,10 +61,16 @@ class GifSettingsFrame(ctk.CTkFrame):
             command=self._handle_resolution_change,
             variable=self._resolution,
         )
-        self._resolution_dropdown.grid(row=1, column=1, padx=8, pady=4, sticky="ew")
+        self._resolution_dropdown.grid(
+            row=1, 
+            column=1, 
+            padx=8, 
+            pady=4, 
+            sticky="ew"
+        )
         self._resolution_dropdown.set("854x480")
 
-        ctk.CTkLabel(self._setting_section, text="Frame Rate:").grid(
+        ctk.CTkLabel(master=self._setting_section, text="Frame Rate:").grid(
             row=2,
             column=0,
             padx=8,
@@ -69,7 +79,7 @@ class GifSettingsFrame(ctk.CTkFrame):
         )
 
         self._frame_rate_dropdown = ctk.CTkComboBox(
-            self._setting_section,
+            master=self._setting_section,
             values=[
                 "24",
                 "15",
@@ -80,9 +90,15 @@ class GifSettingsFrame(ctk.CTkFrame):
             command=self._handle_frame_rate_change,
             variable=self._frame_rate,
         )
-        self._frame_rate_dropdown.grid(row=2, column=1, padx=8, pady=4, sticky="ew")
+        self._frame_rate_dropdown.grid(
+            row=2, 
+            column=1, 
+            padx=8, 
+            pady=4, 
+            sticky="ew"
+        )
 
-        ctk.CTkLabel(self._setting_section, text="Loop Count:").grid(
+        ctk.CTkLabel(master=self._setting_section, text="Loop Count:").grid(
             row=3,
             column=0,
             padx=8,
@@ -91,7 +107,7 @@ class GifSettingsFrame(ctk.CTkFrame):
         )
 
         self._loop_dropdown = ctk.CTkComboBox(
-            self._setting_section,
+            master=self._setting_section,
             values=[
                 "Infinite",
                 "1x",
@@ -103,21 +119,35 @@ class GifSettingsFrame(ctk.CTkFrame):
             command=self._handle_loop_change,
             variable=self._loops,
         )
-        self._loop_dropdown.grid(row=3, column=1, padx=8, pady=(4, 12), sticky="ew")
+        self._loop_dropdown.grid(
+            row=3, 
+            column=1, 
+            padx=8, 
+            pady=(4, 12), 
+            sticky="ew"
+        )
 
         self._button_container = ctk.CTkFrame(self,
             fg_color=frame_color,
             corner_radius=8
         )
-        self._button_container.pack(fill="x", padx=5, pady=(5,0), side="bottom")
+        self._button_container.pack(
+            fill="x", 
+            padx=5, 
+            pady=(5,0), 
+            side="bottom"
+        )
 
         self._create_btn = ctk.CTkButton(
-            self._button_container, 
+            master=self._button_container, 
             text="Create GIF",
             state="disabled",
             command=self._handle_gif_creation
         )
-        self._create_btn.pack(padx=8, pady=8)
+        self._create_btn.pack(
+            padx=8, 
+            pady=8
+        )
     
     def _handle_resolution_change(self, value: str) -> None:
         self._resolution.set(value)

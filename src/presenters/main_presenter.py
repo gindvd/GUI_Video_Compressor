@@ -1,5 +1,4 @@
 from os import path
-from typing import Any
 from collections.abc import Callable
 
 from models.app_state import AppState
@@ -8,6 +7,7 @@ from presenters.settings_presenter import SettingsPresenter
 from presenters.gif_settings_presenter import GifSettingsPresenter
 from presenters.media_player_presenter import MediaPlayerPresenter
 from presenters.frame_viewer_presenter import FrameViewerPresenter
+from presenters.downloader_presenter import DownloaderPresenter
 
 from controllers.ffmpeg_controller import FFmpegController
 from controllers.extraction_controller import ExtractionController
@@ -15,6 +15,7 @@ from controllers.extraction_controller import ExtractionController
 from views import dialogs
 from views.main_frame import MainFrame
 from views.frame_viewer import FrameViewer
+from views.downloader_view import DownloaderView
 
 from services.ffmpeg_service import FFmpegService
 from services.ffprobe_service import FFprobeService
@@ -34,6 +35,7 @@ class MainPresenter:
         vlc_playback_service: VLCService,
         on_exit_command: Callable[[], None],
     ) -> None:
+
         self._app_state: AppState = app_state
         self._view: MainFrame = view
 
@@ -46,6 +48,7 @@ class MainPresenter:
             ffmpeg_service=self._ffmpeg_service,
             app_state=self._app_state,
             on_restore_ui=lambda: self._view.after(0, self.restore_ui),
+            scan_and_load=lambda x: self._view.after(1, self.scan_and_load_files, x)
         )
 
         self._extraction_controller: ExtractionController = ExtractionController(
@@ -83,6 +86,9 @@ class MainPresenter:
 
         self._frame_viewer: FrameViewer | None = None
         self._frame_viewer_presenter: FrameViewerPresenter | None = None
+
+        self._downloader_view: DownloaderView | None = None
+        self._downloader_presenter: DownloaderPresenter | None = None
 
         self._on_exit_command: Callable[[], None] = on_exit_command
 
@@ -131,6 +137,18 @@ class MainPresenter:
         )
 
         self._frame_viewer_presenter.load_media()
+    
+    def on_open_downloader(self) -> None:
+        if self._downloader_view is not None and self._downloader_view.winfo_exists():
+            self._downloader_view.focus()
+            return
+
+        self._downloader_view = DownloaderView(master=self._view)
+
+        self._downloader_presenter = DownloaderPresenter(
+            downloader_view=self._downloader_view,
+            ffmpeg_controller=self.ffmpeg_controller
+        )
 
     def on_exit(self) -> None:
         """Closes all background processes before destroying the app"""
@@ -156,6 +174,35 @@ class MainPresenter:
         self._view.settings_frame.compress_btn_state = "normal"
         self._view.gif_frame.create_button_state = "normal"
         self._view.browse_btn_state = "normal"
+    
+    def scan_and_load_files(self, filepath: str | tuple | None) -> None:
+        if filepath is None or filepath == "" or filepath == ():
+            return
+
+        if isinstance(filepath, tuple):
+            dialogs.show_warning(
+                master=self._view,
+                title="File Error!",
+                message="Cannot load multiple files at once!",
+            )
+            return
+
+        self.disable_ui()
+
+        if not self._compatible_file(filepath):
+            dialogs.show_warning(
+                master=self._view, title="Invalid File", message="File not compatible!"
+            )
+
+            self.restore_ui()
+            return
+
+        self._app_state.media.input_file = filepath
+
+        if self._view.file_entry == "" or self._view.file_entry is None:
+            self._view.file_entry = filepath
+
+        self._extraction_controller.extract_data()
 
     def _calculate_base_fps(self) -> None:
         try:
@@ -219,35 +266,6 @@ class MainPresenter:
             ],
         )
 
-    def scan_and_load_files(self, filepath: str | tuple | None) -> None:
-        if filepath is None or filepath == "" or filepath == ():
-            return
-
-        if isinstance(filepath, tuple):
-            dialogs.show_warning(
-                master=self._view,
-                title="File Error!",
-                message="Cannot load multiple files at once!",
-            )
-            return
-
-        self.disable_ui()
-
-        if not self._compatible_file(filepath):
-            dialogs.show_warning(
-                master=self._view, title="Invalid File", message="File not compatible!"
-            )
-
-            self.restore_ui()
-            return
-
-        self._app_state.media.input_file = filepath
-
-        if self._view.file_entry == "" or self._view.file_entry is None:
-            self._view.file_entry = filepath
-
-        self._extraction_controller.extract_data()
-
     def _compatible_file(self, item: str) -> bool:
         if not path.isfile(item):
             return False
@@ -267,4 +285,5 @@ class MainPresenter:
         self._view.on_show_license = self.on_show_license
         self._view.on_show_third_party_licenses = self.on_show_third_party_licenses
         self._view.on_open_frame_viewer = self.open_frame_viewer
+        self._view.on_open_downloader = self.on_open_downloader
         self._view.on_exit = self.on_exit

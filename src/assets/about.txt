@@ -1,11 +1,9 @@
 
-
 Media Conversion Tool
-Version 3.0.0
+Version 5.0.0
 Created by David Gingerich
 
-Graphical interface for trimming, compressing videos, and taking
-video screenhots.
+Graphical interface for compressing, trimming, and converting video files.
 
 The Media Conversion Tool is Licenced under the GPLv3.0
 See LICENSE.GPL-v3.0.txt
@@ -52,8 +50,29 @@ For more information, visit https://wiki.videolan.org/Python_bindings/.
 Source code located at https://github.com/oaubert/python-vlc.
 
 
-This software uses libraries from the python-pillow (fork) under the MIT-CMU.
+This software uses libraries from the python-pillow (fork) under the 
+MIT-CMU.
 
 For more information, visit https://python-pillow.github.io/.
 Source code located at https://github.com/python-pillow/Pillow.
 
+
+This software uses libraries from the yt-dlp project under the 
+Unlicense License.
+
+For more information, visit https://github.com/yt-dlp. 
+Source code located at https://github.com/yt-dlp/yt-dlp/yt-dlp.
+
+
+This software uses libraries from BeautifulSoup4 by Leonard Richardson 
+under the MIT License.
+
+For more information, visit https://www.crummy.com/software/BeautifulSoup/.
+Source code located at https://code.launchpad.net/beautifulsoup.
+
+
+This software uses libraries from the request libraries by the Python Software Foundation
+under the Apache Software License, Version 2.
+
+For more information, https://requests.readthedocs.io/en/latest/.
+Source code located at https://github.com/psf/requests.

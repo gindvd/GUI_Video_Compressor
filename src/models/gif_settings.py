@@ -6,4 +6,4 @@ class GifSettings:
 
     resolution: str = "854x480"
     fps: str = "15"
-    loops: int = 0
+    loops: str = "0"

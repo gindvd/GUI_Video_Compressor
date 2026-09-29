@@ -11,7 +11,8 @@ from controllers.ffmpeg_controller import FFmpegController
 from services.hardware_detection_service import (
     gpu_manufacturers,
 )
-from services.settings_rules import (
+
+from rules.settings_rules import (
     containers_for,
     audio_codecs_for,
     codecs_for,

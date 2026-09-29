@@ -36,15 +36,15 @@ class GifSettingsPresenter():
     
     def on_loop_change(self, value: str) -> None:
         if value == "Infinite":
-            loop_num = 0
+            loop_num = "0"
         elif value == "1x":
-            loop_num = -1
+            loop_num = "-1"
         elif value == "2x":
-            loop_num = 1
+            loop_num = "1"
         elif value == "5x":
-            loop_num = 4
+            loop_num = "4"
         elif value == "10x":
-            loop_num = 9
+            loop_num = "9"
         else:
             return
 

@@ -147,11 +147,12 @@ def gpu_manufacturers() -> list[str]:
     Returns manufacturer names of all connected GPUs
 
     Possible returns options:
-    NVIDIA - for NVIDIA GPUS
-    AMD - for AMD for dedicated and integrated GPUs
-    Intel - for Intel for dedicated and integrated GPUs
-    Apple - for Macbook M5 GPUs
-    Adapter - possible returns on Virtual Machines and Container hosted OS
+        NVIDIA - for NVIDIA GPUS
+        AMD - for AMD for dedicated and integrated GPUs
+        Intel - for Intel for dedicated and integrated GPUs
+        Apple - for Macbook M5 GPUs
+        Adapter - possible returns on Virtual Machines and Container hosted OS
+                - Also possible return due to missing drivers
     """
 
     output: str = _get_device_output()

@@ -9,9 +9,7 @@ class MessageboxPopup(ctk.CTkToplevel):
 
         self.title(title)
         self.geometry("425x700")
-
-        ctk.set_appearance_mode("System")
-        ctk.set_default_color_theme("blue")
+        self.resizable(False, False)
 
         self._messagebox = ctk.CTkTextbox(self, wrap="word")
         self._messagebox.pack(expand=True, fill="both", padx=10, pady=10)

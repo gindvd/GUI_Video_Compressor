@@ -7,10 +7,16 @@ from typing import Any
 class ProgressbarPopup(ctk.CTkToplevel):
     """Pop up for displaying progress bar while background task is preformed"""
 
-    def __init__(self, master: Any, command: Callable[..., Any], **kwargs) -> None:
+    def __init__(
+        self, 
+        master: Any, 
+        title: str, 
+        command: Callable[[], Any], 
+        **kwargs
+    ) -> None:
         super().__init__(master, **kwargs)
 
-        self.title("Compression in Progress")
+        self.title(title)
         self.resizable(False, False)
 
         self._bar_frame = ctk.CTkFrame(self, corner_radius=0)
@@ -36,6 +42,7 @@ class ProgressbarPopup(ctk.CTkToplevel):
         self.protocol("WM_DELETE_WINDOW", command)
         
         self.lift()
+        self.update_idletasks()
 
     def run_progressbar(self) -> None:
         """Starts the progression bar"""

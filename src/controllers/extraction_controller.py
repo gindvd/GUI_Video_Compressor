@@ -1,6 +1,5 @@
 from threading import Thread
 from collections.abc import Callable
-from typing import Any
 
 from views.main_frame import MainFrame
 from views import dialogs
@@ -21,7 +20,7 @@ class ExtractionController:
         timestamps: MediaTimestamps,
         ffprobe_service: FFprobeService,
         parent_view: MainFrame,
-        after_extraction_command: Callable[..., Any],
+        after_extraction_command: Callable[[], None],
     ):
         self._media_attrs: MediaAttrs = media_attrs
         self._timestamps: MediaTimestamps = timestamps
@@ -29,7 +28,7 @@ class ExtractionController:
         self._ffprobe_service: FFprobeService = ffprobe_service
         self._parent_view: MainFrame = parent_view
 
-        self._after_extraction_command: Callable[..., Any] = after_extraction_command
+        self._after_extraction_command: Callable[[], None] = after_extraction_command
 
         self._extraction_thread: Thread | None = None
 
