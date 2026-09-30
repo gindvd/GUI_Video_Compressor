@@ -495,7 +495,7 @@ class SettingsFrame(ctk.CTkFrame):
 
     # Dropdown values
     @property
-    def video_codec_dropdown(self) -> list:
+    def video_codec_dropdown(self) -> list[str]:
         return list(self._video_codec_dropdown.cget("values"))
 
     @video_codec_dropdown.setter
@@ -506,7 +506,7 @@ class SettingsFrame(ctk.CTkFrame):
             self.video_codec = values[0]
 
     @property
-    def container_dropdown(self) -> list:
+    def container_dropdown(self) -> list[str]:
         return list(self._container_dropdown.cget("values"))
 
     @container_dropdown.setter
@@ -517,7 +517,7 @@ class SettingsFrame(ctk.CTkFrame):
             self.container = values[0]
 
     @property
-    def resolution_dropdown(self) -> list:
+    def resolution_dropdown(self) -> list[str]:
         return list(self._resolution_dropdown.cget("values"))
 
     @resolution_dropdown.setter
@@ -528,7 +528,7 @@ class SettingsFrame(ctk.CTkFrame):
             self.resolution = values[0]
 
     @property
-    def frames_dropdown(self) -> list:
+    def frames_dropdown(self) -> list[str]:
         return list(self._frames_dropdown.cget("values"))
 
     @frames_dropdown.setter
@@ -539,7 +539,7 @@ class SettingsFrame(ctk.CTkFrame):
             self.frame_rate = values[0]
 
     @property
-    def audio_codec_dropdown(self) -> list:
+    def audio_codec_dropdown(self) -> list[str]:
         return list(self._audio_codec_dropdown.cget("values"))
 
     @audio_codec_dropdown.setter
@@ -550,7 +550,7 @@ class SettingsFrame(ctk.CTkFrame):
             self.audio_codec = values[0]
 
     @property
-    def audio_bitrate_dropdown(self) -> list:
+    def audio_bitrate_dropdown(self) -> list[str]:
         return list(self._audio_bitrate_dropdown.cget("values"))
 
     @audio_bitrate_dropdown.setter
@@ -561,7 +561,7 @@ class SettingsFrame(ctk.CTkFrame):
             self.audio_bitrate = values[0]
 
     @property
-    def preset_speed_dropdown(self) -> list:
+    def preset_speed_dropdown(self) -> list[str]:
         return list(self._preset_speed_dropdown.cget("values"))
 
     @preset_speed_dropdown.setter

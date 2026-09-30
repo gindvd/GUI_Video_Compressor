@@ -124,6 +124,14 @@ class FFmpegService:
 
     def create_gif(self, app_state: AppState) -> ExitStatus:
         """Converts video file to GIF"""
+        input_file = app_state.media.input_file
+        output_file = app_state.gif_settings.output_file
+
+        if input_file is None:
+            return ExitStatus.ERROR
+        
+        if output_file is None:
+            return ExitStatus.ERROR
 
         width, _ = app_state.gif_settings.resolution.split("x")
 
@@ -134,26 +142,34 @@ class FFmpegService:
             "[s0]palettegen=stats_mode=diff[p];"
             "[s1][p]paletteuse=dither=sierra2_4a"
         )
-
-        cmd = [
+        
+        cmd: list[str] = [
             self._ffmpeg_path,
             "-ss",
             app_state.timestamps.start_time,
             "-t",
             app_state.timestamps.trimmed_duration,
             "-i",
-            app_state.media.input_file,
+            input_file,
             "-filter_complex",
             filter_complex,
             "-loop",
             app_state.gif_settings.loops,
-            app_state.gif_settings.output_file,
+            output_file,
         ]
 
         return self._run_command(cmd)
 
     def optimize(self, app_state: AppState) -> ExitStatus:
         """Creates FFmpeg command and executes it"""
+        input_file = app_state.media.input_file
+        output_file = app_state.media.output_file
+
+        if input_file is None:
+            return ExitStatus.ERROR
+
+        if output_file is None:
+            return ExitStatus.ERROR
 
         width, height = app_state.settings.resolution.split("x")
         crf: str = quality_converter(app_state.settings.quality)
@@ -192,13 +208,13 @@ class FFmpegService:
             "-t",
             app_state.timestamps.trimmed_duration,
             "-i",
-            app_state.media.input_file,
+            input_file,
             "-c:v",
             app_state.settings.video_codec,
             *scale_args,
         ])
 
-        if app_state.settings.preset:
+        if app_state.settings.preset is not None:
             cmd.extend([
                 "-preset",
                 app_state.settings.preset,
@@ -207,7 +223,7 @@ class FFmpegService:
         cmd.extend([
             *quality_args,
             *aud_opts,
-            app_state.media.output_file,
+            output_file,
         ])
 
         return self._run_command(cmd)
