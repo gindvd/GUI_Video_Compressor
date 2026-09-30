@@ -4,7 +4,7 @@ from collections.abc import Callable
 from typing import Any
 
 
-class SettingsFrame(ctk.CTkScrollableFrame):
+class SettingsFrame(ctk.CTkFrame):
     def __init__(self, master: Any, **kwargs) -> None:
         super().__init__(master=master, **kwargs)
 

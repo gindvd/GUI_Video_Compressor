@@ -7,7 +7,6 @@ from views.main_frame import MainFrame
 from views import dialogs
 
 from models.app_state import AppState
-from models.process_results import ProcessResult
 
 from services.ffmpeg_service import FFmpegService
 from services.exit_status import ExitStatus

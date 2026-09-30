@@ -46,12 +46,25 @@ class MediaPlayerPresenter:
             self._update_state_pause()
 
         elif self._vlc_service.is_media_player_paused():
+            vlc_current_time =self._vlc_service.current_time
 
-            if self._vlc_service.current_time >= self._player_view.end_time:
-                start_time = self._player_view.start_time
+            end_time = self._player_view.end_time
+            start_time = self._player_view.start_time
+            current_time = self._player_view.current_time
 
-                self._vlc_service.current_time = start_time
-                self._player_view.current_time = start_time
+            if start_time == end_time:
+                vlc_current_time = start_time
+                current_time = start_time
+
+                timestamp = ms_to_player_timestamp(start_time)
+                self._player_view.current_timestamp = timestamp
+
+                return
+
+            if vlc_current_time >= end_time:
+                
+                vlc_current_time = start_time
+                current_time = start_time
 
                 timestamp = ms_to_player_timestamp(start_time)
                 self._player_view.current_timestamp = timestamp

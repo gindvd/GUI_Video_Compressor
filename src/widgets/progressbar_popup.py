@@ -40,15 +40,14 @@ class ProgressbarPopup(ctk.CTkToplevel):
 
         # Cancels compression if progress bar is closed
         self.protocol("WM_DELETE_WINDOW", command)
-        
-        self.lift()
-        self.update_idletasks()
 
     def run_progressbar(self) -> None:
         """Starts the progression bar"""
         self._progressbar.start()
         
         self.lift()
+        self.focus_force()
+        self.attributes("-topmost", True)
         self.update_idletasks() 
 
     def destroy_window(self) -> None:

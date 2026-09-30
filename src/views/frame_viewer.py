@@ -66,8 +66,8 @@ class FrameViewer(ctk.CTkToplevel):
 
         self._image_id: int | None = None
         self._text_id: int | None = self._frame_canvas.create_text(
-            x=0, 
-            y=0, 
+            0, 
+            0, 
             text="No media loaded", 
             fill="white", 
             anchor="center"
@@ -357,8 +357,8 @@ class FrameViewer(ctk.CTkToplevel):
     def display_frame(self, x: float, y: float, frame: ImageTk.PhotoImage) -> None:
         if self._image_id is None:
             self._image_id = self._frame_canvas.create_image(
-                x=x, 
-                y=y, 
+                x, 
+                y, 
                 image=frame, 
                 anchor="center"
             )
