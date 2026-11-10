@@ -25,9 +25,8 @@ from rules.optimization_command_rules import (
 class FFmpegService:
     """Handler class for running FFmpeg and yt-dlp processes"""
 
-    def __init__(self, ffmpeg_path: str, ytdlp_path: list[str]) -> None:
+    def __init__(self, ffmpeg_path: str) -> None:
         self._ffmpeg_path: str = ffmpeg_path
-        self._ytdlp_path: list[str] = ytdlp_path
 
         self._proc: subprocess.Popen | None = None
         self._terminated: bool = False
@@ -92,35 +91,6 @@ class FFmpegService:
 
         else:
             return proc.stdout
-
-    def download_video(self, url: str, ext: str, output_file: str) -> ExitStatus:
-        """Downloads a video using yt-dlp"""
-
-        if self._proc:
-            return ExitStatus.BUSY
-        
-        output_path = Path(output_file)
-
-        # Let yt-dlp control the extension during postprocessing
-        output_template = str(output_path.with_suffix("")) + ".%(ext)s"
-
-        cmd = [
-            *self._ytdlp_path,
-            "--no-keep-fragments",
-            "--no-playlist",
-            "--format",
-            "bestvideo+bestaudio/best",
-            # Convert the merged result to the format selected in DownloaderView
-            "--recode-video",
-            ext,
-            "--output",
-            output_template,
-            "--ffmpeg-location",
-            self._ffmpeg_path,
-            url,
-        ]
-
-        return self._run_command(cmd)
 
     def create_gif(self, app_state: AppState) -> ExitStatus:
         """Converts video file to GIF"""
@@ -304,53 +274,12 @@ class FFmpegService:
 
         self._terminated = True
 
-        try:
-            if sys.platform.startswith("win"):
-                proc.send_signal(signal.CTRL_BREAK_EVENT)
-            else:
-                self._terminate_unix_process_group(proc)
+        try: 
+            proc.terminate()
+            proc.timeout(wait=10)
 
-            proc.wait(timeout=5)
-
-        except subprocess.TimeoutExpired:
-
-            try:
-                if sys.platform.startswith("win"):
-                    proc.kill()
-                else:
-                    self._kill_unix_process_group(proc)
-
-            except ProcessLookupError:
-                pass
-
-        except ProcessLookupError:
-            pass
+        except TimeoutExpired:
+            proc.kill()
 
         except OSError as e:
-            logger.exception(
-                "Failed to terminate process: %s",
-                e,
-            )
-    
-    @staticmethod
-    def _terminate_unix_process_group(
-        proc: subprocess.Popen,
-    ) -> None:
-        """Send terminate signal to parent and child processes on Linux/MacOS"""
-
-        os.killpg(
-            os.getpgid(proc.pid),
-            signal.SIGTERM,
-        )
-
-    @staticmethod
-    def _kill_unix_process_group(
-        proc: subprocess.Popen,
-    ) -> None:
-        """Send kill signal to parent and child processes on Linux/MacOS"""
-
-        os.killpg(
-            os.getpgid(proc.pid),
-            signal.SIGKILL,
-        )
- 
+            logger.exception(str(e))

@@ -23,7 +23,6 @@ class MainFrame(ctk.CTkFrame):
         self.on_show_license: Callable[[], None] | None = None
         self.on_show_third_party_licenses: Callable[[], None] | None = None
         self.on_file_entry_submitted: Callable[[str], None] | None = None
-        self.on_open_downloader: Callable[[], None] | None = None
         
         self._build_menubar()
         self._build()
@@ -51,10 +50,6 @@ class MainFrame(ctk.CTkFrame):
         tools_drop.add_option(
             option="Frame Viewer",
             command=self._handle_open_frame_viewer,
-        )
-        tools_drop.add_option(
-            option="YouTube Downloader",
-            command=self._handle_open_downloder,
         )
 
         help_drop = CustomDropdownMenu(widget=help_btn)
@@ -151,7 +146,7 @@ class MainFrame(ctk.CTkFrame):
 
         self._status_label = ctk.CTkLabel(
             self._bottom_frame,
-            text="© David Gingerich",
+            text="Version 5.1.0",
             anchor="e",
         )
 
@@ -199,10 +194,6 @@ class MainFrame(ctk.CTkFrame):
             corner_radius=8,
             border_color=frame_color,
             border_width=2,
-            segmented_button_font=ctk.CTkFont(
-                size=14,
-                weight="bold",
-            ),
         )
         tabview.grid(
             row=0,
@@ -284,9 +275,6 @@ class MainFrame(ctk.CTkFrame):
         if self.on_show_third_party_licenses:
             self.on_show_third_party_licenses()
     
-    def _handle_open_downloder(self) -> None:
-        if self.on_open_downloader:
-            self.on_open_downloader()
 
     @property
     def file_entry(self) -> str:

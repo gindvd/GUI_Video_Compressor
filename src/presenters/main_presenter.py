@@ -7,7 +7,6 @@ from presenters.settings_presenter import SettingsPresenter
 from presenters.gif_settings_presenter import GifSettingsPresenter
 from presenters.media_player_presenter import MediaPlayerPresenter
 from presenters.frame_viewer_presenter import FrameViewerPresenter
-from presenters.downloader_presenter import DownloaderPresenter
 
 from controllers.ffmpeg_controller import FFmpegController
 from controllers.extraction_controller import ExtractionController
@@ -15,7 +14,6 @@ from controllers.extraction_controller import ExtractionController
 from views import dialogs
 from views.main_frame import MainFrame
 from views.frame_viewer import FrameViewer
-from views.downloader_view import DownloaderView
 
 from services.ffmpeg_service import FFmpegService
 from services.ffprobe_service import FFprobeService
@@ -87,9 +85,6 @@ class MainPresenter:
         self._frame_viewer: FrameViewer | None = None
         self._frame_viewer_presenter: FrameViewerPresenter | None = None
 
-        self._downloader_view: DownloaderView | None = None
-        self._downloader_presenter: DownloaderPresenter | None = None
-
         self._on_exit_command: Callable[[], None] = on_exit_command
 
         self._bind_view()
@@ -138,18 +133,6 @@ class MainPresenter:
 
         self._frame_viewer_presenter.load_media()
     
-    def on_open_downloader(self) -> None:
-        if self._downloader_view is not None and self._downloader_view.winfo_exists():
-            self._downloader_view.focus()
-            return
-
-        self._downloader_view = DownloaderView(master=self._view)
-
-        self._downloader_presenter = DownloaderPresenter(
-            downloader_view=self._downloader_view,
-            ffmpeg_controller=self.ffmpeg_controller
-        )
-
     def on_exit(self) -> None:
         """Closes all background processes before destroying the app"""
         self.ffmpeg_controller.shutdown()
@@ -285,5 +268,4 @@ class MainPresenter:
         self._view.on_show_license = self.on_show_license
         self._view.on_show_third_party_licenses = self.on_show_third_party_licenses
         self._view.on_open_frame_viewer = self.open_frame_viewer
-        self._view.on_open_downloader = self.on_open_downloader
         self._view.on_exit = self.on_exit

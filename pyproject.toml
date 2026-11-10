@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MediaOptimizationTool"
-version = "5.0.0"
+version = "5.1.0"
 description = "Optimization tool for compression, converting, and trimming media files with FFmpeg"
 authors = [
   {name = "David Gingerich", email = "gingerichdvd@gmail.com"}
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
 
 dependencies = [
@@ -21,9 +21,6 @@ dependencies = [
   "packaging==26.0",
   "pillow==12.1.1",
   "python-vlc==3.0.21203",
-  "yt-dl==2026.8.19",
-  "beautifulsoup4==4.15.0",
-  "requests==2.34.2"
 ]
 
 [project.optional-dependencies]

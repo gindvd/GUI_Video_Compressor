@@ -2,14 +2,6 @@ from os import path
 from shutil import which
 from sys import platform, executable
 
-if platform.startswith("win"):
-    from ctypes import windll
-
-    try:
-        windll.user32.SetProcessDpiAwarenessContext(-4)
-    except AttributeError:
-        windll.shcore.SetProcessDpiAwareness(2)
-
 import customtkinter as ctk
 from tkinter import PhotoImage
 
@@ -35,7 +27,6 @@ class App(ctk.CTk):
     _FFMPEG: str = "ffmpeg"
     _FFPROBE: str = "ffprobe"
     _VLC: str = "vlc"
-    _YTDLP: str = "yt-dlp"
 
     def __init__(self):
         super().__init__()
@@ -83,6 +74,9 @@ class App(ctk.CTk):
             on_exit_command=self.quit,
         )
 
+        self.update()
+        self.geometry(self.geometry())
+
         self.protocol("WM_DELETE_WINDOW", self._main_presenter.on_exit)
 
     def _win_app_setup(self) -> None:
@@ -90,11 +84,8 @@ class App(ctk.CTk):
         ffmpeg_path: str = resource_path(path.join("bin", f"{self._FFMPEG}.exe"))
         self._check_file(ffmpeg_path)
 
-        ytdlp_path: str = resource_path(path.join("bin", f"{self._YTDLP}.exe"))
-        self._check_file(ytdlp_path)
-
         self._ffmpeg_service = FFmpegService(
-            ffmpeg_path=ffmpeg_path, ytdlp_path=[ytdlp_path]
+            ffmpeg_path=ffmpeg_path
         )
 
         ffprobe_path: str = resource_path(path.join("bin", f"{self._FFPROBE}.exe"))
@@ -122,11 +113,9 @@ class App(ctk.CTk):
 
         if missing:
             raise SystemExit(f"Missing dependency: {', '.join(missing)}")
-        
-        ytdlp_path = self._get_ytdlp()
-
+ 
         self._ffmpeg_service = FFmpegService(
-            ffmpeg_path=self._FFMPEG, ytdlp_path=ytdlp_path
+            ffmpeg_path=self._FFMPEG
         )
 
         self._ffprobe_service = FFprobeService(path=self._FFPROBE)
@@ -142,15 +131,6 @@ class App(ctk.CTk):
         # Sets app icon for Linux
         self.iconphoto(True, icon)
     
-    def _get_ytdlp(self) -> list[str]:
-        ytdlp_path = which(self._YTDLP)
-
-        if ytdlp_path:
-            return [ytdlp_path]
-        
-        # Gets yt-dlp binaries from venv 
-        return [executable, "-m", self._YTDLP]
-
     @staticmethod
     def _check_file(abs_path: str) -> None:
         if not path.isfile(abs_path):
