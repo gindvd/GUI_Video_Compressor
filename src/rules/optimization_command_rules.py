@@ -33,8 +33,11 @@ def scale_args_for(codec: str, fps: str, width: str, height: str) -> list[str]:
         "h264_amf", "hevc_amf",
         "h264_qsv", "hevc_qsv"
     )
+
+    if codec in hdcodec:
+        return  ["-vf", f"format=nv12,scale={width}:{height},fps={fps}",]
     
-    return ["-vf", f"scale={width}:{height},fps={fps}",]
+    return ["-vf", f"format=yuv420p,scale={width}:{height},fps={fps}",]
 
 def get_audio_args(
     include_audio: bool, 
