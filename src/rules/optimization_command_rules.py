@@ -28,6 +28,12 @@ def scale_args_for(codec: str, fps: str, width: str, height: str) -> list[str]:
                 f"format=nv12,fps={fps},hwupload,scale_vaapi=w={width}:h={height}"
             ]
     
+    hdcodecs = (
+        "h264_nvenc", "hevc_nvenc",
+        "h264_amf", "hevc_amf",
+        "h264_qsv", "hevc_qsv"
+    )
+    
     return ["-vf", f"scale={width}:{height},fps={fps}",]
 
 def get_audio_args(
