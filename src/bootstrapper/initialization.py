@@ -9,7 +9,7 @@ from models.media_timestamps import MediaTimestamps
 from models.gif_settings import GifSettings
 
 
-def initiaize_app() -> App:
+def initialize_app() -> App:
     app_state: AppState = AppState(
         media=MediaAttrs(),
         settings=OptimizeSettings(),
