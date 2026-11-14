@@ -13,8 +13,8 @@ def initialize_app() -> App:
     app_state: AppState = AppState(
         media=MediaAttrs(),
         settings=OptimizeSettings(),
-        timestamps=MediaTimestamps,
-        gif_settings=GifSettings
+        timestamps=MediaTimestamps(),
+        gif_settings=GifSettings()
     )
 
     if platform.startswith("win"):

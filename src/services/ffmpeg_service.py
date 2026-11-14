@@ -276,9 +276,9 @@ class FFmpegService:
 
         try: 
             proc.terminate()
-            proc.timeout(wait=10)
+            proc.wait(timeout=10)
 
-        except TimeoutExpired:
+        except TimeoutError:
             proc.kill()
 
         except OSError as e:
