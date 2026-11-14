@@ -114,7 +114,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
             fill="both",
             expand=True,
             padx=0,
-            pady=0,
+            pady=(8, 0),
         )
 
         self._content_frame.grid_columnconfigure(0, weight=1)
