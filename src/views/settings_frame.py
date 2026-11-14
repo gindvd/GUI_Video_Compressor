@@ -239,7 +239,7 @@ class SettingsFrame(ctk.CTkFrame):
 
         self._frames_dropdown = ctk.CTkComboBox(
             master=self._video_section,
-            values=["40", "30", "24", "15"],
+            values=["60", "30", "24", "15"],
             state="readonly",
             command=self._handle_frame_rate_change,
             variable=self._frame_rate,
