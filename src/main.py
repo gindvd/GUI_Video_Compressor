@@ -1,10 +1,10 @@
-from bootstrapper.initialization import initiaize_app
-
 from app import App
+
+from bootstrapper.initialization import initialize_app
 
 
 def main() -> None:
-    app: App = initiaize_app()
+    app: App = initialize_app()
     app.mainloop()
 
 
