@@ -167,6 +167,8 @@ class MainFrame(ctk.CTkFrame):
         self._content_frame.pack(
             fill="both",
             expand=True,
+            padx=4,
+            pady=(0, 2)
         )
 
         self._content_frame.columnconfigure(0, weight=1)
