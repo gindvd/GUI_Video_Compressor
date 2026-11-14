@@ -158,7 +158,7 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
         self._timestamp_viewer.pack(
             padx=0,
-            pady=(8, 0),
+            pady=(8, 2),
             fill="x",
         )
 
@@ -318,8 +318,8 @@ class MediaPlayerFrame(ctk.CTkFrame):
         )
     
     def _build_timestamp_viewer(self) -> None:
-        trim_info_font = ctk.CTkFont(size=11)
-        trim_duration_font = ctk.CTkFont(size=11, weight="bold")
+        trim_info_font = ctk.CTkFont(size=14)
+        trim_duration_font = ctk.CTkFont(size=14, weight="bold")
 
         self._trim_info_frame = ctk.CTkFrame(
             master=self._timestamp_viewer,
