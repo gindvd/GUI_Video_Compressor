@@ -111,7 +111,7 @@ class MainFrame(ctk.CTkFrame):
             row=0,
             column=0,
             padx=8,
-            pady=5,
+            pady=8,
             sticky="ew",
         )
 
@@ -125,7 +125,7 @@ class MainFrame(ctk.CTkFrame):
             row=0,
             column=1,
             padx=8,
-            pady=5,
+            pady=8,
         )
 
         # Bottom frame
