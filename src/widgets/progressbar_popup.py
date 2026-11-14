@@ -47,7 +47,6 @@ class ProgressbarPopup(ctk.CTkToplevel):
         
         self.lift()
         self.focus_force()
-        self.attributes("-topmost", True)
         self.update_idletasks() 
 
     def destroy_window(self) -> None:
