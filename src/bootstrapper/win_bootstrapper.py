@@ -41,13 +41,13 @@ def setup_vlc_environment() -> None:
 def initialize_win(app_state: AppState) -> App:
     setup_vlc_environment()
     
-    ffmpeg_path: str = resource_path(path.join("bin", "ffmpeg.exe"))
+    ffmpeg_path: str = resource_path(os.path.join("bin", "ffmpeg.exe"))
     check_file(ffmpeg_path)
 
-    ffprobe_path: str = resource_path(path.join("bin", "ffprobe.exe"))
+    ffprobe_path: str = resource_path(os.path.join("bin", "ffprobe.exe"))
     check_file(ffprobe_path)
 
-    vlc_path: str = resource_path(path.join("bin", "vlc", "plugins"))
+    vlc_path: str = resource_path(os.path.join("bin", "vlc", "plugins"))
     check_path(vlc_path)
 
     services = Services(
