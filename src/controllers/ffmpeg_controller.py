@@ -74,30 +74,6 @@ class FFmpegController:
         )
         self._process_thread.start()
 
-    def download_video(self, url: str, ext: str, output_file: str) -> None:
-        """Downloads YouTube Video in background on separate thread"""
-
-        if (
-            self._process_thread is not None
-            and self._process_thread.is_alive()
-        ):
-            return
-
-        self._progressbar_popup = ProgressbarPopup(
-            master=self._parent_view,
-            title="Download in Progress",
-            command=self.cancel_process,
-        )
-        self._progressbar_popup.run_progressbar()
-
-        self._process_thread = Thread(
-            target=self._download_video_worker,
-            args=(url, ext, output_file),
-            daemon=True,
-        )
-
-        self._process_thread.start()
-
     def cancel_process(self) -> None:
         self._ffmpeg_service.terminate_process()
     
@@ -155,17 +131,6 @@ class FFmpegController:
             0, self._cleanup, status, self._app_state.media.output_file
         )
     
-    def _download_video_worker(self, url: str, ext: str, output_file: str) -> None:
-        """Worker for yt-dlp video download"""
-
-        status: ExitStatus = self._ffmpeg_service.download_video(
-            url=url,
-            ext=ext,
-            output_file=output_file,
-        )
-
-        self._parent_view.after(0, self._download_cleanup, status, output_file)
-    
     def _create_gif_worker(self) -> None:
         if self._app_state.media.input_file is None:
             return
@@ -221,68 +186,9 @@ class FFmpegController:
 
         self._on_restore_ui()
 
-    def _download_cleanup(self, status: ExitStatus, output_file: str) -> None:
-        self._process_thread = None
-
-        if self._progressbar_popup is not None:
-            self._progressbar_popup.destroy()
-            self._progressbar_popup = None
-        
-        if status in (ExitStatus.ERROR, ExitStatus.TERMINATED):
-            self._remove_partial_output(output_file)
-            self._remove_download_partials(output_file)
-
-        if status == ExitStatus.ERROR:
-            dialogs.show_error(
-                master=self._parent_view,
-                title="Download Error",
-                message="yt-dlp encountered an error!\nCheck logs!",
-            )
-        elif status == ExitStatus.TERMINATED:
-            dialogs.show_info(
-                master=self._parent_view,
-                title="Process Terminated",
-                message="Download cancelled!",
-            )
-        elif status == ExitStatus.SUCCESS:
-            dialogs.show_success(
-                master=self._parent_view,
-                title="Download Complete",
-                message="Video download complete!",
-            )
-
-            self._scan_and_load(output_file)
-
-        self._on_restore_ui()
-
-    def _remove_download_partials(self, output_file: str) -> None:
-        """Removes yt-dlp temporary and partial files from the output directory"""
-        output_path = path.abspath(output_file)
-        output_folder = path.dirname(output_path)
-        output_name = path.basename(output_path)
-        base, _ = path.splitext(output_name)
-
-        patterns = [
-            f"{base}.f*.mp4",
-            f"{base}.f*.webm",
-            f"{base}.f*.m4a",
-            f"{base}.f*.opus",
-            f"{base}.f*.part",
-            f"{base}.part",
-            f"{base}.ytdl",
-            f"{base}.temp",
-        ]
-
-        for pattern in patterns:
-            for temp_file in glob(path.join(output_folder, pattern)):
-                self._remove_partial_output(temp_file)
-    
     def _remove_partial_output(self, output_file: str) -> None:
-        try:
-            if path.isfile(output_file):
-                remove(output_file)
-        except OSError:
-            pass
+        if path.isfile(output_file):
+            remove(output_file)
 
     @staticmethod
     def _uniquify(file_path: str) -> str:

@@ -28,13 +28,13 @@ def scale_args_for(codec: str, fps: str, width: str, height: str) -> list[str]:
                 f"format=nv12,fps={fps},hwupload,scale_vaapi=w={width}:h={height}"
             ]
     
-    hdcodecs = (
+    hd_codecs = (
         "h264_nvenc", "hevc_nvenc",
         "h264_amf", "hevc_amf",
         "h264_qsv", "hevc_qsv"
     )
 
-    if codec in hdcodec:
+    if codec in hd_codecs:
         return  ["-vf", f"format=nv12,scale={width}:{height},fps={fps}",]
     
     return ["-vf", f"format=yuv420p,scale={width}:{height},fps={fps}",]
